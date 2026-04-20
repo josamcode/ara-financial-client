@@ -44,7 +44,7 @@ export function AccountForm({ account, defaultParentId, flatAccounts, onSuccess,
     if (account) {
       reset({
         code: account.code || '',
-        name: account.name || '',
+        name: account.name || account.nameAr || account.nameEn || '',
         type: account.type || 'asset',
         parentId: account.parentId || null,
         isActive: account.isActive !== false,
@@ -61,14 +61,24 @@ export function AccountForm({ account, defaultParentId, flatAccounts, onSuccess,
   }, [account, defaultParentId, reset])
 
   async function onSubmit(values) {
-    const payload = {
-      ...values,
-      parentId: values.parentId || undefined,
-    }
     if (isEditing) {
-      await updateAccount.mutateAsync({ id: account._id, data: payload })
+      await updateAccount.mutateAsync({
+        id: account._id,
+        data: {
+          nameAr: values.name,
+          nameEn: values.name,
+          parentId: values.parentId || undefined,
+          isActive: values.isActive,
+        },
+      })
     } else {
-      await createAccount.mutateAsync(payload)
+      await createAccount.mutateAsync({
+        code: values.code,
+        nameAr: values.name,
+        nameEn: values.name,
+        type: values.type,
+        parentId: values.parentId || undefined,
+      })
     }
     onSuccess?.()
   }

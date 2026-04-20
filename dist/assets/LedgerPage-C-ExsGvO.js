@@ -1,1 +1,0 @@
-import{u as t,j as a,T as s}from"./index-W0JwS11m.js";import{P as o}from"./index-C3do8BDK.js";import{E as r}from"./index-Qffzb8V7.js";function d(){const{t:e}=t();return a.jsxs("div",{className:"animate-fade-in",children:[a.jsx(o,{title:e("nav.ledger")}),a.jsx(r,{icon:s,title:e("nav.ledger"),message:e("common.noData")})]})}export{d as default};

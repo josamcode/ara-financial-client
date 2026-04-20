@@ -1,1 +1,0 @@
-import{u as t,j as s,V as e}from"./index-W0JwS11m.js";import{P as i}from"./index-C3do8BDK.js";import{E as o}from"./index-Qffzb8V7.js";function l(){const{t:a}=t();return s.jsxs("div",{className:"animate-fade-in",children:[s.jsx(i,{title:a("fiscalPeriods.title")}),s.jsx(o,{icon:e,title:a("fiscalPeriods.title"),message:a("common.noData")})]})}export{l as default};
