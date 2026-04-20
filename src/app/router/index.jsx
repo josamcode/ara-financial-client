@@ -32,6 +32,10 @@ const JournalDetailPage = lazy(() => import('@/pages/app/JournalDetailPage'))
 const LedgerPage = lazy(() => import('@/pages/app/LedgerPage'))
 const LedgerAccountPage = lazy(() => import('@/pages/app/LedgerAccountPage'))
 const ReportsPage = lazy(() => import('@/pages/app/ReportsPage'))
+const TrialBalancePage = lazy(() => import('@/pages/app/reports/TrialBalancePage'))
+const IncomeStatementPage = lazy(() => import('@/pages/app/reports/IncomeStatementPage'))
+const BalanceSheetPage = lazy(() => import('@/pages/app/reports/BalanceSheetPage'))
+const CashFlowPage = lazy(() => import('@/pages/app/reports/CashFlowPage'))
 const FiscalPeriodsPage = lazy(() => import('@/pages/app/FiscalPeriodsPage'))
 const UsersPage = lazy(() => import('@/pages/app/UsersPage'))
 const AuditLogsPage = lazy(() => import('@/pages/app/AuditLogsPage'))
@@ -143,6 +147,42 @@ export function AppRouter() {
               element={
                 <ProtectedRoute permission={PERMISSIONS.REPORT_VIEW}>
                   <ReportsPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path={ROUTES.REPORTS_TRIAL_BALANCE}
+              element={
+                <ProtectedRoute permission={PERMISSIONS.REPORT_VIEW}>
+                  <TrialBalancePage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path={ROUTES.REPORTS_INCOME_STATEMENT}
+              element={
+                <ProtectedRoute permission={PERMISSIONS.REPORT_VIEW}>
+                  <IncomeStatementPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path={ROUTES.REPORTS_BALANCE_SHEET}
+              element={
+                <ProtectedRoute permission={PERMISSIONS.REPORT_VIEW}>
+                  <BalanceSheetPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path={ROUTES.REPORTS_CASH_FLOW}
+              element={
+                <ProtectedRoute permission={PERMISSIONS.REPORT_VIEW}>
+                  <CashFlowPage />
                 </ProtectedRoute>
               }
             />
