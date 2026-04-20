@@ -1,0 +1,55 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    direction: rtl;
+  }
+
+  body {
+    @apply bg-background text-text-primary font-sans antialiased;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  h1 {
+    @apply text-4xl font-bold tracking-tight text-text-primary;
+  }
+
+  h2 {
+    @apply text-3xl font-bold tracking-tight text-text-primary;
+  }
+
+  h3 {
+    @apply text-2xl font-semibold text-text-primary;
+  }
+
+  p {
+    @apply text-base leading-relaxed text-text-secondary;
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: theme('colors.gray.300') transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: theme('colors.gray.300');
+    border-radius: 2px;
+  }
+}
