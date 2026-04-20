@@ -1,1 +1,0 @@
-import{f as o}from"./index-Cj_RZbGW.js";const i={list:s=>o.get("/fiscal-periods",{params:s}),getById:s=>o.get(`/fiscal-periods/${s}`),create:s=>o.post("/fiscal-periods",s),close:s=>o.post(`/fiscal-periods/${s}/close`),lock:s=>o.post(`/fiscal-periods/${s}/lock`),reopen:s=>o.post(`/fiscal-periods/${s}/reopen`)};export{i as f};

@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { Plus, Search, FileText } from 'lucide-react'
+import { Select } from '@/shared/components/Select'
 import { useJournalList, useJournalById, useDeleteJournal } from '@/features/journal/hooks/useJournal'
 import { JournalList } from '@/features/journal/components/JournalList'
 import { JournalDetail } from '@/features/journal/components/JournalDetail'
@@ -96,15 +97,16 @@ export default function JournalPage() {
           />
         </div>
 
-        <select
+        <Select
           value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="h-input rounded-md border border-input bg-surface px-3 text-sm text-text-primary focus:outline-none focus:border-primary focus:shadow-focus"
-        >
-          <option value="">{t('journal.allStatuses')}</option>
-          <option value="draft">{t('journal.draft')}</option>
-          <option value="posted">{t('journal.posted')}</option>
-        </select>
+          onChange={setStatusFilter}
+          options={[
+            { value: '', label: t('journal.allStatuses') },
+            { value: 'draft', label: t('journal.draft') },
+            { value: 'posted', label: t('journal.posted') },
+          ]}
+          className="w-40"
+        />
 
         <input
           type="date"

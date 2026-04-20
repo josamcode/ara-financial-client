@@ -30,9 +30,8 @@ function StatCard({ label, value, icon: Icon, trend, isLoading }) {
       </div>
       {trend !== undefined && (
         <p
-          className={`mt-3 text-xs font-medium ${
-            trend >= 0 ? 'text-success' : 'text-error'
-          }`}
+          className={`mt-3 text-xs font-medium ${trend >= 0 ? 'text-success' : 'text-error'
+            }`}
         >
           {trend >= 0 ? '+' : ''}
           {trend}%
@@ -89,6 +88,14 @@ export default function DashboardPage() {
             isLoading={isLoading}
           />
           <StatCard
+            label={t('dashboard.totalEquity')}
+            value={
+              financials ? formatCurrency(financials.totalEquity, currency) : '-'
+            }
+            icon={Scale} // change this later
+            isLoading={isLoading}
+          />
+          <StatCard
             label={t('dashboard.totalRevenue')}
             value={
               financials ? formatCurrency(financials.totalRevenue, currency) : '-'
@@ -102,6 +109,14 @@ export default function DashboardPage() {
               financials ? formatCurrency(financials.totalExpenses, currency) : '-'
             }
             icon={TrendingDown}
+            isLoading={isLoading}
+          />
+          <StatCard
+            label={t('dashboard.netIncome')}
+            value={
+              financials ? formatCurrency(financials.netIncome, currency) : '-'
+            }
+            icon={TrendingUp} // change this later
             isLoading={isLoading}
           />
         </div>

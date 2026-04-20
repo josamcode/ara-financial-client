@@ -44,6 +44,21 @@ export function useChangeUserRole() {
   })
 }
 
+export function useInviteUser() {
+  const queryClient = useQueryClient()
+  const { t } = useTranslation()
+
+  return useMutation({
+    mutationFn: (data) => userApi.invite(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: KEYS.all })
+    },
+    onError: (error) => {
+      toast.error(error?.message || t('common.somethingWentWrong'))
+    },
+  })
+}
+
 export function useDeactivateUser() {
   const queryClient = useQueryClient()
   const { t } = useTranslation()

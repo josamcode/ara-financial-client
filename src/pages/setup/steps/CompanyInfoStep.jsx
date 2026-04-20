@@ -1,4 +1,4 @@
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useTranslation } from 'react-i18next'
@@ -6,11 +6,9 @@ import toast from 'react-hot-toast'
 import { tenantApi } from '@/entities/tenant/api/tenantApi'
 import { Input } from '@/shared/components/Input'
 import { Button } from '@/shared/components/Button'
+import { Select } from '@/shared/components/Select'
 import { Card } from '@/shared/components/Card'
 import { CURRENCIES } from '@/shared/constants/app'
-
-const SELECT_CLASS =
-  'h-input w-full rounded-md border border-input bg-surface px-3 text-sm text-text-primary focus:outline-none focus:border-primary focus:shadow-focus'
 
 const INDUSTRIES = [
   { value: 'general', ar: 'عام', en: 'General' },
@@ -61,6 +59,7 @@ export default function CompanyInfoStep({
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(schema),
@@ -90,6 +89,16 @@ export default function CompanyInfoStep({
     }
   }
 
+  const industryOptions = INDUSTRIES.map((ind) => ({
+    value: ind.value,
+    label: isAr ? ind.ar : ind.en,
+  }))
+
+  const monthOptions = MONTHS.map((m) => ({
+    value: String(m.value),
+    label: isAr ? m.ar : m.en,
+  }))
+
   return (
     <Card padding="lg">
       <h2 className="text-lg font-semibold text-text-primary mb-5">
@@ -116,31 +125,31 @@ export default function CompanyInfoStep({
           {...register('taxId')}
         />
 
-        <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-text-primary">
-            {t('setup.industry')}
-          </label>
-          <select className={SELECT_CLASS} {...register('industry')}>
-            {INDUSTRIES.map((ind) => (
-              <option key={ind.value} value={ind.value}>
-                {isAr ? ind.ar : ind.en}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Controller
+          name="industry"
+          control={control}
+          render={({ field }) => (
+            <Select
+              value={field.value}
+              onChange={field.onChange}
+              options={industryOptions}
+              label={t('setup.industry')}
+            />
+          )}
+        />
 
-        <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-text-primary">
-            {t('setup.fiscalYearStartMonth')}
-          </label>
-          <select className={SELECT_CLASS} {...register('fiscalYearStartMonth')}>
-            {MONTHS.map((m) => (
-              <option key={m.value} value={m.value}>
-                {isAr ? m.ar : m.en}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Controller
+          name="fiscalYearStartMonth"
+          control={control}
+          render={({ field }) => (
+            <Select
+              value={String(field.value)}
+              onChange={(val) => field.onChange(Number(val))}
+              options={monthOptions}
+              label={t('setup.fiscalYearStartMonth')}
+            />
+          )}
+        />
 
         <div className="rounded-md border border-dashed border-border bg-surface-subtle p-4">
           <p className="text-sm font-medium text-text-primary">{t('setup.currency')}</p>

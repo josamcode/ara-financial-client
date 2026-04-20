@@ -1,4 +1,4 @@
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useTranslation } from 'react-i18next'
@@ -6,10 +6,8 @@ import { CheckCircle2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { fiscalPeriodApi } from '@/entities/fiscalPeriod/api/fiscalPeriodApi'
 import { Button } from '@/shared/components/Button'
+import { Select } from '@/shared/components/Select'
 import { Card } from '@/shared/components/Card'
-
-const SELECT_CLASS =
-  'h-input w-full rounded-md border border-input bg-surface px-3 text-sm text-text-primary focus:outline-none focus:border-primary focus:shadow-focus'
 
 const MONTHS = [
   { value: 1, ar: 'يناير', en: 'January' },
@@ -55,6 +53,7 @@ export default function FiscalYearStep({
     register,
     handleSubmit,
     getValues,
+    control,
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(schema),
@@ -160,18 +159,21 @@ export default function FiscalYearStep({
           {errors.year && <p className="text-xs text-error">{errors.year.message}</p>}
         </div>
 
-        <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-text-primary">
-            {t('setup.fiscalYearStartMonth')}
-          </label>
-          <select className={SELECT_CLASS} {...register('startMonth')}>
-            {MONTHS.map((m) => (
-              <option key={m.value} value={m.value}>
-                {isAr ? m.ar : m.en}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Controller
+          name="startMonth"
+          control={control}
+          render={({ field }) => (
+            <Select
+              value={String(field.value)}
+              onChange={(val) => field.onChange(Number(val))}
+              options={MONTHS.map((m) => ({
+                value: String(m.value),
+                label: isAr ? m.ar : m.en,
+              }))}
+              label={t('setup.fiscalYearStartMonth')}
+            />
+          )}
+        />
 
         <div className="flex items-center justify-between pt-2">
           <button

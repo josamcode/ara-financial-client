@@ -171,7 +171,8 @@
     "netEquity": "حقوق الملكية",
     "netIncome": "صافي الدخل",
     "totalRevenue": "إجمالي الإيرادات",
-    "totalExpenses": "إجمالي المصروفات"
+    "totalExpenses": "إجمالي المصروفات",
+    "totalEquity": "إجمالي حقوق الملكية"
   },
   "setup": {
     "title": "إعداد المنشأة",
@@ -472,6 +473,7 @@
     "resourceTypePlaceholder": "مثال: User",
     "resourceIdPlaceholder": "معرّف المورد الدقيق",
     "userIdPlaceholder": "معرّف المستخدم الدقيق",
+    "allUsers": "جميع المستخدمين",
     "noActor": "النظام / غير معروف",
     "noDetails": "لا توجد تفاصيل إضافية",
     "createdFields": "أنشئ بالحقول {{fields}}",

@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { Plus, Trash2, CheckCircle2, AlertCircle } from 'lucide-react'
 import { Input, FormField } from '@/shared/components/Input'
 import { Button } from '@/shared/components/Button'
+import { Select } from '@/shared/components/Select'
 import { cn } from '@/shared/utils/cn'
 import { useCreateJournal, useUpdateJournal, usePostJournal } from '@/features/journal/hooks/useJournal'
 import { useAccountList } from '@/features/accounts/hooks/useAccounts'
@@ -25,7 +26,8 @@ const entrySchema = z.object({
   lines: z.array(lineSchema).min(2, 'journal.minTwoLines'),
 })
 
-const emptyLine = () => ({ accountId: '', description: '', debit: 0, credit: 0 })
+// Empty string so inputs show the placeholder instead of "0"
+const emptyLine = () => ({ accountId: '', description: '', debit: '', credit: '' })
 const amountToApiString = (value) => String(Number(value) || 0)
 
 export function JournalEditor({ entry, onSuccess, onCancel }) {
@@ -40,6 +42,11 @@ export function JournalEditor({ entry, onSuccess, onCancel }) {
 
   const accountsQuery = useAccountList({ limit: 500 })
   const flatAccounts = useMemo(() => accountsQuery.data || [], [accountsQuery.data])
+
+  const accountOptions = useMemo(
+    () => flatAccounts.map((a) => ({ value: a._id, label: `${a.code} — ${a.name}` })),
+    [flatAccounts]
+  )
 
   const {
     register,
@@ -186,8 +193,8 @@ export function JournalEditor({ entry, onSuccess, onCancel }) {
           <div className="grid grid-cols-[auto_1fr_auto_auto_auto] items-center gap-2 px-3 py-2.5 bg-surface-subtle border-b border-border">
             <span className="text-xs font-semibold text-text-muted w-6 text-center">#</span>
             <span className="text-xs font-semibold text-text-muted">{t('journal.account')}</span>
-            <span className="text-xs font-semibold text-text-muted w-28 text-end">{t('common.debit')}</span>
-            <span className="text-xs font-semibold text-text-muted w-28 text-end">{t('common.credit')}</span>
+            <span className="text-xs font-semibold text-success w-28 text-end">{t('common.debit')}</span>
+            <span className="text-xs font-semibold text-primary w-28 text-end">{t('common.credit')}</span>
             <span className="w-8" />
           </div>
 
@@ -205,21 +212,19 @@ export function JournalEditor({ entry, onSuccess, onCancel }) {
 
                 {/* Account + optional line description */}
                 <div className="space-y-1.5 min-w-0">
-                  <select
-                    className={cn(
-                      'h-9 w-full rounded-md border border-input bg-surface px-2.5 text-sm text-text-primary',
-                      'focus:outline-none focus:border-primary focus:shadow-focus transition-colors',
-                      errors.lines?.[index]?.accountId && 'border-error'
-                    )}
-                    {...register(`lines.${index}.accountId`)}
-                  >
-                    <option value="">{t('journal.selectAccount')}</option>
-                    {flatAccounts.map((a) => (
-                      <option key={a._id} value={a._id}>
-                        {a.code} — {a.name}
-                      </option>
-                    ))}
-                  </select>
+                  <Select
+                    value={watchedLines[index]?.accountId || ''}
+                    onChange={(val) =>
+                      setValue(`lines.${index}.accountId`, val, { shouldValidate: true })
+                    }
+                    options={accountOptions}
+                    placeholder={t('journal.selectAccount')}
+                    error={
+                      errors.lines?.[index]?.accountId ? t('errors.required') : undefined
+                    }
+                    isLoading={accountsQuery.isLoading}
+                    className="h-9 px-2.5"
+                  />
 
                   <input
                     type="text"
@@ -231,10 +236,6 @@ export function JournalEditor({ entry, onSuccess, onCancel }) {
                     )}
                     {...register(`lines.${index}.description`)}
                   />
-
-                  {errors.lines?.[index]?.accountId && (
-                    <p className="text-xs text-error">{t('errors.required')}</p>
-                  )}
                 </div>
 
                 {/* Debit */}
@@ -243,12 +244,12 @@ export function JournalEditor({ entry, onSuccess, onCancel }) {
                     type="number"
                     step="0.01"
                     min="0"
-                    placeholder="0.00"
+                    placeholder="—"
                     className={cn(
                       'h-9 w-full rounded-md border border-input bg-surface px-2.5',
                       'text-sm text-text-primary text-end tabular-nums',
-                      'placeholder:text-text-muted focus:outline-none focus:border-primary focus:shadow-focus transition-colors',
-                      'focus:bg-primary-50'
+                      'placeholder:text-text-muted/40 focus:outline-none transition-colors',
+                      'focus:border-success focus:ring-1 focus:ring-success/20 focus:bg-success/5'
                     )}
                     {...register(`lines.${index}.debit`, {
                       onChange: (e) => handleDebitChange(index, e.target.value),
@@ -262,12 +263,12 @@ export function JournalEditor({ entry, onSuccess, onCancel }) {
                     type="number"
                     step="0.01"
                     min="0"
-                    placeholder="0.00"
+                    placeholder="—"
                     className={cn(
                       'h-9 w-full rounded-md border border-input bg-surface px-2.5',
                       'text-sm text-text-primary text-end tabular-nums',
-                      'placeholder:text-text-muted focus:outline-none focus:border-primary focus:shadow-focus transition-colors',
-                      'focus:bg-primary-50'
+                      'placeholder:text-text-muted/40 focus:outline-none transition-colors',
+                      'focus:border-primary focus:ring-1 focus:ring-primary/20 focus:bg-primary-50/50'
                     )}
                     {...register(`lines.${index}.credit`, {
                       onChange: (e) => handleCreditChange(index, e.target.value),
@@ -378,7 +379,7 @@ export function JournalEditor({ entry, onSuccess, onCancel }) {
 
       {/* ── Actions ── */}
       <div className="flex items-center justify-end gap-2 pt-2 border-t border-border">
-        <Button type="button" variant="secondary" size="sm" onClick={onCancel} disabled={anyPending}>
+        <Button type="button" variant="ghost" size="sm" onClick={onCancel} disabled={anyPending}>
           {t('common.cancel')}
         </Button>
         <Button
@@ -396,7 +397,7 @@ export function JournalEditor({ entry, onSuccess, onCancel }) {
         </Button>
         <Button
           type="button"
-          size="sm"
+          size="md"
           isLoading={anyPending && submitModeRef.current === 'post'}
           disabled={anyPending || !isBalanced}
           title={!isBalanced ? t('journal.unbalancedHint') : undefined}

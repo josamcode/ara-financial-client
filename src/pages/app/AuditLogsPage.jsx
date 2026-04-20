@@ -2,13 +2,44 @@ import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ScrollText } from 'lucide-react'
 import { useAuditLogs } from '@/features/auditLogs/hooks/useAuditLogs'
+import { useUsers } from '@/features/users/hooks/useUsers'
 import { PageHeader } from '@/shared/components/PageHeader'
 import { Badge } from '@/shared/components/Badge'
 import { Button } from '@/shared/components/Button'
+import { Select } from '@/shared/components/Select'
 import { EmptyState } from '@/shared/components/EmptyState'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
 import { formatDateTime } from '@/shared/utils/formatters'
+
+const ACTION_OPTIONS = [
+  { value: '', label: '—' },
+  { value: 'journal.created', label: 'journal.created' },
+  { value: 'journal.posted', label: 'journal.posted' },
+  { value: 'journal.deleted', label: 'journal.deleted' },
+  { value: 'account.created', label: 'account.created' },
+  { value: 'account.updated', label: 'account.updated' },
+  { value: 'account.deleted', label: 'account.deleted' },
+  { value: 'user.invited', label: 'user.invited' },
+  { value: 'user.deactivated', label: 'user.deactivated' },
+  { value: 'user.role_changed', label: 'user.role_changed' },
+  { value: 'fiscalPeriod.closed', label: 'fiscalPeriod.closed' },
+  { value: 'fiscalPeriod.locked', label: 'fiscalPeriod.locked' },
+  { value: 'fiscalPeriod.reopened', label: 'fiscalPeriod.reopened' },
+  { value: 'tenant.updated', label: 'tenant.updated' },
+]
+
+const RESOURCE_TYPE_OPTIONS = [
+  { value: '', label: '—' },
+  { value: 'JournalEntry', label: 'JournalEntry' },
+  { value: 'Account', label: 'Account' },
+  { value: 'User', label: 'User' },
+  { value: 'FiscalPeriod', label: 'FiscalPeriod' },
+  { value: 'Tenant', label: 'Tenant' },
+]
+
+const INPUT_CLASS =
+  'h-input rounded-md border border-input bg-surface px-3 text-sm text-text-primary focus:outline-none focus:border-primary focus:shadow-focus'
 
 const PAGE_SIZE = 20
 
@@ -123,6 +154,14 @@ export default function AuditLogsPage() {
   )
 
   const auditQuery = useAuditLogs(queryParams)
+  const usersQuery = useUsers({ limit: 200 })
+  const userOptions = useMemo(() => {
+    const members = usersQuery.data?.users || []
+    return [
+      { value: '', label: '—' },
+      ...members.map((u) => ({ value: u._id, label: u.name || u.email })),
+    ]
+  }, [usersQuery.data])
   const logs = auditQuery.data?.logs || []
   const pagination = auditQuery.data?.pagination
 
@@ -152,36 +191,51 @@ export default function AuditLogsPage() {
         subtitle={t('auditLogs.subtitle')}
       />
 
-      <form onSubmit={handleApplyFilters} className="bg-surface rounded-lg border border-border p-4 mb-5">
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+      <form onSubmit={handleApplyFilters} className="bg-surface rounded-lg border border-border p-4 mb-5 space-y-3">
+        {/* Row 1: Action | Resource Type | User */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-text-primary">
+            <label className="text-xs font-medium text-text-muted">
               {t('auditLogs.action')}
             </label>
-            <input
-              type="text"
+            <Select
               value={draftFilters.action}
-              onChange={(event) => handleFilterChange('action', event.target.value)}
+              onChange={(val) => handleFilterChange('action', val)}
+              options={ACTION_OPTIONS}
               placeholder={t('auditLogs.actionPlaceholder')}
-              className="h-input rounded-md border border-input bg-surface px-3 text-sm text-text-primary focus:outline-none focus:border-primary focus:shadow-focus"
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-text-primary">
+            <label className="text-xs font-medium text-text-muted">
               {t('auditLogs.resourceType')}
             </label>
-            <input
-              type="text"
+            <Select
               value={draftFilters.resourceType}
-              onChange={(event) => handleFilterChange('resourceType', event.target.value)}
+              onChange={(val) => handleFilterChange('resourceType', val)}
+              options={RESOURCE_TYPE_OPTIONS}
               placeholder={t('auditLogs.resourceTypePlaceholder')}
-              className="h-input rounded-md border border-input bg-surface px-3 text-sm text-text-primary focus:outline-none focus:border-primary focus:shadow-focus"
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-text-primary">
+            <label className="text-xs font-medium text-text-muted">
+              {t('auditLogs.user')}
+            </label>
+            <Select
+              value={draftFilters.userId}
+              onChange={(val) => handleFilterChange('userId', val)}
+              options={userOptions}
+              placeholder={t('auditLogs.allUsers')}
+              isLoading={usersQuery.isLoading}
+            />
+          </div>
+        </div>
+
+        {/* Row 2: Resource ID | From | To */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-medium text-text-muted">
               {t('auditLogs.resourceId')}
             </label>
             <input
@@ -189,55 +243,38 @@ export default function AuditLogsPage() {
               value={draftFilters.resourceId}
               onChange={(event) => handleFilterChange('resourceId', event.target.value)}
               placeholder={t('auditLogs.resourceIdPlaceholder')}
-              className="h-input rounded-md border border-input bg-surface px-3 text-sm text-text-primary focus:outline-none focus:border-primary focus:shadow-focus"
+              className={INPUT_CLASS}
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-text-primary">
-              {t('auditLogs.userId')}
-            </label>
-            <input
-              type="text"
-              value={draftFilters.userId}
-              onChange={(event) => handleFilterChange('userId', event.target.value)}
-              placeholder={t('auditLogs.userIdPlaceholder')}
-              className="h-input rounded-md border border-input bg-surface px-3 text-sm text-text-primary focus:outline-none focus:border-primary focus:shadow-focus"
-            />
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-text-primary">{t('common.from')}</label>
+            <label className="text-xs font-medium text-text-muted">{t('common.from')}</label>
             <input
               type="date"
               value={draftFilters.startDate}
               onChange={(event) => handleFilterChange('startDate', event.target.value)}
-              className="h-input rounded-md border border-input bg-surface px-3 text-sm text-text-primary focus:outline-none focus:border-primary focus:shadow-focus"
+              className={INPUT_CLASS}
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-text-primary">{t('common.to')}</label>
+            <label className="text-xs font-medium text-text-muted">{t('common.to')}</label>
             <input
               type="date"
               value={draftFilters.endDate}
               onChange={(event) => handleFilterChange('endDate', event.target.value)}
-              className="h-input rounded-md border border-input bg-surface px-3 text-sm text-text-primary focus:outline-none focus:border-primary focus:shadow-focus"
+              className={INPUT_CLASS}
             />
           </div>
         </div>
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mt-4">
-          <p className="text-xs text-text-muted">{t('auditLogs.exactIdHint')}</p>
-
-          <div className="flex items-center gap-2">
-            <Button size="sm" type="submit">
-              {t('common.apply')}
-            </Button>
-            <Button size="sm" type="button" variant="secondary" onClick={handleClearFilters}>
-              {t('common.clear')}
-            </Button>
-          </div>
+        <div className="flex items-center justify-end gap-2 pt-1">
+          <Button size="sm" type="submit">
+            {t('common.apply')}
+          </Button>
+          <Button size="sm" type="button" variant="secondary" onClick={handleClearFilters}>
+            {t('common.clear')}
+          </Button>
         </div>
       </form>
 

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useTranslation } from 'react-i18next'
@@ -8,11 +8,9 @@ import toast from 'react-hot-toast'
 import { userApi } from '@/entities/user/api/userApi'
 import { Input } from '@/shared/components/Input'
 import { Button } from '@/shared/components/Button'
+import { Select } from '@/shared/components/Select'
 import { Card } from '@/shared/components/Card'
 import { buildInvitationAcceptUrl } from '@/pages/setup/utils/invitationUrl'
-
-const SELECT_CLASS =
-  'h-input w-full rounded-md border border-input bg-surface px-3 text-sm text-text-primary focus:outline-none focus:border-primary focus:shadow-focus'
 
 const schema = z.object({
   email: z.string().min(1, 'errors.required').email('errors.emailInvalid'),
@@ -29,6 +27,7 @@ export default function InviteTeamStep({ onNext, onBack, initialValues }) {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(schema),
@@ -128,13 +127,21 @@ export default function InviteTeamStep({ onNext, onBack, initialValues }) {
           error={errors.name && t(errors.name.message, { min: 2 })}
           {...register('name')}
         />
-        <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-text-primary">{t('setup.role')}</label>
-          <select className={SELECT_CLASS} {...register('roleName')}>
-            <option value="admin">{t('setup.roleAdmin')}</option>
-            <option value="accountant">{t('setup.roleAccountant')}</option>
-          </select>
-        </div>
+        <Controller
+          name="roleName"
+          control={control}
+          render={({ field }) => (
+            <Select
+              value={field.value}
+              onChange={field.onChange}
+              options={[
+                { value: 'admin', label: t('setup.roleAdmin') },
+                { value: 'accountant', label: t('setup.roleAccountant') },
+              ]}
+              label={t('setup.role')}
+            />
+          )}
+        />
         <div className="flex justify-end">
           <Button type="submit" size="sm" isLoading={sending}>
             <Plus size={14} />

@@ -1,10 +1,12 @@
 import { useEffect } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useTranslation } from 'react-i18next'
-import { Input, FormField } from '@/shared/components/Input'
+import { Input } from '@/shared/components/Input'
 import { Button } from '@/shared/components/Button'
+import { Select } from '@/shared/components/Select'
+import { Toggle } from '@/shared/components/Toggle'
 import { useCreateAccount, useUpdateAccount } from '@/features/accounts/hooks/useAccounts'
 import { ACCOUNT_TYPES } from '@/shared/constants/app'
 
@@ -28,6 +30,7 @@ export function AccountForm({ account, defaultParentId, flatAccounts, onSuccess,
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(schema),
@@ -83,9 +86,21 @@ export function AccountForm({ account, defaultParentId, flatAccounts, onSuccess,
     onSuccess?.()
   }
 
-  const availableParents = flatAccounts?.filter(
-    (a) => !account || (a._id !== account._id)
-  ) || []
+  const availableParents =
+    flatAccounts?.filter((a) => !account || a._id !== account._id) || []
+
+  const typeOptions = ACCOUNT_TYPES.map((type) => ({
+    value: type,
+    label: t(`accounts.${type}`),
+  }))
+
+  const parentOptions = [
+    { value: '', label: t('accounts.noParent') },
+    ...availableParents.map((a) => ({
+      value: a._id,
+      label: `${a.code} — ${a.name}`,
+    })),
+  ]
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
@@ -104,41 +119,44 @@ export function AccountForm({ account, defaultParentId, flatAccounts, onSuccess,
         {...register('name')}
       />
 
-      <FormField label={t('accounts.accountType')} error={errors.type && t(errors.type.message)}>
-        <select
-          className="h-input w-full rounded-md border border-input bg-surface px-3 text-sm text-text-primary focus:outline-none focus:border-primary focus:shadow-focus"
-          {...register('type')}
-        >
-          {ACCOUNT_TYPES.map((type) => (
-            <option key={type} value={type}>
-              {t(`accounts.${type}`)}
-            </option>
-          ))}
-        </select>
-      </FormField>
+      <Controller
+        name="type"
+        control={control}
+        render={({ field }) => (
+          <Select
+            value={field.value}
+            onChange={field.onChange}
+            options={typeOptions}
+            label={t('accounts.accountType')}
+            error={errors.type && t(errors.type.message)}
+          />
+        )}
+      />
 
-      <FormField label={t('accounts.parentAccountOptional')}>
-        <select
-          className="h-input w-full rounded-md border border-input bg-surface px-3 text-sm text-text-primary focus:outline-none focus:border-primary focus:shadow-focus"
-          {...register('parentId')}
-        >
-          <option value="">{t('accounts.noParent')}</option>
-          {availableParents.map((a) => (
-            <option key={a._id} value={a._id}>
-              {a.code} — {a.name}
-            </option>
-          ))}
-        </select>
-      </FormField>
+      <Controller
+        name="parentId"
+        control={control}
+        render={({ field }) => (
+          <Select
+            value={field.value || ''}
+            onChange={(val) => field.onChange(val || null)}
+            options={parentOptions}
+            label={t('accounts.parentAccountOptional')}
+          />
+        )}
+      />
 
-      <label className="flex items-center gap-3 cursor-pointer">
-        <input
-          type="checkbox"
-          className="w-4 h-4 accent-primary rounded"
-          {...register('isActive')}
-        />
-        <span className="text-sm font-medium text-text-primary">{t('accounts.isActive')}</span>
-      </label>
+      <Controller
+        name="isActive"
+        control={control}
+        render={({ field }) => (
+          <Toggle
+            checked={field.value}
+            onChange={field.onChange}
+            label={t('accounts.isActive')}
+          />
+        )}
+      />
 
       <div className="flex justify-end gap-2 pt-2">
         <Button type="button" variant="secondary" size="sm" onClick={onCancel}>

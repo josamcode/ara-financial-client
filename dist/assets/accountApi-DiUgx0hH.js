@@ -1,1 +1,0 @@
-import{f as e}from"./index-Cj_RZbGW.js";const o={list:t=>e.get("/accounts",{params:t}),tree:()=>e.get("/accounts/tree"),getById:t=>e.get(`/accounts/${t}`),create:t=>e.post("/accounts",t),applyTemplate:()=>e.post("/accounts/template"),update:(t,c)=>e.patch(`/accounts/${t}`,c),remove:t=>e.delete(`/accounts/${t}`)};export{o as a};

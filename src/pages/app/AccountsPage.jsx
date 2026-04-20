@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, Network, List, Search, SlidersHorizontal } from 'lucide-react'
+import { Plus, Network, List, Search } from 'lucide-react'
+import { Select } from '@/shared/components/Select'
 import { useAccountTree, useAccountList, useDeleteAccount, useApplyTemplate, useToggleAccountActive } from '@/features/accounts/hooks/useAccounts'
 import { AccountTree } from '@/features/accounts/components/AccountTree'
 import { AccountList } from '@/features/accounts/components/AccountList'
@@ -175,21 +176,15 @@ export default function AccountsPage() {
               className="h-input w-full rounded-md border border-input bg-surface ps-9 pe-3 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-primary focus:shadow-focus"
             />
           </div>
-          <div className="relative">
-            <SlidersHorizontal size={14} className="absolute inset-y-0 start-3 my-auto text-text-muted pointer-events-none" />
-            <select
-              value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value)}
-              className="h-input rounded-md border border-input bg-surface ps-9 pe-4 text-sm text-text-primary focus:outline-none focus:border-primary focus:shadow-focus appearance-none"
-            >
-              <option value="">{t('accounts.allTypes')}</option>
-              {ACCOUNT_TYPES.map((type) => (
-                <option key={type} value={type}>
-                  {t(`accounts.${type}`)}
-                </option>
-              ))}
-            </select>
-          </div>
+          <Select
+            value={typeFilter}
+            onChange={setTypeFilter}
+            options={[
+              { value: '', label: t('accounts.allTypes') },
+              ...ACCOUNT_TYPES.map((type) => ({ value: type, label: t(`accounts.${type}`) })),
+            ]}
+            className="w-44"
+          />
         </div>
       )}
 

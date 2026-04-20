@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, TrendingUp, RefreshCw } from 'lucide-react'
+import { Toggle } from '@/shared/components/Toggle'
+import { DatePresets } from '@/shared/components/DatePresets'
 import { useIncomeStatement } from '@/features/reports/hooks/useReports'
 import { reportApi } from '@/entities/report/api/reportApi'
 import { ExportMenu, downloadBlob } from '@/features/reports/components/ExportMenu'
@@ -84,6 +86,15 @@ export default function IncomeStatementPage() {
         onSubmit={handleSubmit}
         className="bg-surface rounded-lg border border-border p-4 mb-5 space-y-3"
       >
+        <DatePresets
+          mode="range"
+          onApply={({ startDate: s, endDate: e }) => {
+            setStartDate(s)
+            setEndDate(e)
+            setAppliedParams({ startDate: s, endDate: e })
+          }}
+        />
+
         <div className="flex flex-wrap items-end gap-3">
           <div className="flex flex-col gap-1">
             <label className="text-xs text-text-muted">
@@ -135,18 +146,11 @@ export default function IncomeStatementPage() {
         </div>
 
         {/* Comparison toggle */}
-        <div className="flex items-center gap-2">
-          <input
-            id="is-comparison"
-            type="checkbox"
-            checked={showComparison}
-            onChange={(e) => setShowComparison(e.target.checked)}
-            className="rounded border-border text-primary"
-          />
-          <label htmlFor="is-comparison" className="text-sm text-text-secondary cursor-pointer">
-            {t('reports.enableComparison')}
-          </label>
-        </div>
+        <Toggle
+          checked={showComparison}
+          onChange={setShowComparison}
+          label={t('reports.enableComparison')}
+        />
 
         {showComparison && (
           <div className="flex flex-wrap items-end gap-3 pt-1">

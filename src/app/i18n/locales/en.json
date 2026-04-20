@@ -171,7 +171,8 @@
     "netEquity": "Net Equity",
     "netIncome": "Net Income",
     "totalRevenue": "Total Revenue",
-    "totalExpenses": "Total Expenses"
+    "totalExpenses": "Total Expenses",
+    "totalEquity": "Total Equity"
   },
   "setup": {
     "title": "Organization Setup",
@@ -472,6 +473,7 @@
     "resourceTypePlaceholder": "Ex: User",
     "resourceIdPlaceholder": "Exact resource ID",
     "userIdPlaceholder": "Exact user ID",
+    "allUsers": "All users",
     "noActor": "System / Unknown",
     "noDetails": "No additional details",
     "createdFields": "Created with {{fields}}",

@@ -15,7 +15,7 @@ i18n
     fallbackLng: 'ar',
     defaultNS: 'translation',
     detection: {
-      order: ['localStorage', 'navigator'],
+      order: ['localStorage'],
       lookupLocalStorage: 'ara_language',
       caches: ['localStorage'],
     },
