@@ -309,8 +309,14 @@ export default function UsersPage() {
       {!usersQuery.isLoading && !usersQuery.isError && !members.length && (
         <EmptyState
           icon={Users}
-          title={search ? (i18n.language === 'ar' ? 'لا توجد نتائج' : 'No results') : t('users.emptyTitle')}
-          message={search ? '' : t('users.emptyMessage')}
+          title={search ? (i18n.language === 'ar' ? 'لا توجد نتائج' : 'No results found') : t('users.emptyTitle')}
+          message={
+            search
+              ? (i18n.language === 'ar' ? `لا يوجد عضو بالاسم أو البريد "${search}"` : `No member matches "${search}"`)
+              : t('users.emptyMessage')
+          }
+          action={search ? () => setSearch('') : undefined}
+          actionLabel={search ? (i18n.language === 'ar' ? 'مسح البحث' : 'Clear search') : undefined}
         />
       )}
 
@@ -321,11 +327,11 @@ export default function UsersPage() {
               <table className="w-full text-sm min-w-[900px]">
                 <thead>
                   <tr className="border-b border-border bg-surface-subtle">
-                    <th className="px-4 py-3 text-start text-xs font-semibold text-text-muted">{t('users.member')}</th>
-                    <th className="px-4 py-3 text-start text-xs font-semibold text-text-muted w-56">{t('users.role')}</th>
-                    <th className="px-4 py-3 text-start text-xs font-semibold text-text-muted w-40">{t('common.status')}</th>
-                    <th className="px-4 py-3 text-start text-xs font-semibold text-text-muted w-64">{t('users.access')}</th>
-                    <th className="px-4 py-3 text-end text-xs font-semibold text-text-muted w-32">{t('common.actions')}</th>
+                    <th className="px-4 py-3.5 text-start text-xs font-semibold text-text-muted">{t('users.member')}</th>
+                    <th className="px-4 py-3.5 text-start text-xs font-semibold text-text-muted w-56">{t('users.role')}</th>
+                    <th className="px-4 py-3.5 text-start text-xs font-semibold text-text-muted w-40">{t('common.status')}</th>
+                    <th className="px-4 py-3.5 text-start text-xs font-semibold text-text-muted w-64">{t('users.access')}</th>
+                    <th className="px-4 py-3.5 text-end text-xs font-semibold text-text-muted w-32">{t('common.actions')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -343,8 +349,8 @@ export default function UsersPage() {
                       canDeactivateUsers && !isCurrentUser && member.isActive && canManageMember
 
                     return (
-                      <tr key={member._id} className="hover:bg-surface-muted transition-colors">
-                        <td className="px-4 py-3 align-top">
+                      <tr key={member._id} className="hover:bg-surface-subtle/60 transition-colors cursor-default">
+                        <td className="px-4 py-3.5 align-top">
                           <div className="flex items-start gap-3">
                             <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                               <Shield size={16} className="text-primary" />
@@ -359,7 +365,7 @@ export default function UsersPage() {
                           </div>
                         </td>
 
-                        <td className="px-4 py-3 align-top">
+                        <td className="px-4 py-3.5 align-top">
                           <div className="space-y-2">
                             <Badge variant="default" size="sm">{resolveRoleLabel(member, t)}</Badge>
                             {showRoleSelector && (
@@ -376,11 +382,11 @@ export default function UsersPage() {
                           </div>
                         </td>
 
-                        <td className="px-4 py-3 align-top">
+                        <td className="px-4 py-3.5 align-top">
                           <Badge variant={statusBadge.variant} size="sm">{statusBadge.label}</Badge>
                         </td>
 
-                        <td className="px-4 py-3 align-top text-sm text-text-secondary">
+                        <td className="px-4 py-3.5 align-top text-sm text-text-secondary">
                           {status === 'invited' && member.invitationExpiresAt ? (
                             <div>
                               <p>{t('users.pendingInviteUntil', { date: formatDateTime(member.invitationExpiresAt, i18n.language) })}</p>
@@ -401,16 +407,14 @@ export default function UsersPage() {
                           )}
                         </td>
 
-                        <td className="px-4 py-3 align-top">
+                        <td className="px-4 py-3.5 align-top">
                           <div className="flex justify-end">
                             {canDeactivateMember ? (
-                              <Button size="sm" variant="secondary" onClick={() => setDeactivateTarget(member)}>
+                              <Button size="sm" variant="danger" onClick={() => setDeactivateTarget(member)}>
                                 <UserX size={14} />
                                 {t('users.deactivate')}
                               </Button>
-                            ) : (
-                              <span className="text-xs text-text-muted pt-2">-</span>
-                            )}
+                            ) : null}
                           </div>
                         </td>
                       </tr>

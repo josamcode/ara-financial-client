@@ -1,1 +1,0 @@
-import{R as c}from"./index-CYwdbePg.js";function f(r){if(r!=null&&r.acceptUrl)return r.acceptUrl;if(!(r!=null&&r.token)||typeof window>"u")return"";const e=new URL(c.ACCEPT_INVITE,window.location.origin);return e.searchParams.set("token",r.token),e.toString()}export{f as b};

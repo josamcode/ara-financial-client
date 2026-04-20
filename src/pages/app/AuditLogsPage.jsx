@@ -14,19 +14,19 @@ import { formatDateTime } from '@/shared/utils/formatters'
 
 const ACTION_OPTIONS = [
   { value: '', label: '—' },
-  { value: 'journal.created', label: 'journal.created' },
-  { value: 'journal.posted', label: 'journal.posted' },
-  { value: 'journal.deleted', label: 'journal.deleted' },
-  { value: 'account.created', label: 'account.created' },
-  { value: 'account.updated', label: 'account.updated' },
-  { value: 'account.deleted', label: 'account.deleted' },
-  { value: 'user.invited', label: 'user.invited' },
-  { value: 'user.deactivated', label: 'user.deactivated' },
-  { value: 'user.role_changed', label: 'user.role_changed' },
-  { value: 'fiscalPeriod.closed', label: 'fiscalPeriod.closed' },
-  { value: 'fiscalPeriod.locked', label: 'fiscalPeriod.locked' },
-  { value: 'fiscalPeriod.reopened', label: 'fiscalPeriod.reopened' },
-  { value: 'tenant.updated', label: 'tenant.updated' },
+  { value: 'journal.created', label: 'Journal: Created' },
+  { value: 'journal.posted', label: 'Journal: Posted' },
+  { value: 'journal.deleted', label: 'Journal: Deleted' },
+  { value: 'account.created', label: 'Account: Created' },
+  { value: 'account.updated', label: 'Account: Updated' },
+  { value: 'account.deleted', label: 'Account: Deleted' },
+  { value: 'user.invited', label: 'User: Invited' },
+  { value: 'user.deactivated', label: 'User: Deactivated' },
+  { value: 'user.role_changed', label: 'User: Role Changed' },
+  { value: 'fiscalPeriod.closed', label: 'Period: Closed' },
+  { value: 'fiscalPeriod.locked', label: 'Period: Locked' },
+  { value: 'fiscalPeriod.reopened', label: 'Period: Reopened' },
+  { value: 'tenant.updated', label: 'Company: Updated' },
 ]
 
 const RESOURCE_TYPE_OPTIONS = [
@@ -136,6 +136,10 @@ function PaginationControls({ pagination, onPageChange, t }) {
       </div>
     </div>
   )
+}
+
+function hasActiveFilters(filters) {
+  return Object.values(filters).some(Boolean)
 }
 
 export default function AuditLogsPage() {
@@ -269,11 +273,11 @@ export default function AuditLogsPage() {
         </div>
 
         <div className="flex items-center justify-end gap-2 pt-1">
+          <Button size="sm" type="button" variant="ghost" onClick={handleClearFilters}>
+            {t('common.clear')}
+          </Button>
           <Button size="sm" type="submit">
             {t('common.apply')}
-          </Button>
-          <Button size="sm" type="button" variant="secondary" onClick={handleClearFilters}>
-            {t('common.clear')}
           </Button>
         </div>
       </form>
@@ -290,8 +294,10 @@ export default function AuditLogsPage() {
       {!auditQuery.isLoading && !auditQuery.isError && !logs.length && (
         <EmptyState
           icon={ScrollText}
-          title={t('auditLogs.emptyTitle')}
-          message={t('auditLogs.emptyMessage')}
+          title={hasActiveFilters(appliedFilters) ? (i18n.language === 'ar' ? 'لا توجد نتائج' : 'No results for current filters') : t('auditLogs.emptyTitle')}
+          message={hasActiveFilters(appliedFilters) ? (i18n.language === 'ar' ? 'جرب تغيير الفلاتر أو مسحها' : 'Try adjusting or clearing the filters') : t('auditLogs.emptyMessage')}
+          action={hasActiveFilters(appliedFilters) ? handleClearFilters : undefined}
+          actionLabel={hasActiveFilters(appliedFilters) ? (i18n.language === 'ar' ? 'مسح الفلاتر' : 'Clear filters') : undefined}
         />
       )}
 
@@ -302,19 +308,19 @@ export default function AuditLogsPage() {
               <table className="w-full text-sm min-w-[1040px]">
                 <thead>
                   <tr className="border-b border-border bg-surface-subtle">
-                    <th className="px-4 py-3 text-start text-xs font-semibold text-text-muted w-48">
+                    <th className="px-4 py-3.5 text-start text-xs font-semibold text-text-muted w-48">
                       {t('auditLogs.action')}
                     </th>
-                    <th className="px-4 py-3 text-start text-xs font-semibold text-text-muted w-56">
+                    <th className="px-4 py-3.5 text-start text-xs font-semibold text-text-muted w-56">
                       {t('auditLogs.resource')}
                     </th>
-                    <th className="px-4 py-3 text-start text-xs font-semibold text-text-muted w-56">
+                    <th className="px-4 py-3.5 text-start text-xs font-semibold text-text-muted w-56">
                       {t('auditLogs.user')}
                     </th>
-                    <th className="px-4 py-3 text-start text-xs font-semibold text-text-muted">
+                    <th className="px-4 py-3.5 text-start text-xs font-semibold text-text-muted">
                       {t('auditLogs.summary')}
                     </th>
-                    <th className="px-4 py-3 text-start text-xs font-semibold text-text-muted w-44">
+                    <th className="px-4 py-3.5 text-start text-xs font-semibold text-text-muted w-44">
                       {t('auditLogs.timestamp')}
                     </th>
                   </tr>
@@ -322,14 +328,14 @@ export default function AuditLogsPage() {
 
                 <tbody className="divide-y divide-border">
                   {logs.map((log) => (
-                    <tr key={log._id} className="hover:bg-surface-muted transition-colors">
-                      <td className="px-4 py-3 align-top">
+                    <tr key={log._id} className="hover:bg-surface-subtle/60 transition-colors cursor-default">
+                      <td className="px-4 py-3.5 align-top">
                         <Badge variant="info" size="sm" className="font-mono">
                           {log.action}
                         </Badge>
                       </td>
 
-                      <td className="px-4 py-3 align-top">
+                      <td className="px-4 py-3.5 align-top">
                         <div>
                           <p className="font-medium text-text-primary">{log.resourceType}</p>
                           <p className="text-xs font-mono text-text-muted mt-1 break-all">
@@ -338,7 +344,7 @@ export default function AuditLogsPage() {
                         </div>
                       </td>
 
-                      <td className="px-4 py-3 align-top">
+                      <td className="px-4 py-3.5 align-top">
                         <div>
                           <p className="font-medium text-text-primary">
                             {log.userId?.name || t('auditLogs.noActor')}
@@ -349,11 +355,11 @@ export default function AuditLogsPage() {
                         </div>
                       </td>
 
-                      <td className="px-4 py-3 align-top text-text-secondary">
+                      <td className="px-4 py-3.5 align-top text-text-secondary">
                         {summarizeDetails(log, t)}
                       </td>
 
-                      <td className="px-4 py-3 align-top text-text-secondary whitespace-nowrap">
+                      <td className="px-4 py-3.5 align-top text-text-secondary whitespace-nowrap">
                         {formatDateTime(log.createdAt, i18n.language)}
                       </td>
                     </tr>

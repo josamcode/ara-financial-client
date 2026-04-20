@@ -193,8 +193,8 @@ export function JournalEditor({ entry, onSuccess, onCancel }) {
           <div className="grid grid-cols-[auto_1fr_auto_auto_auto] items-center gap-2 px-3 py-2.5 bg-surface-subtle border-b border-border">
             <span className="text-xs font-semibold text-text-muted w-6 text-center">#</span>
             <span className="text-xs font-semibold text-text-muted">{t('journal.account')}</span>
-            <span className="text-xs font-semibold text-success w-28 text-end">{t('common.debit')}</span>
-            <span className="text-xs font-semibold text-primary w-28 text-end">{t('common.credit')}</span>
+            <span className="text-xs font-semibold text-success w-28 text-end bg-success/8 rounded px-2 py-0.5">{t('common.debit')}</span>
+            <span className="text-xs font-semibold text-primary w-28 text-end bg-primary/8 rounded px-2 py-0.5">{t('common.credit')}</span>
             <span className="w-8" />
           </div>
 
@@ -249,6 +249,7 @@ export function JournalEditor({ entry, onSuccess, onCancel }) {
                       'h-9 w-full rounded-md border border-input bg-surface px-2.5',
                       'text-sm text-text-primary text-end tabular-nums',
                       'placeholder:text-text-muted/40 focus:outline-none transition-colors',
+                      'border-s-2 border-s-success/40',
                       'focus:border-success focus:ring-1 focus:ring-success/20 focus:bg-success/5'
                     )}
                     {...register(`lines.${index}.debit`, {
@@ -268,6 +269,7 @@ export function JournalEditor({ entry, onSuccess, onCancel }) {
                       'h-9 w-full rounded-md border border-input bg-surface px-2.5',
                       'text-sm text-text-primary text-end tabular-nums',
                       'placeholder:text-text-muted/40 focus:outline-none transition-colors',
+                      'border-s-2 border-s-primary/40',
                       'focus:border-primary focus:ring-1 focus:ring-primary/20 focus:bg-primary-50/50'
                     )}
                     {...register(`lines.${index}.credit`, {
@@ -295,15 +297,16 @@ export function JournalEditor({ entry, onSuccess, onCancel }) {
           </div>
 
           {/* Add line button */}
-          <div className="px-3 py-3 border-t border-border bg-surface-subtle">
-            <button
+          <div className="px-3 py-2.5 border-t border-border bg-surface-subtle">
+            <Button
               type="button"
+              variant="secondary"
+              size="sm"
               onClick={() => append(emptyLine())}
-              className="flex items-center gap-1.5 text-sm text-primary hover:text-primary-700 font-medium transition-colors"
             >
               <Plus size={14} />
               {t('journal.addLine')}
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -311,28 +314,28 @@ export function JournalEditor({ entry, onSuccess, onCancel }) {
       {/* ── Balance summary ── */}
       <div
         className={cn(
-          'flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-4 py-3.5 rounded-lg border',
+          'flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-4 py-4 rounded-lg border',
           isBalanced
-            ? 'bg-success-soft/40 border-success/30'
+            ? 'bg-success/8 border-success/40'
             : hasAmounts
-            ? 'bg-error-soft/40 border-error/30'
+            ? 'bg-error/8 border-error/40'
             : 'bg-surface-muted border-border'
         )}
       >
         {/* Balance status indicator */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           {isBalanced ? (
-            <CheckCircle2 size={16} className="text-success shrink-0" />
+            <CheckCircle2 size={18} className="text-success shrink-0" />
           ) : (
             <AlertCircle
-              size={16}
+              size={18}
               className={cn('shrink-0', hasAmounts ? 'text-error' : 'text-text-muted')}
             />
           )}
           <div>
             <span
               className={cn(
-                'text-sm font-semibold',
+                'text-sm font-bold',
                 isBalanced ? 'text-success' : hasAmounts ? 'text-error' : 'text-text-muted'
               )}
             >
@@ -343,7 +346,7 @@ export function JournalEditor({ entry, onSuccess, onCancel }) {
                 : t('journal.enterAmounts')}
             </span>
             {!isBalanced && hasAmounts && (
-              <span className="block text-xs text-error mt-0.5">
+              <span className="block text-xs font-semibold text-error mt-0.5">
                 {t('journal.difference')}: {formatNumber(difference, locale)}
               </span>
             )}
@@ -353,24 +356,15 @@ export function JournalEditor({ entry, onSuccess, onCancel }) {
         {/* Totals */}
         <div className="flex items-center gap-6 text-sm tabular-nums">
           <div className="text-end">
-            <div className="text-xs text-text-muted mb-0.5">{t('common.debit')}</div>
-            <div
-              className={cn(
-                'font-semibold',
-                totalDebit > 0 ? 'text-text-primary' : 'text-text-muted'
-              )}
-            >
+            <div className="text-xs text-success/80 font-medium mb-0.5">{t('common.debit')}</div>
+            <div className={cn('font-bold', totalDebit > 0 ? 'text-text-primary' : 'text-text-muted')}>
               {formatNumber(totalDebit, locale)}
             </div>
           </div>
+          <div className="w-px h-8 bg-border" />
           <div className="text-end">
-            <div className="text-xs text-text-muted mb-0.5">{t('common.credit')}</div>
-            <div
-              className={cn(
-                'font-semibold',
-                totalCredit > 0 ? 'text-text-primary' : 'text-text-muted'
-              )}
-            >
+            <div className="text-xs text-primary/80 font-medium mb-0.5">{t('common.credit')}</div>
+            <div className={cn('font-bold', totalCredit > 0 ? 'text-text-primary' : 'text-text-muted')}>
               {formatNumber(totalCredit, locale)}
             </div>
           </div>
@@ -378,7 +372,7 @@ export function JournalEditor({ entry, onSuccess, onCancel }) {
       </div>
 
       {/* ── Actions ── */}
-      <div className="flex items-center justify-end gap-2 pt-2 border-t border-border">
+      <div className="flex items-center justify-end gap-3 pt-2 border-t border-border">
         <Button type="button" variant="ghost" size="sm" onClick={onCancel} disabled={anyPending}>
           {t('common.cancel')}
         </Button>
@@ -397,7 +391,7 @@ export function JournalEditor({ entry, onSuccess, onCancel }) {
         </Button>
         <Button
           type="button"
-          size="md"
+          size="lg"
           isLoading={anyPending && submitModeRef.current === 'post'}
           disabled={anyPending || !isBalanced}
           title={!isBalanced ? t('journal.unbalancedHint') : undefined}
