@@ -1,0 +1,1 @@
+import{j as e,h as n}from"./index-Cj_RZbGW.js";function p({children:r,className:d,padding:s="md",...o}){const a={none:"",sm:"p-4",md:"p-5",lg:"p-6"};return e.jsx("div",{className:n("bg-surface rounded-lg border border-border shadow-card",a[s],d),...o,children:r})}export{p as C};

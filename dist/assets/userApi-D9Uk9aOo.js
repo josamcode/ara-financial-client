@@ -1,0 +1,1 @@
+import{f as t}from"./index-Cj_RZbGW.js";const i={list:e=>t.get("/users",{params:e}),getById:e=>t.get(`/users/${e}`),getProfile:()=>t.get("/users/profile"),updateProfile:e=>t.patch("/users/profile",e),invite:e=>t.post("/users/invite",e),changeRole:(e,s)=>t.patch(`/users/${e}/role`,{roleName:s}),deactivate:e=>t.patch(`/users/${e}/deactivate`)};export{i as u};

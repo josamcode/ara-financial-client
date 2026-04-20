@@ -3,6 +3,7 @@ import { BookOpen, Building2, CalendarRange, Coins, Users } from 'lucide-react'
 import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
 import { CURRENCIES } from '@/shared/constants/app'
+import { buildInvitationAcceptUrl } from '@/pages/setup/utils/invitationUrl'
 
 const INDUSTRY_LABELS = {
   general: { ar: 'عام', en: 'General' },
@@ -169,34 +170,38 @@ export default function CompleteStep({
                     {t('setup.inviteManualShareHint')}
                   </p>
                   <div className="mt-3 space-y-2">
-                    {invited.map((invite) => (
-                      <div
-                        key={`${invite.email}-${invite.roleName}`}
-                        className="rounded-md border border-border bg-surface-subtle px-3 py-2.5 text-sm"
-                      >
-                        <p className="font-medium text-text-primary">{invite.name}</p>
-                        <p className="text-text-muted mt-0.5">{invite.email}</p>
-                        {invite.acceptUrl ? (
-                          <div className="mt-2">
-                            <p className="text-xs font-medium text-text-primary">
-                              {t('setup.invitationLink')}
+                    {invited.map((invite) => {
+                      const acceptUrl = buildInvitationAcceptUrl(invite)
+
+                      return (
+                        <div
+                          key={`${invite.email}-${invite.roleName}`}
+                          className="rounded-md border border-border bg-surface-subtle px-3 py-2.5 text-sm"
+                        >
+                          <p className="font-medium text-text-primary">{invite.name}</p>
+                          <p className="text-text-muted mt-0.5">{invite.email}</p>
+                          {acceptUrl ? (
+                            <div className="mt-2">
+                              <p className="text-xs font-medium text-text-primary">
+                                {t('setup.invitationLink')}
+                              </p>
+                              <a
+                                href={acceptUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-xs text-primary break-all hover:underline"
+                              >
+                                {acceptUrl}
+                              </a>
+                            </div>
+                          ) : (
+                            <p className="text-xs text-text-muted mt-2">
+                              {t('setup.invitationLinkUnavailable')}
                             </p>
-                            <a
-                              href={invite.acceptUrl}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="text-xs text-primary break-all hover:underline"
-                            >
-                              {invite.acceptUrl}
-                            </a>
-                          </div>
-                        ) : (
-                          <p className="text-xs text-text-muted mt-2">
-                            {t('setup.invitationLinkUnavailable')}
-                          </p>
-                        )}
-                      </div>
-                    ))}
+                          )}
+                        </div>
+                      )
+                    })}
                   </div>
                 </>
               ) : (

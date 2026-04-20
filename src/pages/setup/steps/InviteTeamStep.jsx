@@ -9,6 +9,7 @@ import { userApi } from '@/entities/user/api/userApi'
 import { Input } from '@/shared/components/Input'
 import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
+import { buildInvitationAcceptUrl } from '@/pages/setup/utils/invitationUrl'
 
 const SELECT_CLASS =
   'h-input w-full rounded-md border border-input bg-surface px-3 text-sm text-text-primary focus:outline-none focus:border-primary focus:shadow-focus'
@@ -41,7 +42,8 @@ export default function InviteTeamStep({ onNext, onBack, initialValues }) {
       const invitation = result?.data?.invitation ?? result?.invitation
       const inviteRecord = {
         ...values,
-        acceptUrl: invitation?.acceptUrl || '',
+        token: invitation?.token || '',
+        acceptUrl: buildInvitationAcceptUrl(invitation),
         expiresAt: invitation?.expiresAt || '',
       }
 
@@ -68,45 +70,49 @@ export default function InviteTeamStep({ onNext, onBack, initialValues }) {
 
       {sent.length > 0 && (
         <div className="mb-5 space-y-2">
-          {sent.map((inv, i) => (
-            <div
-              key={i}
-              className="px-3 py-2.5 rounded-md bg-surface-subtle border border-border text-sm"
-            >
-              <div className="flex items-start gap-3">
-                <UserCheck size={14} className="text-success shrink-0 mt-0.5" />
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-medium text-text-primary">{inv.name}</span>
-                    <span className="text-xs text-text-muted capitalize">{inv.roleName}</span>
-                  </div>
-                  <p className="text-text-muted mt-0.5">{inv.email}</p>
-                  <p className="text-xs text-text-muted mt-2">
-                    {t('setup.inviteManualShareHint')}
-                  </p>
-                  {inv.acceptUrl ? (
-                    <div className="mt-1">
-                      <p className="text-xs font-medium text-text-primary">
-                        {t('setup.invitationLink')}
-                      </p>
-                      <a
-                        href={inv.acceptUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-xs text-primary break-all hover:underline"
-                      >
-                        {inv.acceptUrl}
-                      </a>
+          {sent.map((inv, i) => {
+            const acceptUrl = buildInvitationAcceptUrl(inv)
+
+            return (
+              <div
+                key={i}
+                className="px-3 py-2.5 rounded-md bg-surface-subtle border border-border text-sm"
+              >
+                <div className="flex items-start gap-3">
+                  <UserCheck size={14} className="text-success shrink-0 mt-0.5" />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-medium text-text-primary">{inv.name}</span>
+                      <span className="text-xs text-text-muted capitalize">{inv.roleName}</span>
                     </div>
-                  ) : (
-                    <p className="text-xs text-text-muted mt-1">
-                      {t('setup.invitationLinkUnavailable')}
+                    <p className="text-text-muted mt-0.5">{inv.email}</p>
+                    <p className="text-xs text-text-muted mt-2">
+                      {t('setup.inviteManualShareHint')}
                     </p>
-                  )}
+                    {acceptUrl ? (
+                      <div className="mt-1">
+                        <p className="text-xs font-medium text-text-primary">
+                          {t('setup.invitationLink')}
+                        </p>
+                        <a
+                          href={acceptUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-xs text-primary break-all hover:underline"
+                        >
+                          {acceptUrl}
+                        </a>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-text-muted mt-1">
+                        {t('setup.invitationLinkUnavailable')}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
 

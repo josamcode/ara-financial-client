@@ -63,6 +63,7 @@ export default function FiscalYearStep({
       startMonth: initialValues?.startMonth || defaultStartMonth,
     },
   })
+  const submitFiscalYear = handleSubmit(onSubmit)
 
   async function onSubmit(values) {
     try {
@@ -123,6 +124,7 @@ export default function FiscalYearStep({
           <button
             type="button"
             onClick={onBack}
+            disabled={isSubmitting}
             className="text-sm text-text-muted hover:text-primary transition-colors"
           >
             {t('common.back')}
@@ -142,7 +144,7 @@ export default function FiscalYearStep({
       </h2>
       <p className="text-sm text-text-secondary mb-6">{t('setup.fiscalYearDescription')}</p>
 
-      <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
+      <form onSubmit={submitFiscalYear} noValidate className="space-y-4">
         <div className="flex flex-col gap-1.5">
           <label className="text-sm font-medium text-text-primary">
             {t('setup.fiscalYear')}
@@ -183,11 +185,12 @@ export default function FiscalYearStep({
             <button
               type="button"
               onClick={handleSkip}
+              disabled={isSubmitting}
               className="text-sm text-text-muted hover:text-text-primary transition-colors"
             >
               {t('setup.skip')}
             </button>
-            <Button type="submit" isLoading={isSubmitting}>
+            <Button type="button" onClick={submitFiscalYear} isLoading={isSubmitting}>
               {t('common.next')}
             </Button>
           </div>
