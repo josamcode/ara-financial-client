@@ -1,1 +1,0 @@
-import{u as e,j as t,Y as a}from"./index-BAFVt89_.js";import{P as r}from"./index-BCa_0655.js";import{E as i}from"./index-BEpSQnxh.js";function l(){const{t:s}=e();return t.jsxs("div",{className:"animate-fade-in",children:[t.jsx(r,{title:s("users.title")}),t.jsx(i,{icon:a,title:s("users.title"),message:s("common.noData")})]})}export{l as default};

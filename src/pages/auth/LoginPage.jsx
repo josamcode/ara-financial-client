@@ -31,7 +31,7 @@ export default function LoginPage() {
       const user = await login(values)
       const from = location.state?.from?.pathname
       const dest =
-        user?.tenant && !user.tenant.isSetupComplete
+        user?.tenant?.isSetupComplete === false
           ? ROUTES.SETUP
           : from || ROUTES.DASHBOARD
       navigate(dest, { replace: true })

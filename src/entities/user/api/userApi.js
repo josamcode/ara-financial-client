@@ -16,8 +16,8 @@ export const userApi = {
   invite: (data) =>
     apiClient.post('/users/invite', data),
 
-  changeRole: (id, roleId) =>
-    apiClient.patch(`/users/${id}/role`, { roleId }),
+  changeRole: (id, roleName) =>
+    apiClient.patch(`/users/${id}/role`, { roleName }),
 
   deactivate: (id) =>
     apiClient.patch(`/users/${id}/deactivate`),

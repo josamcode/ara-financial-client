@@ -14,11 +14,27 @@ function normalizeUser(user) {
   if (!user) return null
 
   const resolvedUser = user.user ?? user
-  const resolvedRole = resolvedUser.role ?? resolvedUser.roleId ?? null
+  const resolvedRole = resolvedUser.role ?? resolvedUser.roleId ?? user.role ?? null
+  const resolvedTenantSource =
+    resolvedUser.tenant && typeof resolvedUser.tenant === 'object'
+      ? resolvedUser.tenant
+      : user.tenant && typeof user.tenant === 'object'
+      ? user.tenant
+      : null
+  const resolvedTenant = resolvedTenantSource
+    ? {
+        ...resolvedTenantSource,
+        isSetupComplete:
+          resolvedTenantSource.isSetupComplete ?? resolvedTenantSource.setupCompleted,
+        setupCompleted:
+          resolvedTenantSource.setupCompleted ?? resolvedTenantSource.isSetupComplete,
+      }
+    : null
 
   return {
     ...resolvedUser,
     ...(resolvedRole ? { role: resolvedRole } : {}),
+    ...(resolvedTenant ? { tenant: resolvedTenant } : {}),
   }
 }
 
@@ -58,8 +74,15 @@ function authReducer(state, action) {
 }
 
 async function fetchCurrentUser() {
-  const response = await apiClient.get('/auth/me')
-  return normalizeUser(response.data?.user ?? response.user ?? response)
+  const [authResponse, tenantResponse] = await Promise.all([
+    apiClient.get('/auth/me'),
+    apiClient.get('/tenants'),
+  ])
+
+  return normalizeUser({
+    ...(authResponse.data ?? authResponse),
+    tenant: tenantResponse.data?.tenant ?? tenantResponse.tenant ?? null,
+  })
 }
 
 export function AuthProvider({ children }) {
@@ -95,18 +118,18 @@ export function AuthProvider({ children }) {
 
   const login = useCallback(async (credentials) => {
     const response = await apiClient.post('/auth/login', credentials)
-    const { accessToken, refreshToken, user } = response.data
-    const normalizedUser = normalizeUser(user)
+    const { accessToken, refreshToken } = response.data
     storage.setTokens(accessToken, refreshToken)
+    const normalizedUser = await fetchCurrentUser().catch(() => normalizeUser(response.data))
     dispatch({ type: 'LOGIN', payload: { user: normalizedUser } })
     return normalizedUser
   }, [])
 
   const register = useCallback(async (data) => {
     const response = await apiClient.post('/auth/register', data)
-    const { accessToken, refreshToken, user } = response.data
-    const normalizedUser = normalizeUser(user)
+    const { accessToken, refreshToken } = response.data
     storage.setTokens(accessToken, refreshToken)
+    const normalizedUser = await fetchCurrentUser().catch(() => normalizeUser(response.data))
     dispatch({ type: 'LOGIN', payload: { user: normalizedUser } })
     return normalizedUser
   }, [])

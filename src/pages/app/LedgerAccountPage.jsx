@@ -100,8 +100,8 @@ export default function LedgerAccountPage() {
 
   const accountName = account
     ? isAr
-      ? account.nameAr
-      : account.nameEn
+      ? account.nameAr || account.nameEn
+      : account.nameEn || account.nameAr
     : '...'
 
   function handleReset() {
@@ -123,11 +123,11 @@ export default function LedgerAccountPage() {
   async function handleExport() {
     try {
       setIsExporting(true)
-      const response = await ledgerApi.exportAccountLedger(accountId, {
+      const blob = await ledgerApi.exportAccountLedger(accountId, {
         startDate: startDate || undefined,
         endDate: endDate || undefined,
       })
-      const url = URL.createObjectURL(response.data)
+      const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
       a.download = `ledger-${account?.code || accountId}.csv`

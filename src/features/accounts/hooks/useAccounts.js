@@ -10,17 +10,33 @@ const KEYS = {
   detail: (id) => ['accounts', 'detail', id],
 }
 
+function normalizeAccount(account) {
+  if (!account) return account
+
+  return {
+    ...account,
+    name: account.name ?? account.nameEn ?? account.nameAr ?? '',
+  }
+}
+
+function normalizeAccountTree(nodes = []) {
+  return nodes.map((node) => ({
+    ...normalizeAccount(node),
+    children: normalizeAccountTree(node.children || []),
+  }))
+}
+
 export function useAccountTree() {
   return useQuery({
     queryKey: KEYS.tree(),
-    queryFn: () => accountApi.tree().then((r) => r.data),
+    queryFn: () => accountApi.tree().then((r) => normalizeAccountTree(r.data || [])),
   })
 }
 
 export function useAccountList(params) {
   return useQuery({
     queryKey: KEYS.list(params),
-    queryFn: () => accountApi.list(params).then((r) => r.data),
+    queryFn: () => accountApi.list(params).then((r) => (r.data || []).map(normalizeAccount)),
   })
 }
 
@@ -86,9 +102,10 @@ export function useToggleAccountActive() {
   return useMutation({
     mutationFn: ({ id, isActive }) => accountApi.update(id, { isActive }).then((r) => r.data),
     onSuccess: (data) => {
+      const account = data?.account ?? data
       qc.invalidateQueries({ queryKey: KEYS.all })
       toast.success(
-        data.isActive ? t('accounts.accountActivated') : t('accounts.accountDeactivated')
+        account?.isActive ? t('accounts.accountActivated') : t('accounts.accountDeactivated')
       )
     },
   })

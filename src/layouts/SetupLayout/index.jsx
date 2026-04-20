@@ -8,7 +8,7 @@ export function SetupLayout() {
   const { user } = useAuth()
 
   // Already set up → go to dashboard
-  if (user?.tenant?.isSetupComplete) {
+  if (user?.tenant?.isSetupComplete === true) {
     return <Navigate to={ROUTES.DASHBOARD} replace />
   }
 

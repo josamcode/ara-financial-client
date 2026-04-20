@@ -4,7 +4,6 @@ import { Badge } from '@/shared/components/Badge'
 const variantMap = {
   draft: 'warning',
   posted: 'success',
-  reversed: 'info',
 }
 
 export function JournalStatusBadge({ status, size = 'md' }) {

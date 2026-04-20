@@ -9,6 +9,10 @@ const KEYS = {
   detail: (id) => ['journal', 'detail', id],
 }
 
+function extractJournalEntry(response) {
+  return response?.data?.entry ?? response?.entry ?? null
+}
+
 export function useJournalList(params) {
   return useQuery({
     queryKey: KEYS.list(params),
@@ -19,7 +23,7 @@ export function useJournalList(params) {
 export function useJournalById(id) {
   return useQuery({
     queryKey: KEYS.detail(id),
-    queryFn: () => journalApi.getById(id).then((r) => r.data),
+    queryFn: () => journalApi.getById(id).then(extractJournalEntry),
     enabled: !!id,
   })
 }
@@ -28,7 +32,7 @@ export function useCreateJournal() {
   const qc = useQueryClient()
   const { t } = useTranslation()
   return useMutation({
-    mutationFn: (data) => journalApi.create(data).then((r) => r.data),
+    mutationFn: (data) => journalApi.create(data).then(extractJournalEntry),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: KEYS.all })
       toast.success(t('journal.entryCreated'))
@@ -43,7 +47,7 @@ export function useUpdateJournal() {
   const qc = useQueryClient()
   const { t } = useTranslation()
   return useMutation({
-    mutationFn: ({ id, data }) => journalApi.update(id, data).then((r) => r.data),
+    mutationFn: ({ id, data }) => journalApi.update(id, data).then(extractJournalEntry),
     onSuccess: (_, { id }) => {
       qc.invalidateQueries({ queryKey: KEYS.all })
       qc.invalidateQueries({ queryKey: KEYS.detail(id) })
@@ -59,7 +63,7 @@ export function usePostJournal() {
   const qc = useQueryClient()
   const { t } = useTranslation()
   return useMutation({
-    mutationFn: (id) => journalApi.post(id).then((r) => r.data),
+    mutationFn: (id) => journalApi.post(id).then(extractJournalEntry),
     onSuccess: (_, id) => {
       qc.invalidateQueries({ queryKey: KEYS.all })
       qc.invalidateQueries({ queryKey: KEYS.detail(id) })
@@ -75,7 +79,7 @@ export function useReverseJournal() {
   const qc = useQueryClient()
   const { t } = useTranslation()
   return useMutation({
-    mutationFn: (id) => journalApi.reverse(id).then((r) => r.data),
+    mutationFn: (id) => journalApi.reverse(id).then(extractJournalEntry),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: KEYS.all })
       toast.success(t('journal.entryReversed'))

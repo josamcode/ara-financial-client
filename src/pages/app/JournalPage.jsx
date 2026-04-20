@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { Plus, Search, FileText } from 'lucide-react'
-import { useJournalList, useDeleteJournal } from '@/features/journal/hooks/useJournal'
+import { useJournalList, useJournalById, useDeleteJournal } from '@/features/journal/hooks/useJournal'
 import { JournalList } from '@/features/journal/components/JournalList'
 import { JournalDetail } from '@/features/journal/components/JournalDetail'
 import { PageHeader } from '@/shared/components/PageHeader'
@@ -32,13 +32,14 @@ export default function JournalPage() {
     () => ({
       search: search || undefined,
       status: statusFilter || undefined,
-      dateFrom: dateFrom || undefined,
-      dateTo: dateTo || undefined,
+      startDate: dateFrom || undefined,
+      endDate: dateTo || undefined,
     }),
     [search, statusFilter, dateFrom, dateTo]
   )
 
   const listQuery = useJournalList(queryParams)
+  const detailQuery = useJournalById(viewEntry?._id)
   const deleteJournal = useDeleteJournal()
 
   const entries = useMemo(() => {
@@ -103,7 +104,6 @@ export default function JournalPage() {
           <option value="">{t('journal.allStatuses')}</option>
           <option value="draft">{t('journal.draft')}</option>
           <option value="posted">{t('journal.posted')}</option>
-          <option value="reversed">{t('journal.reversed')}</option>
         </select>
 
         <input
@@ -158,7 +158,7 @@ export default function JournalPage() {
       <SlidePanel
         open={!!viewEntry}
         onClose={() => setViewEntry(null)}
-        title={viewEntry?.entryNumber || t('journal.entryDetails')}
+        title={detailQuery.data?.entryNumber || viewEntry?.entryNumber || t('journal.entryDetails')}
         width="lg"
         footer={
           viewEntry && (
@@ -190,7 +190,11 @@ export default function JournalPage() {
           )
         }
       >
-        {viewEntry && <JournalDetail entry={viewEntry} />}
+        {viewEntry && (
+          detailQuery.isLoading
+            ? <LoadingState message={t('common.loading')} />
+            : <JournalDetail entry={detailQuery.data || viewEntry} />
+        )}
       </SlidePanel>
 
       {/* ── Delete confirm ── */}

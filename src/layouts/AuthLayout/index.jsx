@@ -18,7 +18,7 @@ export function AuthLayout() {
 
   if (isAuthenticated) {
     const dest =
-      user?.tenant && !user.tenant.isSetupComplete
+      user?.tenant?.isSetupComplete === false
         ? ROUTES.SETUP
         : ROUTES.DASHBOARD
     return <Navigate to={dest} replace />

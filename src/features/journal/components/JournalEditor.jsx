@@ -26,6 +26,7 @@ const entrySchema = z.object({
 })
 
 const emptyLine = () => ({ accountId: '', description: '', debit: 0, credit: 0 })
+const amountToApiString = (value) => String(Number(value) || 0)
 
 export function JournalEditor({ entry, onSuccess, onCancel }) {
   const { t, i18n } = useTranslation()
@@ -70,7 +71,10 @@ export function JournalEditor({ entry, onSuccess, onCancel }) {
         lines:
           entry.lines?.length >= 2
             ? entry.lines.map((l) => ({
-                accountId: l.account?._id || l.accountId || '',
+                accountId:
+                  l.account?._id ||
+                  (l.accountId && typeof l.accountId === 'object' ? l.accountId._id : l.accountId) ||
+                  '',
                 description: l.description || '',
                 debit: Number(l.debit) || 0,
                 credit: Number(l.credit) || 0,
@@ -106,8 +110,8 @@ export function JournalEditor({ entry, onSuccess, onCancel }) {
       lines: values.lines.map((l) => ({
         accountId: l.accountId,
         description: l.description || undefined,
-        debit: Number(l.debit) || 0,
-        credit: Number(l.credit) || 0,
+        debit: amountToApiString(l.debit),
+        credit: amountToApiString(l.credit),
       })),
     }
   }

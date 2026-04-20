@@ -52,12 +52,13 @@ export default function DashboardPage() {
     retry: 1,
   })
 
-  const summary = data?.data?.summary
+  const financials = data?.data?.financials
+  const currency = user?.tenant?.baseCurrency || 'EGP'
 
   return (
     <div className="animate-fade-in">
       <PageHeader
-        title={`${t('dashboard.welcome')}، ${user?.name?.split(' ')[0] || ''}`}
+        title={`${t('dashboard.welcome')}, ${user?.name?.split(' ')[0] || ''}`}
         subtitle={t('dashboard.subtitle')}
       />
 
@@ -74,7 +75,7 @@ export default function DashboardPage() {
           <StatCard
             label={t('dashboard.totalAssets')}
             value={
-              summary ? formatCurrency(summary.totalAssets, 'EGP') : '—'
+              financials ? formatCurrency(financials.totalAssets, currency) : '-'
             }
             icon={DollarSign}
             isLoading={isLoading}
@@ -82,7 +83,7 @@ export default function DashboardPage() {
           <StatCard
             label={t('dashboard.totalLiabilities')}
             value={
-              summary ? formatCurrency(summary.totalLiabilities, 'EGP') : '—'
+              financials ? formatCurrency(financials.totalLiabilities, currency) : '-'
             }
             icon={Scale}
             isLoading={isLoading}
@@ -90,7 +91,7 @@ export default function DashboardPage() {
           <StatCard
             label={t('dashboard.totalRevenue')}
             value={
-              summary ? formatCurrency(summary.totalRevenue, 'EGP') : '—'
+              financials ? formatCurrency(financials.totalRevenue, currency) : '-'
             }
             icon={TrendingUp}
             isLoading={isLoading}
@@ -98,7 +99,7 @@ export default function DashboardPage() {
           <StatCard
             label={t('dashboard.totalExpenses')}
             value={
-              summary ? formatCurrency(summary.totalExpenses, 'EGP') : '—'
+              financials ? formatCurrency(financials.totalExpenses, currency) : '-'
             }
             icon={TrendingDown}
             isLoading={isLoading}

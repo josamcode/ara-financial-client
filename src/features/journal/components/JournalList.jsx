@@ -28,7 +28,17 @@ export function JournalList({ entries, onView, onEdit, onDelete }) {
 
       {/* Rows */}
       <div className="divide-y divide-border">
-        {entries.map((entry) => (
+        {entries.map((entry) => {
+          const totalDebit =
+            entry.totalDebit ??
+            entry.lines?.reduce((sum, line) => sum + (Number(line.debit) || 0), 0) ??
+            0
+          const totalCredit =
+            entry.totalCredit ??
+            entry.lines?.reduce((sum, line) => sum + (Number(line.credit) || 0), 0) ??
+            0
+
+          return (
           <div
             key={entry._id}
             className="group grid grid-cols-[1fr_auto] sm:grid-cols-[6rem_6rem_1fr_6rem_7rem_7rem_5rem_5rem] items-center gap-3 px-4 py-3 hover:bg-surface-muted transition-colors"
@@ -72,12 +82,12 @@ export function JournalList({ entries, onView, onEdit, onDelete }) {
 
               {/* Debit */}
               <span className="text-xs tabular-nums text-text-secondary text-end hidden sm:block">
-                {formatNumber(entry.totalDebit ?? 0, locale)}
+                {formatNumber(totalDebit, locale)}
               </span>
 
               {/* Credit */}
               <span className="text-xs tabular-nums text-text-secondary text-end hidden sm:block">
-                {formatNumber(entry.totalCredit ?? 0, locale)}
+                {formatNumber(totalCredit, locale)}
               </span>
 
               {/* Status */}
@@ -131,7 +141,7 @@ export function JournalList({ entries, onView, onEdit, onDelete }) {
               )}
             </div>
           </div>
-        ))}
+        )})}
       </div>
     </div>
   )

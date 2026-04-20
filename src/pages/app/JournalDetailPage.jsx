@@ -36,6 +36,7 @@ export default function JournalDetailPage() {
   const entry = entryQuery.data
   const isDraft = entry?.status === 'draft'
   const isPosted = entry?.status === 'posted'
+  const canReverse = isPosted && !entry?.reversalEntryId
   const isActionLoading =
     postJournal.isPending || reverseJournal.isPending || deleteJournal.isPending
 
@@ -161,7 +162,7 @@ export default function JournalDetailPage() {
                   </>
                 )}
 
-                {isPosted && (
+                {canReverse && (
                   <PermissionGate permission={PERMISSIONS.JOURNAL_POST}>
                     <Button
                       size="sm"

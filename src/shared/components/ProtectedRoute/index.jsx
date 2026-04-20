@@ -33,7 +33,7 @@ export function ProtectedRoute({ children, permission, redirectTo }) {
   }
 
   // Redirect to setup if tenant hasn't completed onboarding
-  const setupIncomplete = user?.tenant && !user.tenant.isSetupComplete
+  const setupIncomplete = user?.tenant?.isSetupComplete === false
   if (setupIncomplete && location.pathname !== ROUTES.SETUP) {
     return <Navigate to={ROUTES.SETUP} replace />
   }

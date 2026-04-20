@@ -36,7 +36,6 @@ export default function SetupPage() {
     try {
       await tenantApi.updateSettings({
         name: values.companyName,
-        currency: values.currency,
       })
       await tenantApi.completeSetup()
       await refreshUser()

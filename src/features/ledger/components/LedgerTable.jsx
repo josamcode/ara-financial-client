@@ -116,7 +116,7 @@ export function LedgerTable({ movements, openingBalance, showOpeningBalance, acc
                     <AmountCell value={row.credit} />
                   </td>
                   <td className="px-4 py-3 text-end">
-                    <BalanceCell value={row.runningBalance} />
+                    <BalanceCell value={row.balance} />
                   </td>
                 </tr>
               ))
@@ -158,7 +158,7 @@ export function LedgerTable({ movements, openingBalance, showOpeningBalance, acc
                 </td>
                 <td className="px-4 py-2.5 text-end">
                   {movements.length > 0 && (
-                    <BalanceCell value={movements[movements.length - 1].runningBalance} />
+                    <BalanceCell value={movements[movements.length - 1].balance} />
                   )}
                 </td>
               </tr>

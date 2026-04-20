@@ -10,7 +10,7 @@ const KEYS = {
 export function useAccountLedger(accountId, params) {
   return useQuery({
     queryKey: KEYS.account(accountId, params),
-    queryFn: () => ledgerApi.getAccountLedger(accountId, params).then((r) => r.data),
+    queryFn: () => ledgerApi.getAccountLedger(accountId, params),
     enabled: !!accountId,
     keepPreviousData: true,
   })
@@ -19,6 +19,6 @@ export function useAccountLedger(accountId, params) {
 export function useAllLedger(params) {
   return useQuery({
     queryKey: KEYS.allLedger(params),
-    queryFn: () => ledgerApi.getAllLedger(params).then((r) => r.data),
+    queryFn: () => ledgerApi.getAllLedger(params),
   })
 }
