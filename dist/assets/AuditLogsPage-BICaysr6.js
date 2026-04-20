@@ -1,1 +1,0 @@
-import{u as s,j as a,Z as e}from"./index-aayb8UKP.js";import{P as o}from"./index-Cy59mKTQ.js";import{E as i}from"./index-BXnf2ha3.js";function l(){const{t}=s();return a.jsxs("div",{className:"animate-fade-in",children:[a.jsx(o,{title:t("auditLogs.title")}),a.jsx(i,{icon:e,title:t("auditLogs.title"),message:t("common.noData")})]})}export{l as default};
