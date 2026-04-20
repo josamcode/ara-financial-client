@@ -19,10 +19,13 @@ export function formatRelativeTime(value, locale = 'ar') {
 
 export function formatCurrency(amount, currency = 'EGP', locale = 'ar-EG') {
   if (amount === null || amount === undefined) return '—'
+
+  const hasDecimals = Number(amount) % 1 !== 0
+
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,
-    minimumFractionDigits: 2,
+    minimumFractionDigits: hasDecimals ? 2 : 0,
     maximumFractionDigits: 2,
   }).format(Number(amount))
 }
