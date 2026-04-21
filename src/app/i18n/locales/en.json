@@ -192,7 +192,48 @@
     "apAging": "AP Aging",
     "ytd": "Year to date",
     "needsAttention": "Needs attention",
-    "allCurrent": "All up to date"
+    "allCurrent": "All up to date",
+    "insights": {
+      "title": "Insights",
+      "items": {
+        "overdueInvoices": {
+          "title": "Overdue invoices need follow-up",
+          "description": "{{count}} customer invoices are past due."
+        },
+        "noOverdueInvoices": {
+          "title": "Customer invoices are current",
+          "description": "No overdue customer invoices right now."
+        },
+        "overdueBills": {
+          "title": "Overdue supplier bills need action",
+          "description": "{{count}} supplier bills are past due."
+        },
+        "noOverdueBills": {
+          "title": "Supplier bills are current",
+          "description": "No overdue supplier bills right now."
+        },
+        "topCustomerOutstanding": {
+          "title": "Largest customer exposure",
+          "description": "{{name}} has {{amount}} outstanding."
+        },
+        "topSupplierPayable": {
+          "title": "Largest supplier payable",
+          "description": "{{name}} is owed {{amount}}."
+        },
+        "netIncomePositive": {
+          "title": "Net income is positive",
+          "description": "Year-to-date net income is {{amount}}."
+        },
+        "netIncomeNegative": {
+          "title": "Net income is negative",
+          "description": "Year-to-date net income is {{amount}}."
+        },
+        "netIncomeNeutral": {
+          "title": "Net income is flat",
+          "description": "No net profit or loss has been recorded yet."
+        }
+      }
+    }
   },
   "setup": {
     "title": "Organization Setup",

@@ -6,6 +6,8 @@ import {
   Receipt,
   TrendingUp,
   AlertCircle,
+  CheckCircle2,
+  Info,
   Plus,
   BookOpen,
   BarChart2,
@@ -95,6 +97,187 @@ function SummaryCard({ label, value, icon: Icon, accent = 'default', subtext, on
 }
 
 // ─── Recent invoices ──────────────────────────────────────────────────────────
+
+const INSIGHT_STYLES = {
+  info: {
+    panel: 'border-blue-200 bg-blue-50/80',
+    iconWrap: 'bg-blue-100 text-blue-700',
+    title: 'text-blue-900',
+    description: 'text-blue-700',
+  },
+  success: {
+    panel: 'border-green-200 bg-green-50/80',
+    iconWrap: 'bg-green-100 text-green-700',
+    title: 'text-green-900',
+    description: 'text-green-700',
+  },
+  warning: {
+    panel: 'border-amber-200 bg-amber-50/80',
+    iconWrap: 'bg-amber-100 text-amber-700',
+    title: 'text-amber-900',
+    description: 'text-amber-700',
+  },
+  danger: {
+    panel: 'border-red-200 bg-red-50/80',
+    iconWrap: 'bg-red-100 text-red-700',
+    title: 'text-red-900',
+    description: 'text-red-700',
+  },
+}
+
+const INSIGHT_ICONS = {
+  info: Info,
+  success: CheckCircle2,
+  warning: AlertCircle,
+  danger: AlertCircle,
+}
+
+function getInsightContent(insight, t, currency) {
+  switch (insight.id) {
+    case 'overdue_invoices':
+      return {
+        title: t('dashboard.insights.items.overdueInvoices.title'),
+        description: t('dashboard.insights.items.overdueInvoices.description', {
+          count: insight.count,
+        }),
+      }
+    case 'no_overdue_invoices':
+      return {
+        title: t('dashboard.insights.items.noOverdueInvoices.title'),
+        description: t('dashboard.insights.items.noOverdueInvoices.description'),
+      }
+    case 'overdue_bills':
+      return {
+        title: t('dashboard.insights.items.overdueBills.title'),
+        description: t('dashboard.insights.items.overdueBills.description', {
+          count: insight.count,
+        }),
+      }
+    case 'no_overdue_bills':
+      return {
+        title: t('dashboard.insights.items.noOverdueBills.title'),
+        description: t('dashboard.insights.items.noOverdueBills.description'),
+      }
+    case 'top_customer_outstanding':
+      return {
+        title: t('dashboard.insights.items.topCustomerOutstanding.title'),
+        description: t('dashboard.insights.items.topCustomerOutstanding.description', {
+          name: insight.customerName,
+          amount: formatCurrency(insight.amount, currency),
+        }),
+      }
+    case 'top_supplier_payable':
+      return {
+        title: t('dashboard.insights.items.topSupplierPayable.title'),
+        description: t('dashboard.insights.items.topSupplierPayable.description', {
+          name: insight.supplierName,
+          amount: formatCurrency(insight.amount, currency),
+        }),
+      }
+    case 'net_income_positive':
+      return {
+        title: t('dashboard.insights.items.netIncomePositive.title'),
+        description: t('dashboard.insights.items.netIncomePositive.description', {
+          amount: formatCurrency(insight.amount, currency),
+        }),
+      }
+    case 'net_income_negative':
+      return {
+        title: t('dashboard.insights.items.netIncomeNegative.title'),
+        description: t('dashboard.insights.items.netIncomeNegative.description', {
+          amount: formatCurrency(insight.amount, currency),
+        }),
+      }
+    case 'net_income_neutral':
+      return {
+        title: t('dashboard.insights.items.netIncomeNeutral.title'),
+        description: t('dashboard.insights.items.netIncomeNeutral.description'),
+      }
+    default:
+      return null
+  }
+}
+
+function DashboardInsights({ insights, currency, isLoading }) {
+  const { t } = useTranslation()
+  const navigate = useNavigate()
+
+  const resolvedInsights = Array.isArray(insights)
+    ? insights
+        .map((insight) => ({
+          insight,
+          content: getInsightContent(insight, t, currency),
+        }))
+        .filter(({ content }) => content != null)
+    : []
+
+  return (
+    <Card padding="md">
+      <h3 className="text-base font-semibold text-text-primary">{t('dashboard.insights.title')}</h3>
+
+      {isLoading && (
+        <div className="mt-4">
+          <LoadingRows count={4} />
+        </div>
+      )}
+
+      {!isLoading && resolvedInsights.length === 0 && (
+        <p className="py-6 text-center text-sm text-text-secondary">{t('common.noData')}</p>
+      )}
+
+      {!isLoading && resolvedInsights.length > 0 && (
+        <div className="mt-4 grid grid-cols-1 xl:grid-cols-2 gap-3">
+          {resolvedInsights.map(({ insight, content }) => {
+            const styles = INSIGHT_STYLES[insight.tone] ?? INSIGHT_STYLES.info
+            const Icon = INSIGHT_ICONS[insight.tone] ?? INSIGHT_ICONS.info
+            const panelClassName = cn(
+              'w-full rounded-lg border px-4 py-3 text-start transition-shadow',
+              styles.panel,
+              insight.href && 'cursor-pointer hover:shadow-sm'
+            )
+
+            const body = (
+              <div className="flex items-start gap-3">
+                <div className={cn('mt-0.5 flex h-9 w-9 items-center justify-center rounded-full', styles.iconWrap)}>
+                  <Icon size={18} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className={cn('text-sm font-semibold', styles.title)}>{content.title}</p>
+                  <p className={cn('mt-1 text-sm', styles.description)}>{content.description}</p>
+                </div>
+                {insight.href && (
+                  <ChevronRight
+                    size={16}
+                    className="mt-1 flex-shrink-0 text-text-muted rtl:rotate-180"
+                  />
+                )}
+              </div>
+            )
+
+            if (insight.href) {
+              return (
+                <button
+                  key={insight.id}
+                  type="button"
+                  className={panelClassName}
+                  onClick={() => navigate(insight.href)}
+                >
+                  {body}
+                </button>
+              )
+            }
+
+            return (
+              <div key={insight.id} className={panelClassName}>
+                {body}
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </Card>
+  )
+}
 
 function RecentInvoices({ invoices, currency, isLoading }) {
   const { t } = useTranslation()
@@ -274,6 +457,7 @@ export default function DashboardPage() {
   const financials = data?.data?.financials
   const arap = data?.data?.arap
   const activity = data?.data?.activity
+  const insights = data?.data?.insights
   const currency = user?.tenant?.baseCurrency || 'EGP'
 
   const netIncomeNum = financials ? Number(financials.netIncome) : null
@@ -334,6 +518,12 @@ export default function DashboardPage() {
           </div>
 
           {/* Row 2 — recent activity */}
+          <DashboardInsights
+            insights={insights}
+            currency={currency}
+            isLoading={isLoading}
+          />
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <RecentInvoices
               invoices={activity?.recentInvoices}

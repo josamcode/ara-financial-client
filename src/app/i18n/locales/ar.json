@@ -192,7 +192,48 @@
     "apAging": "تحليل ذمم الموردين",
     "ytd": "منذ بداية السنة",
     "needsAttention": "يحتاج مراجعة",
-    "allCurrent": "كل شيء بنظام"
+    "allCurrent": "كل شيء بنظام",
+    "insights": {
+      "title": "المؤشرات",
+      "items": {
+        "overdueInvoices": {
+          "title": "فواتير عملاء متأخرة",
+          "description": "{{count}} فواتير تجاوزت تاريخ الاستحقاق."
+        },
+        "noOverdueInvoices": {
+          "title": "فواتير العملاء منتظمة",
+          "description": "لا توجد فواتير عملاء متأخرة حالياً."
+        },
+        "overdueBills": {
+          "title": "فواتير موردين متأخرة",
+          "description": "{{count}} فواتير موردين تجاوزت تاريخ الاستحقاق."
+        },
+        "noOverdueBills": {
+          "title": "فواتير الموردين منتظمة",
+          "description": "لا توجد فواتير موردين متأخرة حالياً."
+        },
+        "topCustomerOutstanding": {
+          "title": "أعلى رصيد عميل قائم",
+          "description": "{{name}} عليه {{amount}} مستحق."
+        },
+        "topSupplierPayable": {
+          "title": "أعلى رصيد مورد مستحق",
+          "description": "لـ {{name}} مبلغ {{amount}} مستحق."
+        },
+        "netIncomePositive": {
+          "title": "صافي الدخل موجب",
+          "description": "صافي الدخل منذ بداية السنة {{amount}}."
+        },
+        "netIncomeNegative": {
+          "title": "صافي الدخل سالب",
+          "description": "صافي الدخل منذ بداية السنة {{amount}}."
+        },
+        "netIncomeNeutral": {
+          "title": "صافي الدخل متعادل",
+          "description": "لا يوجد ربح أو خسارة صافية حتى الآن."
+        }
+      }
+    }
   },
   "setup": {
     "title": "إعداد المنشأة",
