@@ -1,6 +1,6 @@
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ArrowLeft, ExternalLink } from 'lucide-react'
+import { ArrowLeft, ExternalLink, FileText } from 'lucide-react'
 import { PageHeader } from '@/shared/components/PageHeader'
 import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
@@ -45,10 +45,16 @@ export default function CustomerDetailPage() {
           { label: customer.name },
         ]}
         actions={
-          <Button variant="secondary" size="sm" onClick={() => navigate(ROUTES.CUSTOMERS)}>
-            <ArrowLeft size={14} className="me-1" />
-            {t('common.back')}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button size="sm" onClick={() => navigate(ROUTES.CUSTOMER_STATEMENT(id))}>
+              <FileText size={14} className="me-1" />
+              {t('customers.openStatement')}
+            </Button>
+            <Button variant="secondary" size="sm" onClick={() => navigate(ROUTES.CUSTOMERS)}>
+              <ArrowLeft size={14} className="me-1" />
+              {t('common.back')}
+            </Button>
+          </div>
         }
       />
 

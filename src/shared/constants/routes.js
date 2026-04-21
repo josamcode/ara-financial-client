@@ -44,6 +44,7 @@ export const ROUTES = {
   // Customers
   CUSTOMERS: '/customers',
   CUSTOMER_DETAIL: (id = ':id') => `/customers/${id}`,
+  CUSTOMER_STATEMENT: (id = ':id') => `/customers/${id}/statement`,
 
   // Invoices
   INVOICES: '/invoices',
