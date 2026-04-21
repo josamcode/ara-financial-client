@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ArrowLeft, ExternalLink } from 'lucide-react'
@@ -7,6 +8,7 @@ import { Card } from '@/shared/components/Card'
 import { EmptyState } from '@/shared/components/EmptyState'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
+import { PaginationControls } from '@/shared/components/PaginationControls'
 import { useCustomerStatement } from '@/features/customers/hooks/useCustomers'
 import { ROUTES } from '@/shared/constants/routes'
 import { formatCurrency, formatDate } from '@/shared/utils/formatters'
@@ -39,15 +41,16 @@ export default function CustomerStatementPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { t, i18n } = useTranslation()
+  const [page, setPage] = useState(1)
   const locale = i18n.language === 'ar' ? 'ar-EG' : 'en-US'
 
-  const { data, isLoading, isError, refetch } = useCustomerStatement(id)
+  const { data, isLoading, isError, refetch } = useCustomerStatement(id, { page, limit: 20 })
 
   if (isLoading) return <LoadingState />
   if (isError) return <ErrorState onRetry={refetch} />
   if (!data) return null
 
-  const { customer, summary, transactions } = data
+  const { customer, summary, transactions, pagination } = data
   const currency = transactions[0]?.currency ?? 'EGP'
 
   return (
@@ -176,6 +179,15 @@ export default function CustomerStatementPage() {
               </tbody>
             </table>
           </div>
+          {pagination?.totalPages > 1 && (
+            <div className="border-t border-border px-4 py-3">
+              <PaginationControls
+                pagination={pagination}
+                onPageChange={setPage}
+                className="mt-0"
+              />
+            </div>
+          )}
         </Card>
       )}
     </div>

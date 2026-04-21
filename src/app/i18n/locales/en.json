@@ -177,7 +177,19 @@
     "netIncome": "Net Income",
     "totalRevenue": "Total Revenue",
     "totalExpenses": "Total Expenses",
-    "totalEquity": "Total Equity"
+    "totalEquity": "Total Equity",
+    "arOutstanding": "Accounts Receivable",
+    "apOutstanding": "Accounts Payable",
+    "overdueInvoices": "Overdue Invoices",
+    "recentInvoices": "Recent Invoices",
+    "recentBills": "Recent Bills",
+    "quickActions": "Quick Actions",
+    "viewAll": "View All",
+    "newInvoice": "New Invoice",
+    "newBill": "New Bill",
+    "newJournalEntry": "New Journal Entry",
+    "arAging": "AR Aging",
+    "apAging": "AP Aging"
   },
   "setup": {
     "title": "Organization Setup",
@@ -558,7 +570,9 @@
     "statementEmptyTitle": "No statement activity yet",
     "statementEmptyDesc": "Bills and payments for this supplier will appear here",
     "statementBill": "Bill",
-    "statementPayment": "Payment"
+    "statementPayment": "Payment",
+    "noBills": "No bills yet",
+    "noBillsDesc": "No bills have been created for this supplier"
   },
   "invoices": {
     "new": "New Invoice",

@@ -177,7 +177,19 @@
     "netIncome": "صافي الدخل",
     "totalRevenue": "إجمالي الإيرادات",
     "totalExpenses": "إجمالي المصروفات",
-    "totalEquity": "إجمالي حقوق الملكية"
+    "totalEquity": "إجمالي حقوق الملكية",
+    "arOutstanding": "ذمم العملاء",
+    "apOutstanding": "ذمم الموردين",
+    "overdueInvoices": "فواتير متأخرة",
+    "recentInvoices": "آخر الفواتير",
+    "recentBills": "آخر فواتير الموردين",
+    "quickActions": "إجراءات سريعة",
+    "viewAll": "عرض الكل",
+    "newInvoice": "فاتورة جديدة",
+    "newBill": "فاتورة مورد جديدة",
+    "newJournalEntry": "قيد جديد",
+    "arAging": "تحليل ذمم العملاء",
+    "apAging": "تحليل ذمم الموردين"
   },
   "setup": {
     "title": "إعداد المنشأة",
@@ -558,7 +570,9 @@
     "statementEmptyTitle": "لا توجد حركة مالية بعد",
     "statementEmptyDesc": "ستظهر هنا فواتير المورد والمدفوعات الخاصة بهذا المورد",
     "statementBill": "فاتورة مورد",
-    "statementPayment": "دفعة"
+    "statementPayment": "دفعة",
+    "noBills": "لا توجد فواتير مورد بعد",
+    "noBillsDesc": "لم يتم إنشاء أي فواتير لهذا المورد"
   },
   "invoices": {
     "new": "فاتورة جديدة",

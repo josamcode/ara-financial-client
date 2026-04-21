@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { FileText, Pencil, Plus, Search, Trash2 } from 'lucide-react'
 import { PageHeader } from '@/shared/components/PageHeader'
@@ -23,6 +23,7 @@ import { useAuth } from '@/entities/auth/model/useAuth'
 
 export default function SuppliersPage() {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const { user } = useAuth()
   const canCreate = hasPermission(user, PERMISSIONS.SUPPLIER_CREATE)
   const canUpdate = hasPermission(user, PERMISSIONS.SUPPLIER_UPDATE)
@@ -130,7 +131,14 @@ export default function SuppliersPage() {
               <tbody className="divide-y divide-border">
                 {suppliers.map((supplier) => (
                   <tr key={supplier._id} className="transition-colors hover:bg-surface-subtle">
-                    <td className="px-4 py-3 font-medium text-text-primary">{supplier.name}</td>
+                    <td className="px-4 py-3 font-medium text-text-primary">
+                      <button
+                        onClick={() => navigate(ROUTES.SUPPLIER_DETAIL(supplier._id))}
+                        className="text-start transition-colors hover:text-primary hover:underline"
+                      >
+                        {supplier.name}
+                      </button>
+                    </td>
                     <td className="px-4 py-3 text-text-secondary">{supplier.email || '-'}</td>
                     <td className="px-4 py-3 text-text-secondary">{supplier.phone || '-'}</td>
                     <td className="px-4 py-3">

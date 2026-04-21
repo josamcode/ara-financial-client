@@ -50,6 +50,7 @@ export const ROUTES = {
 
   // Suppliers
   SUPPLIERS: '/suppliers',
+  SUPPLIER_DETAIL: (id = ':id') => `/suppliers/${id}`,
   SUPPLIER_STATEMENT: (id = ':id') => `/suppliers/${id}/statement`,
 
   // Invoices

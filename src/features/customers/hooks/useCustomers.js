@@ -13,10 +13,10 @@ export function useCustomerDetail(id) {
   })
 }
 
-export function useCustomerStatement(id) {
+export function useCustomerStatement(id, params = {}) {
   return useQuery({
-    queryKey: [CUSTOMERS_KEY, 'statement', id],
-    queryFn: () => customerApi.getStatement(id).then((r) => r.data),
+    queryKey: [CUSTOMERS_KEY, 'statement', id, params],
+    queryFn: () => customerApi.getStatement(id, params).then((r) => r.data),
     enabled: !!id,
   })
 }

@@ -20,10 +20,18 @@ export function useAllSuppliers() {
   })
 }
 
-export function useSupplierStatement(id) {
+export function useSupplierDetail(id) {
   return useQuery({
-    queryKey: [SUPPLIERS_KEY, 'statement', id],
-    queryFn: () => supplierApi.getStatement(id).then((response) => response.data),
+    queryKey: [SUPPLIERS_KEY, 'detail', id],
+    queryFn: () => supplierApi.getBills(id).then((response) => response.data),
+    enabled: !!id,
+  })
+}
+
+export function useSupplierStatement(id, params = {}) {
+  return useQuery({
+    queryKey: [SUPPLIERS_KEY, 'statement', id, params],
+    queryFn: () => supplierApi.getStatement(id, params).then((response) => response.data),
     enabled: !!id,
   })
 }

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ArrowLeft, ExternalLink } from 'lucide-react'
@@ -7,6 +8,7 @@ import { Card } from '@/shared/components/Card'
 import { EmptyState } from '@/shared/components/EmptyState'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
+import { PaginationControls } from '@/shared/components/PaginationControls'
 import { useSupplierStatement } from '@/features/suppliers/hooks/useSuppliers'
 import { ROUTES } from '@/shared/constants/routes'
 import { formatCurrency, formatDate } from '@/shared/utils/formatters'
@@ -39,15 +41,16 @@ export default function SupplierStatementPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { t, i18n } = useTranslation()
+  const [page, setPage] = useState(1)
   const locale = i18n.language === 'ar' ? 'ar-EG' : 'en-US'
 
-  const { data, isLoading, isError, refetch } = useSupplierStatement(id)
+  const { data, isLoading, isError, refetch } = useSupplierStatement(id, { page, limit: 20 })
 
   if (isLoading) return <LoadingState />
   if (isError) return <ErrorState onRetry={refetch} />
   if (!data) return null
 
-  const { supplier, summary, transactions } = data
+  const { supplier, summary, transactions, pagination } = data
   const currency = transactions[0]?.currency ?? 'EGP'
 
   return (
@@ -57,11 +60,11 @@ export default function SupplierStatementPage() {
         subtitle={supplier.name}
         breadcrumbs={[
           { label: t('suppliers.title'), href: ROUTES.SUPPLIERS },
-          { label: supplier.name },
+          { label: supplier.name, href: ROUTES.SUPPLIER_DETAIL(supplier._id) },
           { label: t('suppliers.statement') },
         ]}
         actions={
-          <Button variant="secondary" size="sm" onClick={() => navigate(ROUTES.SUPPLIERS)}>
+          <Button variant="secondary" size="sm" onClick={() => navigate(ROUTES.SUPPLIER_DETAIL(supplier._id))}>
             <ArrowLeft size={14} className="me-1" />
             {t('common.back')}
           </Button>
@@ -176,6 +179,15 @@ export default function SupplierStatementPage() {
               </tbody>
             </table>
           </div>
+          {pagination?.totalPages > 1 && (
+            <div className="border-t border-border px-4 py-3">
+              <PaginationControls
+                pagination={pagination}
+                onPageChange={setPage}
+                className="mt-0"
+              />
+            </div>
+          )}
         </Card>
       )}
     </div>
