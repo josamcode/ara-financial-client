@@ -10,6 +10,17 @@ const KEYS = {
   detail: (id) => ['accounts', 'detail', id],
 }
 
+function normalizeAccountListResponse(response) {
+  const accounts = Array.isArray(response?.data)
+    ? response.data.map(normalizeAccount)
+    : []
+
+  return {
+    accounts,
+    pagination: response?.meta?.pagination ?? null,
+  }
+}
+
 function normalizeAccount(account) {
   if (!account) return account
 
@@ -33,10 +44,17 @@ export function useAccountTree() {
   })
 }
 
-export function useAccountList(params) {
+export function useAccountList(params, options = {}) {
+  const { paginated = false } = options
+
   return useQuery({
-    queryKey: KEYS.list(params),
-    queryFn: () => accountApi.list(params).then((r) => (r.data || []).map(normalizeAccount)),
+    queryKey: KEYS.list({ ...params, paginated }),
+    queryFn: () =>
+      accountApi.list(params).then((response) => {
+        const result = normalizeAccountListResponse(response)
+        return paginated ? result : result.accounts
+      }),
+    keepPreviousData: paginated,
   })
 }
 

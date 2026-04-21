@@ -10,6 +10,7 @@ import { Select } from '@/shared/components/Select'
 import { EmptyState } from '@/shared/components/EmptyState'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
+import { PaginationControls } from '@/shared/components/PaginationControls'
 import { formatDateTime } from '@/shared/utils/formatters'
 
 const ACTION_OPTIONS = [
@@ -93,49 +94,6 @@ function summarizeDetails(log, t) {
   }
 
   return log?.ip || t('auditLogs.noDetails')
-}
-
-function PaginationControls({ pagination, onPageChange, t }) {
-  if (!pagination || pagination.totalPages <= 1) return null
-
-  return (
-    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mt-4 text-sm text-text-muted">
-      <span>
-        {t('common.showingRange', {
-          from: (pagination.page - 1) * pagination.limit + 1,
-          to: Math.min(pagination.page * pagination.limit, pagination.total),
-          total: pagination.total,
-        })}
-      </span>
-
-      <div className="flex items-center gap-2">
-        <Button
-          size="sm"
-          variant="secondary"
-          disabled={!pagination.hasPrevPage}
-          onClick={() => onPageChange(pagination.page - 1)}
-        >
-          {t('common.previous')}
-        </Button>
-
-        <span className="px-2 tabular-nums">
-          {t('common.pageOf', {
-            page: pagination.page,
-            totalPages: pagination.totalPages,
-          })}
-        </span>
-
-        <Button
-          size="sm"
-          variant="secondary"
-          disabled={!pagination.hasNextPage}
-          onClick={() => onPageChange(pagination.page + 1)}
-        >
-          {t('common.next')}
-        </Button>
-      </div>
-    </div>
-  )
 }
 
 function hasActiveFilters(filters) {
@@ -372,7 +330,6 @@ export default function AuditLogsPage() {
           <PaginationControls
             pagination={pagination}
             onPageChange={setPage}
-            t={t}
           />
         </>
       )}
