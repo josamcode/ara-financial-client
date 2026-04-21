@@ -32,6 +32,13 @@ export const PERMISSIONS = {
   REPORT_VIEW: 'report:view',
   REPORT_EXPORT: 'report:export',
 
+  // Invoices
+  INVOICE_READ: 'invoice:read',
+  INVOICE_CREATE: 'invoice:create',
+  INVOICE_UPDATE: 'invoice:update',
+  INVOICE_DELETE: 'invoice:delete',
+  INVOICE_SEND: 'invoice:send',
+
   // Dashboard
   DASHBOARD_VIEW: 'dashboard:view',
 

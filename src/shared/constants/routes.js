@@ -41,6 +41,11 @@ export const ROUTES = {
   // Audit Logs
   AUDIT_LOGS: '/audit-logs',
 
+  // Invoices
+  INVOICES: '/invoices',
+  INVOICE_NEW: '/invoices/new',
+  INVOICE_DETAIL: (id = ':id') => `/invoices/${id}`,
+
   // Settings
   SETTINGS: '/settings',
   SETTINGS_GENERAL: '/settings/general',

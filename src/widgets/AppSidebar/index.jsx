@@ -11,6 +11,7 @@ import {
   ScrollText,
   Settings,
   X,
+  Receipt,
 } from 'lucide-react'
 import { cn } from '@/shared/utils/cn'
 import { ROUTES } from '@/shared/constants/routes'
@@ -54,6 +55,18 @@ const navGroups = [
         icon: BookMarked,
         to: ROUTES.LEDGER,
         permission: PERMISSIONS.REPORT_VIEW,
+      },
+    ],
+  },
+  {
+    label: 'nav.billing',
+    items: [
+      {
+        key: 'invoices',
+        label: 'nav.invoices',
+        icon: Receipt,
+        to: ROUTES.INVOICES,
+        permission: PERMISSIONS.INVOICE_READ,
       },
     ],
   },

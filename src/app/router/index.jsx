@@ -40,6 +40,9 @@ const FiscalPeriodsPage = lazy(() => import('@/pages/app/FiscalPeriodsPage'))
 const UsersPage = lazy(() => import('@/pages/app/UsersPage'))
 const AuditLogsPage = lazy(() => import('@/pages/app/AuditLogsPage'))
 const SettingsPage = lazy(() => import('@/pages/app/SettingsPage'))
+const InvoicesPage = lazy(() => import('@/pages/app/InvoicesPage'))
+const InvoiceNewPage = lazy(() => import('@/pages/app/InvoiceNewPage'))
+const InvoiceDetailPage = lazy(() => import('@/pages/app/InvoiceDetailPage'))
 
 function PageLoader() {
   return (
@@ -210,6 +213,33 @@ export function AppRouter() {
               element={
                 <ProtectedRoute permission={PERMISSIONS.AUDIT_READ}>
                   <AuditLogsPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path={ROUTES.INVOICES}
+              element={
+                <ProtectedRoute permission={PERMISSIONS.INVOICE_READ}>
+                  <InvoicesPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path={ROUTES.INVOICE_NEW}
+              element={
+                <ProtectedRoute permission={PERMISSIONS.INVOICE_CREATE}>
+                  <InvoiceNewPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path={ROUTES.INVOICE_DETAIL()}
+              element={
+                <ProtectedRoute permission={PERMISSIONS.INVOICE_READ}>
+                  <InvoiceDetailPage />
                 </ProtectedRoute>
               }
             />
