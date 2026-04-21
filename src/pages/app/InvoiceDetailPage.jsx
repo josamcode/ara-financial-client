@@ -8,6 +8,7 @@ import { LoadingState } from '@/shared/components/LoadingState'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { Input } from '@/shared/components/Input'
 import { Select } from '@/shared/components/Select'
+import { ConfirmDialog } from '@/shared/components/ConfirmDialog'
 import { PermissionGate } from '@/shared/components/PermissionGate'
 import { PERMISSIONS } from '@/shared/constants/permissions'
 import { ROUTES } from '@/shared/constants/routes'
@@ -58,6 +59,7 @@ export default function InvoiceDetailPage() {
   const [editing, setEditing] = useState(false)
   const [sendDialog, setSendDialog] = useState(false)
   const [payDialog, setPayDialog] = useState(false)
+  const [cancelDialog, setCancelDialog] = useState(false)
   const [arAccountId, setArAccountId] = useState('')
   const [revenueAccountId, setRevenueAccountId] = useState('')
   const [cashAccountId, setCashAccountId] = useState('')
@@ -118,8 +120,8 @@ export default function InvoiceDetailPage() {
   }
 
   async function handleCancel() {
-    if (!window.confirm(t('invoices.confirmCancel'))) return
     await cancelMutation.mutateAsync(id)
+    setCancelDialog(false)
   }
 
   async function handleUpdate(formData) {
@@ -168,7 +170,7 @@ export default function InvoiceDetailPage() {
 
             {canCancel && (
               <PermissionGate permission={PERMISSIONS.INVOICE_UPDATE}>
-                <Button variant="danger" size="sm" onClick={handleCancel} isLoading={cancelMutation.isPending}>
+                <Button variant="danger" size="sm" onClick={() => setCancelDialog(true)}>
                   <XCircle size={14} className="me-1" />
                   {t('invoices.cancel')}
                 </Button>
@@ -395,6 +397,17 @@ export default function InvoiceDetailPage() {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={cancelDialog}
+        title={t('invoices.cancel')}
+        message={t('invoices.confirmCancel')}
+        confirmLabel={t('invoices.cancel')}
+        confirmVariant="danger"
+        isLoading={cancelMutation.isPending}
+        onConfirm={handleCancel}
+        onCancel={() => setCancelDialog(false)}
+      />
     </div>
   )
 }

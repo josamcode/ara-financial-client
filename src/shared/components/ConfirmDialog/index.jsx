@@ -1,7 +1,20 @@
 import { AlertTriangle } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/shared/components/Button'
 
-export function ConfirmDialog({ open, title, message, onConfirm, onCancel, isLoading, confirmLabel, confirmVariant = 'danger' }) {
+export function ConfirmDialog({
+  open,
+  title,
+  message,
+  onConfirm,
+  onCancel,
+  isLoading,
+  confirmLabel,
+  cancelLabel,
+  confirmVariant = 'danger',
+}) {
+  const { t } = useTranslation()
+
   if (!open) return null
 
   return (
@@ -19,10 +32,10 @@ export function ConfirmDialog({ open, title, message, onConfirm, onCancel, isLoa
         </div>
         <div className="flex justify-end gap-2 mt-6">
           <Button variant="secondary" size="sm" onClick={onCancel} disabled={isLoading}>
-            إلغاء
+            {cancelLabel || t('common.cancel')}
           </Button>
           <Button variant={confirmVariant} size="sm" onClick={onConfirm} isLoading={isLoading}>
-            {confirmLabel || 'تأكيد'}
+            {confirmLabel || t('common.confirm')}
           </Button>
         </div>
       </div>
