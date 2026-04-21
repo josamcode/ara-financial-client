@@ -41,3 +41,48 @@ export function useCreateBill() {
     onError: (error) => toast.error(error?.message || t('common.somethingWentWrong')),
   })
 }
+
+export function usePostBill() {
+  const qc = useQueryClient()
+  const { t } = useTranslation()
+
+  return useMutation({
+    mutationFn: ({ id, data }) => billApi.post(id, data),
+    onSuccess: (_data, { id }) => {
+      qc.invalidateQueries({ queryKey: KEYS.detail(id) })
+      qc.invalidateQueries({ queryKey: KEYS.all })
+      toast.success(t('bills.posted'))
+    },
+    onError: (error) => toast.error(error?.message || t('common.somethingWentWrong')),
+  })
+}
+
+export function usePayBill() {
+  const qc = useQueryClient()
+  const { t } = useTranslation()
+
+  return useMutation({
+    mutationFn: ({ id, data }) => billApi.pay(id, data),
+    onSuccess: (_data, { id }) => {
+      qc.invalidateQueries({ queryKey: KEYS.detail(id) })
+      qc.invalidateQueries({ queryKey: KEYS.all })
+      toast.success(t('bills.paid'))
+    },
+    onError: (error) => toast.error(error?.message || t('common.somethingWentWrong')),
+  })
+}
+
+export function useCancelBill() {
+  const qc = useQueryClient()
+  const { t } = useTranslation()
+
+  return useMutation({
+    mutationFn: (id) => billApi.cancel(id),
+    onSuccess: (_data, id) => {
+      qc.invalidateQueries({ queryKey: KEYS.detail(id) })
+      qc.invalidateQueries({ queryKey: KEYS.all })
+      toast.success(t('bills.cancelled'))
+    },
+    onError: (error) => toast.error(error?.message || t('common.somethingWentWrong')),
+  })
+}

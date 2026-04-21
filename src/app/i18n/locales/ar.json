@@ -1,4 +1,4 @@
-{
+﻿{
   "common": {
     "loading": "جاري التحميل...",
     "save": "حفظ",
@@ -584,6 +584,11 @@
     "paymentHistory": "سجل الدفعات",
     "sentEntry": "قيد الفاتورة",
     "paymentEntry": "قيد الدفع",
+    "postBill": "ترحيل الفاتورة",
+    "postDescription": "اختر حساب المدين وحساب الذمم الدائنة لترحيل الفاتورة",
+    "apAccount": "حساب الذمم الدائنة",
+    "debitAccount": "حساب المدين",
+    "postedEntry": "قيد الفاتورة",
     "status": {
       "draft": "مسودة",
       "sent": "مرسلة",
@@ -594,6 +599,8 @@
     }
   },
   "bills": {
+    "posted": "تم ترحيل فاتورة المورد",
+    "paid": "تم تسجيل الدفع",
     "new": "فاتورة مورد جديدة",
     "created": "تم إنشاء فاتورة المورد",
     "empty": "لا توجد فواتير موردين",
@@ -613,8 +620,29 @@
     "subtotal": "المجموع الفرعي",
     "total": "الإجمالي",
     "status": {
-      "draft": "مسودة"
-    }
+      "draft": "مسودة",
+      "posted": "مرحّل",
+      "partially_paid": "مدفوعة جزئياً",
+      "paid": "مدفوعة",
+      "overdue": "متأخرة",
+      "cancelled": "ملغاة"
+    },
+    "paidAmount": "المبلغ المدفوع",
+    "remainingAmount": "المبلغ المتبقي",
+    "postBill": "ترحيل الفاتورة",
+    "recordPayment": "تسجيل دفع",
+    "postDescription": "اختر حساب المدين وحساب الذمم الدائنة لترحيل الفاتورة",
+    "payDescription": "اختر حساب الصندوق أو البنك لتسجيل الدفع",
+    "apAccount": "حساب الذمم الدائنة",
+    "debitAccount": "حساب المدين",
+    "cashAccount": "حساب الصندوق / البنك",
+    "journalEntries": "القيود المحاسبية",
+    "paymentHistory": "سجل الدفعات",
+    "postedEntry": "قيد الفاتورة",
+    "paymentEntry": "قيد الدفع",
+    "cancelled": "تم إلغاء العملية",
+    "cancel": "إلغاء",
+    "confirmCancel": "هل أنت متأكد من إلغاء العملية؟"
   },
   "settings": {
     "title": "الإعدادات",

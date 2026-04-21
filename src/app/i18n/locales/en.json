@@ -596,6 +596,9 @@
   "bills": {
     "new": "New Bill",
     "created": "Bill created",
+    "posted": "Bill posted",
+    "paid": "Payment recorded",
+    "cancelled": "Bill cancelled",
     "empty": "No bills",
     "emptyDescription": "Create your first bill",
     "number": "Bill #",
@@ -612,8 +615,28 @@
     "lineTotal": "Total",
     "subtotal": "Subtotal",
     "total": "Total",
+    "paidAmount": "Paid Amount",
+    "remainingAmount": "Remaining Amount",
+    "postBill": "Post Bill",
+    "recordPayment": "Record Payment",
+    "cancel": "Cancel Bill",
+    "confirmCancel": "Cancel this bill?",
+    "postDescription": "Select the debit account and accounts payable account for posting",
+    "payDescription": "Select the cash or bank account to record payment",
+    "apAccount": "Accounts Payable",
+    "debitAccount": "Debit Account",
+    "cashAccount": "Cash / Bank Account",
+    "journalEntries": "Journal Entries",
+    "paymentHistory": "Payment History",
+    "postedEntry": "Bill Entry",
+    "paymentEntry": "Payment Entry",
     "status": {
-      "draft": "Draft"
+      "draft": "Draft",
+      "posted": "Posted",
+      "partially_paid": "Partially Paid",
+      "paid": "Paid",
+      "overdue": "Overdue",
+      "cancelled": "Cancelled"
     }
   },
   "settings": {
