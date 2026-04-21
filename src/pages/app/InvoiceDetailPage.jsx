@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ArrowLeft, Send, CreditCard, XCircle, Pencil } from 'lucide-react'
+import { Send, CreditCard, XCircle, Pencil } from 'lucide-react'
 import { PageHeader } from '@/shared/components/PageHeader'
 import { Button } from '@/shared/components/Button'
 import { LoadingState } from '@/shared/components/LoadingState'
 import { ErrorState } from '@/shared/components/ErrorState'
+import { Input } from '@/shared/components/Input'
 import { Select } from '@/shared/components/Select'
 import { PermissionGate } from '@/shared/components/PermissionGate'
 import { PERMISSIONS } from '@/shared/constants/permissions'
@@ -19,7 +20,7 @@ import { useAccountList } from '@/features/accounts/hooks/useAccounts'
 function AccountSelect({ label, value, onChange, accounts, isLoading }) {
   const options = (accounts ?? []).filter((a) => !a.isParentOnly && a.isActive).map((a) => ({
     value: a._id,
-    label: `${a.code} — ${a.nameAr || a.nameEn}`,
+    label: `${a.code} - ${a.nameAr || a.nameEn}`,
   }))
   return (
     <Select
@@ -28,15 +29,23 @@ function AccountSelect({ label, value, onChange, accounts, isLoading }) {
       onChange={onChange}
       options={options}
       isLoading={isLoading}
-      placeholder="—"
+      placeholder="-"
     />
   )
+}
+
+function getTodayDateValue() {
+  return new Date().toISOString().slice(0, 10)
+}
+
+function getPaymentAccountLabel(account) {
+  if (!account) return '-'
+  return account.code ? `${account.code} - ${account.nameAr || account.nameEn}` : account.nameAr || account.nameEn || '-'
 }
 
 export default function InvoiceDetailPage() {
   const { id } = useParams()
   const { t, i18n } = useTranslation()
-  const navigate = useNavigate()
   const locale = i18n.language === 'ar' ? 'ar-EG' : 'en-US'
 
   const { data: invoice, isLoading, isError, refetch } = useInvoice(id)
@@ -52,6 +61,8 @@ export default function InvoiceDetailPage() {
   const [arAccountId, setArAccountId] = useState('')
   const [revenueAccountId, setRevenueAccountId] = useState('')
   const [cashAccountId, setCashAccountId] = useState('')
+  const [paymentAmount, setPaymentAmount] = useState('')
+  const [paymentDate, setPaymentDate] = useState(getTodayDateValue())
 
   const accountList = accounts ?? []
 
@@ -59,12 +70,33 @@ export default function InvoiceDetailPage() {
   if (isError) return <ErrorState onRetry={refetch} />
   if (!invoice) return null
 
+  const totalAmount = Number(invoice.total ?? 0)
+  const paidAmount = typeof invoice.paidAmount === 'number'
+    ? invoice.paidAmount
+    : invoice.status === 'paid'
+      ? totalAmount
+      : 0
+  const remainingAmount = typeof invoice.remainingAmount === 'number'
+    ? invoice.remainingAmount
+    : invoice.status === 'paid'
+      ? 0
+      : Math.max(totalAmount - paidAmount, 0)
+  const payments = Array.isArray(invoice.payments) ? invoice.payments : []
+
   const isDraft = invoice.status === 'draft'
   const isSent = invoice.status === 'sent'
-  const isOverdue = invoice.status === 'overdue'
+  const isPartiallyPaid = invoice.status === 'partially_paid'
   const canSend = isDraft
-  const canPay = isSent || isOverdue
+  const canPay = isSent || isPartiallyPaid
   const canCancel = !['paid', 'cancelled'].includes(invoice.status)
+  const payDisabled = !cashAccountId || !paymentDate || !paymentAmount || Number(paymentAmount) <= 0 || Number(paymentAmount) > remainingAmount
+
+  function openPayDialog() {
+    setCashAccountId('')
+    setPaymentAmount(remainingAmount > 0 ? String(remainingAmount) : '')
+    setPaymentDate(getTodayDateValue())
+    setPayDialog(true)
+  }
 
   async function handleSend() {
     if (!arAccountId || !revenueAccountId) return
@@ -73,8 +105,15 @@ export default function InvoiceDetailPage() {
   }
 
   async function handlePay() {
-    if (!cashAccountId) return
-    await payMutation.mutateAsync({ id, data: { cashAccountId } })
+    if (payDisabled) return
+    await payMutation.mutateAsync({
+      id,
+      data: {
+        cashAccountId,
+        amount: paymentAmount,
+        paymentDate,
+      },
+    })
     setPayDialog(false)
   }
 
@@ -120,7 +159,7 @@ export default function InvoiceDetailPage() {
 
             {canPay && (
               <PermissionGate permission={PERMISSIONS.INVOICE_SEND}>
-                <Button size="sm" onClick={() => setPayDialog(true)}>
+                <Button size="sm" onClick={openPayDialog}>
                   <CreditCard size={14} className="me-1" />
                   {t('invoices.recordPayment')}
                 </Button>
@@ -139,7 +178,6 @@ export default function InvoiceDetailPage() {
         }
       />
 
-      {/* Edit mode */}
       {editing ? (
         <div className="bg-surface rounded-lg border border-border p-6 mb-6">
           <InvoiceForm
@@ -165,9 +203,8 @@ export default function InvoiceDetailPage() {
         </div>
       ) : (
         <div className="space-y-6">
-          {/* Info card */}
           <div className="bg-surface rounded-lg border border-border p-6">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 text-sm">
               <div>
                 <p className="text-text-muted mb-1">{t('invoices.customer')}</p>
                 <p className="font-medium text-text-primary">{invoice.customerName}</p>
@@ -189,6 +226,18 @@ export default function InvoiceDetailPage() {
                   {formatCurrency(invoice.total, invoice.currency, locale)}
                 </p>
               </div>
+              <div>
+                <p className="text-text-muted mb-1">{t('invoices.paidAmount')}</p>
+                <p className="font-semibold text-lg tabular-nums">
+                  {formatCurrency(paidAmount, invoice.currency, locale)}
+                </p>
+              </div>
+              <div>
+                <p className="text-text-muted mb-1">{t('invoices.remainingAmount')}</p>
+                <p className="font-semibold text-lg tabular-nums">
+                  {formatCurrency(remainingAmount, invoice.currency, locale)}
+                </p>
+              </div>
             </div>
 
             {invoice.notes && (
@@ -199,7 +248,6 @@ export default function InvoiceDetailPage() {
             )}
           </div>
 
-          {/* Line items */}
           <div className="bg-surface rounded-lg border border-border overflow-hidden">
             <div className="px-4 py-3 border-b border-border bg-surface-subtle">
               <h3 className="text-sm font-semibold text-text-primary">{t('invoices.lineItems')}</h3>
@@ -228,7 +276,34 @@ export default function InvoiceDetailPage() {
             </div>
           </div>
 
-          {/* Journal entries */}
+          <div className="bg-surface rounded-lg border border-border overflow-hidden">
+            <div className="px-4 py-3 border-b border-border bg-surface-subtle">
+              <h3 className="text-sm font-semibold text-text-primary">{t('invoices.paymentHistory')}</h3>
+            </div>
+            {payments.length === 0 ? (
+              <div className="px-4 py-3 text-sm text-text-muted">{t('common.noData')}</div>
+            ) : (
+              <div className="divide-y divide-border">
+                {payments.map((payment) => (
+                  <div key={payment._id || `${payment.date}-${payment.amount}`} className="px-4 py-3 flex items-start justify-between gap-4 text-sm">
+                    <div className="space-y-1 min-w-0">
+                      <p className="font-medium text-text-primary tabular-nums">
+                        {formatCurrency(payment.amount, invoice.currency, locale)}
+                      </p>
+                      <p className="text-text-secondary">{formatDate(payment.date, i18n.language)}</p>
+                      <p className="text-text-secondary break-words">{getPaymentAccountLabel(payment.accountId)}</p>
+                    </div>
+                    {payment.journalEntryId?.entryNumber && (
+                      <p className="text-text-muted whitespace-nowrap">
+                        {t('invoices.paymentEntry')}: #{payment.journalEntryId.entryNumber}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           {(invoice.sentJournalEntryId || invoice.paymentJournalEntryId) && (
             <div className="bg-surface rounded-lg border border-border p-4 text-sm space-y-2">
               <h3 className="font-semibold text-text-primary mb-2">{t('invoices.journalEntries')}</h3>
@@ -247,7 +322,6 @@ export default function InvoiceDetailPage() {
         </div>
       )}
 
-      {/* Send dialog */}
       {sendDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-surface rounded-lg border border-border p-6 w-full max-w-sm space-y-4">
@@ -281,12 +355,26 @@ export default function InvoiceDetailPage() {
         </div>
       )}
 
-      {/* Pay dialog */}
       {payDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-surface rounded-lg border border-border p-6 w-full max-w-sm space-y-4">
             <h2 className="font-semibold text-text-primary">{t('invoices.recordPayment')}</h2>
             <p className="text-sm text-text-secondary">{t('invoices.payDescription')}</p>
+            <Input
+              label={t('common.amount')}
+              type="number"
+              min="0"
+              step="0.000001"
+              value={paymentAmount}
+              onChange={(event) => setPaymentAmount(event.target.value)}
+              hint={`${t('invoices.remainingAmount')}: ${formatCurrency(remainingAmount, invoice.currency, locale)}`}
+            />
+            <Input
+              label={t('common.date')}
+              type="date"
+              value={paymentDate}
+              onChange={(event) => setPaymentDate(event.target.value)}
+            />
             <AccountSelect
               label={t('invoices.cashAccount')}
               value={cashAccountId}
@@ -299,7 +387,7 @@ export default function InvoiceDetailPage() {
               <Button
                 onClick={handlePay}
                 isLoading={payMutation.isPending}
-                disabled={!cashAccountId}
+                disabled={payDisabled}
               >
                 {t('invoices.recordPayment')}
               </Button>

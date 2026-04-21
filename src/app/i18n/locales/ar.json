@@ -530,6 +530,8 @@
     "lineTotal": "الإجمالي",
     "subtotal": "المجموع الفرعي",
     "total": "الإجمالي",
+    "paidAmount": "المبلغ المدفوع",
+    "remainingAmount": "المبلغ المتبقي",
     "markAsSent": "تأكيد وإرسال",
     "recordPayment": "تسجيل دفع",
     "cancel": "إلغاء الفاتورة",
@@ -541,11 +543,13 @@
     "revenueAccount": "حساب الإيرادات",
     "cashAccount": "حساب الصندوق / البنك",
     "journalEntries": "القيود المحاسبية",
+    "paymentHistory": "سجل الدفعات",
     "sentEntry": "قيد الفاتورة",
     "paymentEntry": "قيد الدفع",
     "status": {
       "draft": "مسودة",
       "sent": "مرسلة",
+      "partially_paid": "مدفوعة جزئياً",
       "paid": "مدفوعة",
       "overdue": "متأخرة",
       "cancelled": "ملغاة"

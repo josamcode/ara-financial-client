@@ -530,6 +530,8 @@
     "lineTotal": "Total",
     "subtotal": "Subtotal",
     "total": "Total",
+    "paidAmount": "Paid Amount",
+    "remainingAmount": "Remaining Amount",
     "markAsSent": "Mark as Sent",
     "recordPayment": "Record Payment",
     "cancel": "Cancel Invoice",
@@ -541,11 +543,13 @@
     "revenueAccount": "Revenue Account",
     "cashAccount": "Cash / Bank Account",
     "journalEntries": "Journal Entries",
+    "paymentHistory": "Payment History",
     "sentEntry": "Invoice Entry",
     "paymentEntry": "Payment Entry",
     "status": {
       "draft": "Draft",
       "sent": "Sent",
+      "partially_paid": "Partially Paid",
       "paid": "Paid",
       "overdue": "Overdue",
       "cancelled": "Cancelled"
