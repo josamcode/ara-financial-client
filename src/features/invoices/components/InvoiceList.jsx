@@ -28,8 +28,9 @@ export function InvoiceList({ invoices, onView, onDelete }) {
       <div className="divide-y divide-border">
         {invoices.map((invoice) => (
           <div
+            onClick={() => onView?.(invoice)}
             key={invoice._id}
-            className="group grid grid-cols-[1fr_auto] sm:grid-cols-[6rem_1fr_1fr_6rem_7rem_5rem_5rem] items-center gap-3 px-4 py-3 hover:bg-surface-muted transition-colors"
+            className="group grid grid-cols-[1fr_auto] sm:grid-cols-[6rem_1fr_1fr_6rem_7rem_5rem_5rem] items-center gap-3 px-4 py-3 hover:bg-surface-muted transition-colors cursor-pointer"
           >
             {/* Mobile stacked */}
             <div className="sm:contents">
