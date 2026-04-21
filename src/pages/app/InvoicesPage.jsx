@@ -18,6 +18,7 @@ const STATUS_OPTIONS = [
   { value: '', label: '' },
   { value: 'draft', label: 'draft' },
   { value: 'sent', label: 'sent' },
+  { value: 'partially_paid', label: 'partially_paid' },
   { value: 'paid', label: 'paid' },
   { value: 'overdue', label: 'overdue' },
   { value: 'cancelled', label: 'cancelled' },

@@ -86,10 +86,8 @@ export default function InvoiceDetailPage() {
   const payments = Array.isArray(invoice.payments) ? invoice.payments : []
 
   const isDraft = invoice.status === 'draft'
-  const isSent = invoice.status === 'sent'
-  const isPartiallyPaid = invoice.status === 'partially_paid'
   const canSend = isDraft
-  const canPay = isSent || isPartiallyPaid
+  const canPay = ['sent', 'partially_paid', 'overdue'].includes(invoice.status)
   const canCancel = !['paid', 'cancelled'].includes(invoice.status)
   const payDisabled = !cashAccountId || !paymentDate || !paymentAmount || Number(paymentAmount) <= 0 || Number(paymentAmount) > remainingAmount
 
