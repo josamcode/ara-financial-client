@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import { Scale, TrendingUp, Building2, Waves } from 'lucide-react'
+import { Scale, TrendingUp, Building2, Waves, Clock3 } from 'lucide-react'
 import { PageHeader } from '@/shared/components/PageHeader'
 import { ROUTES } from '@/shared/constants/routes'
 
@@ -28,6 +28,12 @@ const REPORT_CARDS = [
     route: ROUTES.REPORTS_CASH_FLOW,
     icon: Waves,
     subtitleKey: 'reports.cashFlowSubtitle',
+  },
+  {
+    key: 'arAging',
+    route: ROUTES.REPORTS_AR_AGING,
+    icon: Clock3,
+    subtitleKey: 'reports.arAgingSubtitle',
   },
 ]
 

@@ -20,4 +20,7 @@ export const reportApi = {
     apiClient.get('/reports/cash-flow', { params }),
   exportCashFlow: (params) =>
     apiClient.get('/reports/cash-flow/export', { params, responseType: 'blob' }),
+
+  getARAging: (params) =>
+    apiClient.get('/reports/ar-aging', { params }),
 }

@@ -17,17 +17,18 @@ export function formatRelativeTime(value, locale = 'ar') {
   return dayjs(value).locale(locale).fromNow()
 }
 
-export function formatCurrency(amount, currency = 'EGP', locale = 'ar-EG') {
+export function formatCurrency(amount, currency = 'EGP', locale = 'en-US') {
   if (amount === null || amount === undefined) return '—'
 
-  const hasDecimals = Number(amount) % 1 !== 0
+  const num = Number(amount)
+  const hasDecimals = num % 1 !== 0
 
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,
     minimumFractionDigits: hasDecimals ? 2 : 0,
     maximumFractionDigits: 2,
-  }).format(Number(amount))
+  }).format(num)
 }
 
 export function formatNumber(value, locale = 'ar-EG', decimals = 2) {

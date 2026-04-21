@@ -31,6 +31,7 @@ export const ROUTES = {
   REPORTS_INCOME_STATEMENT: '/reports/income-statement',
   REPORTS_BALANCE_SHEET: '/reports/balance-sheet',
   REPORTS_CASH_FLOW: '/reports/cash-flow',
+  REPORTS_AR_AGING: '/reports/ar-aging',
 
   // Fiscal Periods
   FISCAL_PERIODS: '/fiscal-periods',

@@ -6,6 +6,7 @@ const KEYS = {
   incomeStatement: (params) => ['reports', 'income-statement', params],
   balanceSheet: (params) => ['reports', 'balance-sheet', params],
   cashFlow: (params) => ['reports', 'cash-flow', params],
+  arAging: (params) => ['reports', 'ar-aging', params],
 }
 
 export function useTrialBalance(params) {
@@ -42,6 +43,16 @@ export function useCashFlow(params) {
   return useQuery({
     queryKey: KEYS.cashFlow(params),
     queryFn: () => reportApi.getCashFlow(params),
+    enabled: !!params,
+    keepPreviousData: true,
+    staleTime: 1000 * 60 * 5,
+  })
+}
+
+export function useARAging(params) {
+  return useQuery({
+    queryKey: KEYS.arAging(params),
+    queryFn: () => reportApi.getARAging(params),
     enabled: !!params,
     keepPreviousData: true,
     staleTime: 1000 * 60 * 5,

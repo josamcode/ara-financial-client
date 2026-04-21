@@ -36,6 +36,7 @@ const TrialBalancePage = lazy(() => import('@/pages/app/reports/TrialBalancePage
 const IncomeStatementPage = lazy(() => import('@/pages/app/reports/IncomeStatementPage'))
 const BalanceSheetPage = lazy(() => import('@/pages/app/reports/BalanceSheetPage'))
 const CashFlowPage = lazy(() => import('@/pages/app/reports/CashFlowPage'))
+const ARAgingPage = lazy(() => import('@/pages/app/reports/ARAgingPage'))
 const FiscalPeriodsPage = lazy(() => import('@/pages/app/FiscalPeriodsPage'))
 const UsersPage = lazy(() => import('@/pages/app/UsersPage'))
 const AuditLogsPage = lazy(() => import('@/pages/app/AuditLogsPage'))
@@ -189,6 +190,15 @@ export function AppRouter() {
               element={
                 <ProtectedRoute permission={PERMISSIONS.REPORT_VIEW}>
                   <CashFlowPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path={ROUTES.REPORTS_AR_AGING}
+              element={
+                <ProtectedRoute permission={PERMISSIONS.REPORT_VIEW}>
+                  <ARAgingPage />
                 </ProtectedRoute>
               }
             />
