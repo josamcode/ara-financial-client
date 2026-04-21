@@ -32,6 +32,12 @@ export const PERMISSIONS = {
   REPORT_VIEW: 'report:view',
   REPORT_EXPORT: 'report:export',
 
+  // Customers
+  CUSTOMER_READ: 'customer:read',
+  CUSTOMER_CREATE: 'customer:create',
+  CUSTOMER_UPDATE: 'customer:update',
+  CUSTOMER_DELETE: 'customer:delete',
+
   // Invoices
   INVOICE_READ: 'invoice:read',
   INVOICE_CREATE: 'invoice:create',
@@ -46,9 +52,24 @@ export const PERMISSIONS = {
   AUDIT_READ: 'audit:read',
 }
 
+function getUserPermissions(user) {
+  if (!user) return []
+
+  const permissionSources = [
+    user.permissions,
+    user.role?.permissions,
+    user.roleId?.permissions,
+    user.user?.permissions,
+    user.user?.role?.permissions,
+    user.user?.roleId?.permissions,
+  ]
+
+  return permissionSources.find(Array.isArray) ?? []
+}
+
 export function hasPermission(user, permission) {
   if (!user) return false
-  const userPermissions = user?.role?.permissions ?? user?.roleId?.permissions ?? []
+  const userPermissions = getUserPermissions(user)
   if (Array.isArray(permission)) {
     return permission.some((p) => userPermissions.includes(p))
   }
@@ -57,6 +78,6 @@ export function hasPermission(user, permission) {
 
 export function hasAllPermissions(user, permissions) {
   if (!user) return false
-  const userPermissions = user?.role?.permissions ?? user?.roleId?.permissions ?? []
+  const userPermissions = getUserPermissions(user)
   return permissions.every((p) => userPermissions.includes(p))
 }

@@ -41,6 +41,10 @@ export const ROUTES = {
   // Audit Logs
   AUDIT_LOGS: '/audit-logs',
 
+  // Customers
+  CUSTOMERS: '/customers',
+  CUSTOMER_DETAIL: (id = ':id') => `/customers/${id}`,
+
   // Invoices
   INVOICES: '/invoices',
   INVOICE_NEW: '/invoices/new',

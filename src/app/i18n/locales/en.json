@@ -117,6 +117,7 @@
     "settings": "Settings",
     "profile": "Profile",
     "billing": "Billing",
+    "customers": "Customers",
     "invoices": "Invoices"
   },
   "landing": {
@@ -481,6 +482,29 @@
     "createdFields": "Created with {{fields}}",
     "changedFields": "Changed {{fields}}",
     "removedFields": "Removed {{fields}}"
+  },
+  "customers": {
+    "title": "Customers",
+    "subtitle": "Manage your customer records",
+    "new": "New Customer",
+    "edit": "Edit Customer",
+    "address": "Address",
+    "searchPlaceholder": "Search by name or email...",
+    "emptyTitle": "No customers yet",
+    "emptyDesc": "Start by adding your first customer",
+    "emptySearchDesc": "No customers match your search",
+    "createSuccess": "Customer created successfully",
+    "updateSuccess": "Customer updated successfully",
+    "deleteSuccess": "Customer deleted successfully",
+    "deleteTitle": "Delete Customer",
+    "deleteMessage": "Are you sure you want to delete {{name}}? This cannot be undone.",
+    "selectCustomer": "Select a customer",
+    "selectCustomerPlaceholder": "— Select a customer or enter manually —",
+    "totalInvoiced": "Total Invoiced",
+    "totalPaid": "Total Paid",
+    "outstandingBalance": "Outstanding Balance",
+    "noInvoices": "No invoices yet",
+    "noInvoicesDesc": "No invoices have been created for this customer"
   },
   "invoices": {
     "new": "New Invoice",

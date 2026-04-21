@@ -38,6 +38,7 @@ export function Select({
   required = false,
   disabled = false,
   isLoading = false,
+  searchable,
   className,
   wrapperClassName,
 }) {
@@ -55,7 +56,7 @@ export function Select({
   const searchRef = useRef(null)
   const listRef = useRef(null)
 
-  const showSearch = options.length > SEARCH_THRESHOLD
+  const showSearch = searchable ?? (options.length > SEARCH_THRESHOLD)
 
   const filteredOptions = useMemo(() => {
     if (!showSearch || !search.trim()) return options

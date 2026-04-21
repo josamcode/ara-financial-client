@@ -40,6 +40,8 @@ const FiscalPeriodsPage = lazy(() => import('@/pages/app/FiscalPeriodsPage'))
 const UsersPage = lazy(() => import('@/pages/app/UsersPage'))
 const AuditLogsPage = lazy(() => import('@/pages/app/AuditLogsPage'))
 const SettingsPage = lazy(() => import('@/pages/app/SettingsPage'))
+const CustomersPage = lazy(() => import('@/pages/app/CustomersPage'))
+const CustomerDetailPage = lazy(() => import('@/pages/app/CustomerDetailPage'))
 const InvoicesPage = lazy(() => import('@/pages/app/InvoicesPage'))
 const InvoiceNewPage = lazy(() => import('@/pages/app/InvoiceNewPage'))
 const InvoiceDetailPage = lazy(() => import('@/pages/app/InvoiceDetailPage'))
@@ -213,6 +215,24 @@ export function AppRouter() {
               element={
                 <ProtectedRoute permission={PERMISSIONS.AUDIT_READ}>
                   <AuditLogsPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path={ROUTES.CUSTOMERS}
+              element={
+                <ProtectedRoute permission={PERMISSIONS.CUSTOMER_READ}>
+                  <CustomersPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path={ROUTES.CUSTOMER_DETAIL()}
+              element={
+                <ProtectedRoute permission={PERMISSIONS.CUSTOMER_READ}>
+                  <CustomerDetailPage />
                 </ProtectedRoute>
               }
             />

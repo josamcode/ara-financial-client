@@ -12,6 +12,7 @@ import {
   Settings,
   X,
   Receipt,
+  Contact,
 } from 'lucide-react'
 import { cn } from '@/shared/utils/cn'
 import { ROUTES } from '@/shared/constants/routes'
@@ -61,6 +62,13 @@ const navGroups = [
   {
     label: 'nav.billing',
     items: [
+      {
+        key: 'customers',
+        label: 'nav.customers',
+        icon: Contact,
+        to: ROUTES.CUSTOMERS,
+        permission: PERMISSIONS.CUSTOMER_READ,
+      },
       {
         key: 'invoices',
         label: 'nav.invoices',

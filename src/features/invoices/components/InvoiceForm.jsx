@@ -1,8 +1,10 @@
-import { useForm, useFieldArray, Controller } from 'react-hook-form'
+import { useForm, useFieldArray } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { Plus, Trash2 } from 'lucide-react'
 import { Input } from '@/shared/components/Input'
 import { Button } from '@/shared/components/Button'
+import { Select } from '@/shared/components/Select'
+import { useAllCustomers } from '@/features/customers/hooks/useCustomers'
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10)
@@ -18,6 +20,8 @@ const DEFAULT_LINE = { description: '', quantity: '1', unitPrice: '0', lineTotal
 
 export function InvoiceForm({ defaultValues, onSubmit, isSubmitting }) {
   const { t } = useTranslation()
+  const { data: customersData } = useAllCustomers()
+  const customers = customersData?.customers ?? []
 
   const {
     register,
@@ -28,6 +32,7 @@ export function InvoiceForm({ defaultValues, onSubmit, isSubmitting }) {
     formState: { errors },
   } = useForm({
     defaultValues: defaultValues ?? {
+      customerId: '',
       customerName: '',
       customerEmail: '',
       issueDate: todayISO(),
@@ -39,6 +44,26 @@ export function InvoiceForm({ defaultValues, onSubmit, isSubmitting }) {
       total: '0',
     },
   })
+
+  const selectedCustomerId = watch('customerId')
+  const customerOptions = [
+    { value: '', label: t('customers.selectCustomerPlaceholder') },
+    ...customers.map((c) => ({
+      value: c._id,
+      label: `${c.name}${c.email ? ` — ${c.email}` : ''}`,
+    })),
+  ]
+
+  function handleCustomerSelect(id) {
+    setValue('customerId', id)
+    if (id) {
+      const customer = customers.find((c) => c._id === id)
+      if (customer) {
+        setValue('customerName', customer.name)
+        setValue('customerEmail', customer.email || '')
+      }
+    }
+  }
 
   const { fields, append, remove } = useFieldArray({ control, name: 'lineItems' })
   const lineItems = watch('lineItems')
@@ -80,19 +105,35 @@ export function InvoiceForm({ defaultValues, onSubmit, isSubmitting }) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* Customer */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Input
-          label={t('invoices.customerName')}
-          required
-          error={errors.customerName?.message}
-          {...register('customerName', { required: t('errors.required') })}
-        />
-        <Input
-          label={t('invoices.customerEmail')}
-          type="email"
-          error={errors.customerEmail?.message}
-          {...register('customerEmail')}
-        />
+      <div className="space-y-3">
+        {customers.length > 0 && (
+          <Select
+            label={t('customers.selectCustomer')}
+            value={selectedCustomerId || ''}
+            onChange={handleCustomerSelect}
+            options={customerOptions}
+            searchable
+          />
+        )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Input
+            label={t('invoices.customerName')}
+            required
+            error={errors.customerName?.message}
+            readOnly={!!selectedCustomerId}
+            className={selectedCustomerId ? 'bg-surface-subtle text-text-secondary' : ''}
+            {...register('customerName', { required: t('errors.required') })}
+          />
+          <Input
+            label={t('invoices.customerEmail')}
+            type="email"
+            error={errors.customerEmail?.message}
+            readOnly={!!selectedCustomerId}
+            className={selectedCustomerId ? 'bg-surface-subtle text-text-secondary' : ''}
+            {...register('customerEmail')}
+          />
+        </div>
+        <input type="hidden" {...register('customerId')} />
       </div>
 
       {/* Dates + currency */}

@@ -117,6 +117,7 @@
     "settings": "الإعدادات",
     "profile": "الملف الشخصي",
     "billing": "الفوترة",
+    "customers": "العملاء",
     "invoices": "الفواتير"
   },
   "landing": {
@@ -481,6 +482,29 @@
     "createdFields": "أنشئ بالحقول {{fields}}",
     "changedFields": "تغيرت الحقول {{fields}}",
     "removedFields": "أزيلت الحقول {{fields}}"
+  },
+  "customers": {
+    "title": "العملاء",
+    "subtitle": "إدارة بيانات عملائك",
+    "new": "عميل جديد",
+    "edit": "تعديل العميل",
+    "address": "العنوان",
+    "searchPlaceholder": "بحث بالاسم أو البريد الإلكتروني...",
+    "emptyTitle": "لا يوجد عملاء",
+    "emptyDesc": "ابدأ بإضافة أول عميل",
+    "emptySearchDesc": "لا توجد نتائج مطابقة للبحث",
+    "createSuccess": "تم إنشاء العميل بنجاح",
+    "updateSuccess": "تم تحديث العميل بنجاح",
+    "deleteSuccess": "تم حذف العميل بنجاح",
+    "deleteTitle": "حذف العميل",
+    "deleteMessage": "هل تريد حذف العميل {{name}}؟ لا يمكن التراجع عن هذا الإجراء.",
+    "selectCustomer": "اختر عميلاً",
+    "selectCustomerPlaceholder": "— اختر عميلاً أو أدخل البيانات يدوياً —",
+    "totalInvoiced": "إجمالي الفواتير",
+    "totalPaid": "إجمالي المدفوعات",
+    "outstandingBalance": "الرصيد المستحق",
+    "noInvoices": "لا توجد فواتير بعد",
+    "noInvoicesDesc": "لم يتم إنشاء أي فواتير لهذا العميل"
   },
   "invoices": {
     "new": "فاتورة جديدة",
