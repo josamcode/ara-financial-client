@@ -38,12 +38,22 @@ export const PERMISSIONS = {
   CUSTOMER_UPDATE: 'customer:update',
   CUSTOMER_DELETE: 'customer:delete',
 
+  // Suppliers
+  SUPPLIER_READ: 'supplier:read',
+  SUPPLIER_CREATE: 'supplier:create',
+  SUPPLIER_UPDATE: 'supplier:update',
+  SUPPLIER_DELETE: 'supplier:delete',
+
   // Invoices
   INVOICE_READ: 'invoice:read',
   INVOICE_CREATE: 'invoice:create',
   INVOICE_UPDATE: 'invoice:update',
   INVOICE_DELETE: 'invoice:delete',
   INVOICE_SEND: 'invoice:send',
+
+  // Bills
+  BILL_READ: 'bill:read',
+  BILL_CREATE: 'bill:create',
 
   // Dashboard
   DASHBOARD_VIEW: 'dashboard:view',

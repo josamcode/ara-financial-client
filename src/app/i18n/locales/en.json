@@ -118,7 +118,9 @@
     "profile": "Profile",
     "billing": "Billing",
     "customers": "Customers",
-    "invoices": "Invoices"
+    "suppliers": "Suppliers",
+    "invoices": "Invoices",
+    "bills": "Bills"
   },
   "landing": {
     "getStarted": "Get Started",
@@ -524,6 +526,24 @@
     "noInvoices": "No invoices yet",
     "noInvoicesDesc": "No invoices have been created for this customer"
   },
+  "suppliers": {
+    "title": "Suppliers",
+    "subtitle": "Manage your supplier records",
+    "new": "New Supplier",
+    "edit": "Edit Supplier",
+    "address": "Address",
+    "searchPlaceholder": "Search by name or email...",
+    "emptyTitle": "No suppliers yet",
+    "emptyDesc": "Start by adding your first supplier",
+    "emptySearchDesc": "No suppliers match your search",
+    "createSuccess": "Supplier created successfully",
+    "updateSuccess": "Supplier updated successfully",
+    "deleteSuccess": "Supplier deleted successfully",
+    "deleteTitle": "Delete Supplier",
+    "deleteMessage": "Are you sure you want to delete {{name}}? This cannot be undone.",
+    "selectSupplier": "Select a supplier",
+    "selectSupplierPlaceholder": "- Select a supplier or enter manually -"
+  },
   "invoices": {
     "new": "New Invoice",
     "created": "Invoice created",
@@ -571,6 +591,29 @@
       "paid": "Paid",
       "overdue": "Overdue",
       "cancelled": "Cancelled"
+    }
+  },
+  "bills": {
+    "new": "New Bill",
+    "created": "Bill created",
+    "empty": "No bills",
+    "emptyDescription": "Create your first bill",
+    "number": "Bill #",
+    "supplier": "Supplier",
+    "supplierName": "Supplier Name",
+    "supplierEmail": "Supplier Email",
+    "issueDate": "Issue Date",
+    "dueDate": "Due Date",
+    "currency": "Currency",
+    "lineItems": "Line Items",
+    "addLine": "Add Line",
+    "qty": "Qty",
+    "unitPrice": "Unit Price",
+    "lineTotal": "Total",
+    "subtotal": "Subtotal",
+    "total": "Total",
+    "status": {
+      "draft": "Draft"
     }
   },
   "settings": {

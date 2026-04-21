@@ -118,7 +118,9 @@
     "profile": "الملف الشخصي",
     "billing": "الفوترة",
     "customers": "العملاء",
-    "invoices": "الفواتير"
+    "suppliers": "الموردون",
+    "invoices": "الفواتير",
+    "bills": "فواتير الموردين"
   },
   "landing": {
     "getStarted": "ابدأ الآن",
@@ -524,6 +526,24 @@
     "noInvoices": "لا توجد فواتير بعد",
     "noInvoicesDesc": "لم يتم إنشاء أي فواتير لهذا العميل"
   },
+  "suppliers": {
+    "title": "الموردون",
+    "subtitle": "إدارة بيانات الموردين",
+    "new": "مورد جديد",
+    "edit": "تعديل المورد",
+    "address": "العنوان",
+    "searchPlaceholder": "بحث بالاسم أو البريد الإلكتروني...",
+    "emptyTitle": "لا يوجد موردون",
+    "emptyDesc": "ابدأ بإضافة أول مورد",
+    "emptySearchDesc": "لا توجد نتائج مطابقة للبحث",
+    "createSuccess": "تم إنشاء المورد بنجاح",
+    "updateSuccess": "تم تحديث المورد بنجاح",
+    "deleteSuccess": "تم حذف المورد بنجاح",
+    "deleteTitle": "حذف المورد",
+    "deleteMessage": "هل تريد حذف المورد {{name}}؟ لا يمكن التراجع عن هذا الإجراء.",
+    "selectSupplier": "اختر موردا",
+    "selectSupplierPlaceholder": "- اختر موردا أو أدخل البيانات يدويا -"
+  },
   "invoices": {
     "new": "فاتورة جديدة",
     "created": "تم إنشاء الفاتورة",
@@ -571,6 +591,29 @@
       "paid": "مدفوعة",
       "overdue": "متأخرة",
       "cancelled": "ملغاة"
+    }
+  },
+  "bills": {
+    "new": "فاتورة مورد جديدة",
+    "created": "تم إنشاء فاتورة المورد",
+    "empty": "لا توجد فواتير موردين",
+    "emptyDescription": "ابدأ بإنشاء أول فاتورة مورد",
+    "number": "رقم الفاتورة",
+    "supplier": "المورد",
+    "supplierName": "اسم المورد",
+    "supplierEmail": "البريد الإلكتروني للمورد",
+    "issueDate": "تاريخ الإصدار",
+    "dueDate": "تاريخ الاستحقاق",
+    "currency": "العملة",
+    "lineItems": "بنود الفاتورة",
+    "addLine": "إضافة بند",
+    "qty": "الكمية",
+    "unitPrice": "سعر الوحدة",
+    "lineTotal": "الإجمالي",
+    "subtotal": "المجموع الفرعي",
+    "total": "الإجمالي",
+    "status": {
+      "draft": "مسودة"
     }
   },
   "settings": {

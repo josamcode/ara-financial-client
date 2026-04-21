@@ -47,10 +47,18 @@ export const ROUTES = {
   CUSTOMER_DETAIL: (id = ':id') => `/customers/${id}`,
   CUSTOMER_STATEMENT: (id = ':id') => `/customers/${id}/statement`,
 
+  // Suppliers
+  SUPPLIERS: '/suppliers',
+
   // Invoices
   INVOICES: '/invoices',
   INVOICE_NEW: '/invoices/new',
   INVOICE_DETAIL: (id = ':id') => `/invoices/${id}`,
+
+  // Bills
+  BILLS: '/bills',
+  BILL_NEW: '/bills/new',
+  BILL_DETAIL: (id = ':id') => `/bills/${id}`,
 
   // Settings
   SETTINGS: '/settings',

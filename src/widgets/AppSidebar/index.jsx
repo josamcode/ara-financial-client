@@ -13,6 +13,7 @@ import {
   X,
   Receipt,
   Contact,
+  Briefcase,
 } from 'lucide-react'
 import { cn } from '@/shared/utils/cn'
 import { ROUTES } from '@/shared/constants/routes'
@@ -70,11 +71,25 @@ const navGroups = [
         permission: PERMISSIONS.CUSTOMER_READ,
       },
       {
+        key: 'suppliers',
+        label: 'nav.suppliers',
+        icon: Briefcase,
+        to: ROUTES.SUPPLIERS,
+        permission: PERMISSIONS.SUPPLIER_READ,
+      },
+      {
         key: 'invoices',
         label: 'nav.invoices',
         icon: Receipt,
         to: ROUTES.INVOICES,
         permission: PERMISSIONS.INVOICE_READ,
+      },
+      {
+        key: 'bills',
+        label: 'nav.bills',
+        icon: FileText,
+        to: ROUTES.BILLS,
+        permission: PERMISSIONS.BILL_READ,
       },
     ],
   },

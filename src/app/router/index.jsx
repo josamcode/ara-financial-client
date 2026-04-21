@@ -44,9 +44,13 @@ const SettingsPage = lazy(() => import('@/pages/app/SettingsPage'))
 const CustomersPage = lazy(() => import('@/pages/app/CustomersPage'))
 const CustomerDetailPage = lazy(() => import('@/pages/app/CustomerDetailPage'))
 const CustomerStatementPage = lazy(() => import('@/pages/app/CustomerStatementPage'))
+const SuppliersPage = lazy(() => import('@/pages/app/SuppliersPage'))
 const InvoicesPage = lazy(() => import('@/pages/app/InvoicesPage'))
 const InvoiceNewPage = lazy(() => import('@/pages/app/InvoiceNewPage'))
 const InvoiceDetailPage = lazy(() => import('@/pages/app/InvoiceDetailPage'))
+const BillsPage = lazy(() => import('@/pages/app/BillsPage'))
+const BillNewPage = lazy(() => import('@/pages/app/BillNewPage'))
+const BillDetailPage = lazy(() => import('@/pages/app/BillDetailPage'))
 
 function PageLoader() {
   return (
@@ -258,10 +262,46 @@ export function AppRouter() {
             />
 
             <Route
+              path={ROUTES.SUPPLIERS}
+              element={
+                <ProtectedRoute permission={PERMISSIONS.SUPPLIER_READ}>
+                  <SuppliersPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
               path={ROUTES.INVOICES}
               element={
                 <ProtectedRoute permission={PERMISSIONS.INVOICE_READ}>
                   <InvoicesPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path={ROUTES.BILLS}
+              element={
+                <ProtectedRoute permission={PERMISSIONS.BILL_READ}>
+                  <BillsPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path={ROUTES.BILL_NEW}
+              element={
+                <ProtectedRoute permission={PERMISSIONS.BILL_CREATE}>
+                  <BillNewPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path={ROUTES.BILL_DETAIL()}
+              element={
+                <ProtectedRoute permission={PERMISSIONS.BILL_READ}>
+                  <BillDetailPage />
                 </ProtectedRoute>
               }
             />
