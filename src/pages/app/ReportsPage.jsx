@@ -35,6 +35,12 @@ const REPORT_CARDS = [
     icon: Clock3,
     subtitleKey: 'reports.arAgingSubtitle',
   },
+  {
+    key: 'apAging',
+    route: ROUTES.REPORTS_AP_AGING,
+    icon: Clock3,
+    subtitleKey: 'reports.apAgingSubtitle',
+  },
 ]
 
 export default function ReportsPage() {

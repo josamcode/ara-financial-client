@@ -32,6 +32,7 @@ export const ROUTES = {
   REPORTS_BALANCE_SHEET: '/reports/balance-sheet',
   REPORTS_CASH_FLOW: '/reports/cash-flow',
   REPORTS_AR_AGING: '/reports/ar-aging',
+  REPORTS_AP_AGING: '/reports/ap-aging',
 
   // Fiscal Periods
   FISCAL_PERIODS: '/fiscal-periods',
@@ -49,6 +50,7 @@ export const ROUTES = {
 
   // Suppliers
   SUPPLIERS: '/suppliers',
+  SUPPLIER_STATEMENT: (id = ':id') => `/suppliers/${id}/statement`,
 
   // Invoices
   INVOICES: '/invoices',

@@ -20,6 +20,14 @@ export function useAllSuppliers() {
   })
 }
 
+export function useSupplierStatement(id) {
+  return useQuery({
+    queryKey: [SUPPLIERS_KEY, 'statement', id],
+    queryFn: () => supplierApi.getStatement(id).then((response) => response.data),
+    enabled: !!id,
+  })
+}
+
 export function useCreateSupplier() {
   const { t } = useTranslation()
   const qc = useQueryClient()

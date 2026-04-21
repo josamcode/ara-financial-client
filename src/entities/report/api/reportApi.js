@@ -23,4 +23,7 @@ export const reportApi = {
 
   getARAging: (params) =>
     apiClient.get('/reports/ar-aging', { params }),
+
+  getAPAging: (params) =>
+    apiClient.get('/reports/ap-aging', { params }),
 }

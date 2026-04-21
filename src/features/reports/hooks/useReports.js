@@ -7,6 +7,7 @@ const KEYS = {
   balanceSheet: (params) => ['reports', 'balance-sheet', params],
   cashFlow: (params) => ['reports', 'cash-flow', params],
   arAging: (params) => ['reports', 'ar-aging', params],
+  apAging: (params) => ['reports', 'ap-aging', params],
 }
 
 export function useTrialBalance(params) {
@@ -53,6 +54,16 @@ export function useARAging(params) {
   return useQuery({
     queryKey: KEYS.arAging(params),
     queryFn: () => reportApi.getARAging(params),
+    enabled: !!params,
+    keepPreviousData: true,
+    staleTime: 1000 * 60 * 5,
+  })
+}
+
+export function useAPAging(params) {
+  return useQuery({
+    queryKey: KEYS.apAging(params),
+    queryFn: () => reportApi.getAPAging(params),
     enabled: !!params,
     keepPreviousData: true,
     staleTime: 1000 * 60 * 5,

@@ -37,6 +37,7 @@ const IncomeStatementPage = lazy(() => import('@/pages/app/reports/IncomeStateme
 const BalanceSheetPage = lazy(() => import('@/pages/app/reports/BalanceSheetPage'))
 const CashFlowPage = lazy(() => import('@/pages/app/reports/CashFlowPage'))
 const ARAgingPage = lazy(() => import('@/pages/app/reports/ARAgingPage'))
+const APAgingPage = lazy(() => import('@/pages/app/reports/APAgingPage'))
 const FiscalPeriodsPage = lazy(() => import('@/pages/app/FiscalPeriodsPage'))
 const UsersPage = lazy(() => import('@/pages/app/UsersPage'))
 const AuditLogsPage = lazy(() => import('@/pages/app/AuditLogsPage'))
@@ -45,6 +46,7 @@ const CustomersPage = lazy(() => import('@/pages/app/CustomersPage'))
 const CustomerDetailPage = lazy(() => import('@/pages/app/CustomerDetailPage'))
 const CustomerStatementPage = lazy(() => import('@/pages/app/CustomerStatementPage'))
 const SuppliersPage = lazy(() => import('@/pages/app/SuppliersPage'))
+const SupplierStatementPage = lazy(() => import('@/pages/app/SupplierStatementPage'))
 const InvoicesPage = lazy(() => import('@/pages/app/InvoicesPage'))
 const InvoiceNewPage = lazy(() => import('@/pages/app/InvoiceNewPage'))
 const InvoiceDetailPage = lazy(() => import('@/pages/app/InvoiceDetailPage'))
@@ -208,6 +210,15 @@ export function AppRouter() {
             />
 
             <Route
+              path={ROUTES.REPORTS_AP_AGING}
+              element={
+                <ProtectedRoute permission={PERMISSIONS.REPORT_VIEW}>
+                  <APAgingPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
               path={ROUTES.FISCAL_PERIODS}
               element={
                 <ProtectedRoute permission={PERMISSIONS.FISCAL_READ}>
@@ -266,6 +277,15 @@ export function AppRouter() {
               element={
                 <ProtectedRoute permission={PERMISSIONS.SUPPLIER_READ}>
                   <SuppliersPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path={ROUTES.SUPPLIER_STATEMENT()}
+              element={
+                <ProtectedRoute permission={PERMISSIONS.SUPPLIER_READ}>
+                  <SupplierStatementPage />
                 </ProtectedRoute>
               }
             />

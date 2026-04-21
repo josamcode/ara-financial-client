@@ -1,6 +1,7 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Pencil, Plus, Search, Trash2 } from 'lucide-react'
+import { FileText, Pencil, Plus, Search, Trash2 } from 'lucide-react'
 import { PageHeader } from '@/shared/components/PageHeader'
 import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
@@ -17,6 +18,7 @@ import {
   useUpdateSupplier,
 } from '@/features/suppliers/hooks/useSuppliers'
 import { PERMISSIONS, hasPermission } from '@/shared/constants/permissions'
+import { ROUTES } from '@/shared/constants/routes'
 import { useAuth } from '@/entities/auth/model/useAuth'
 
 export default function SuppliersPage() {
@@ -122,7 +124,7 @@ export default function SuppliersPage() {
                   <th className="px-4 py-3 text-start">{t('common.name')}</th>
                   <th className="px-4 py-3 text-start">{t('common.email')}</th>
                   <th className="px-4 py-3 text-start">{t('common.phone')}</th>
-                  {(canUpdate || canDelete) && <th className="w-20 px-4 py-3" />}
+                  <th className="w-28 px-4 py-3 text-end">{t('common.actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -131,30 +133,35 @@ export default function SuppliersPage() {
                     <td className="px-4 py-3 font-medium text-text-primary">{supplier.name}</td>
                     <td className="px-4 py-3 text-text-secondary">{supplier.email || '-'}</td>
                     <td className="px-4 py-3 text-text-secondary">{supplier.phone || '-'}</td>
-                    {(canUpdate || canDelete) && (
-                      <td className="px-4 py-3">
-                        <div className="flex items-center justify-end gap-1">
-                          {canUpdate && (
-                            <button
-                              onClick={() => openEdit(supplier)}
-                              className="rounded p-1.5 text-text-muted transition-colors hover:bg-primary/10 hover:text-primary"
-                              title={t('common.edit')}
-                            >
-                              <Pencil size={14} />
-                            </button>
-                          )}
-                          {canDelete && (
-                            <button
-                              onClick={() => setDeleteTarget(supplier)}
-                              className="rounded p-1.5 text-text-muted transition-colors hover:bg-error/10 hover:text-error"
-                              title={t('common.delete')}
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    )}
+                    <td className="px-4 py-3">
+                      <div className="flex items-center justify-end gap-1">
+                        <Link
+                          to={ROUTES.SUPPLIER_STATEMENT(supplier._id)}
+                          className="rounded p-1.5 text-text-muted transition-colors hover:bg-primary/10 hover:text-primary"
+                          title={t('suppliers.openStatement')}
+                        >
+                          <FileText size={14} />
+                        </Link>
+                        {canUpdate && (
+                          <button
+                            onClick={() => openEdit(supplier)}
+                            className="rounded p-1.5 text-text-muted transition-colors hover:bg-primary/10 hover:text-primary"
+                            title={t('common.edit')}
+                          >
+                            <Pencil size={14} />
+                          </button>
+                        )}
+                        {canDelete && (
+                          <button
+                            onClick={() => setDeleteTarget(supplier)}
+                            className="rounded p-1.5 text-text-muted transition-colors hover:bg-error/10 hover:text-error"
+                            title={t('common.delete')}
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        )}
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
