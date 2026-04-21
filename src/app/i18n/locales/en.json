@@ -189,7 +189,10 @@
     "newBill": "New Bill",
     "newJournalEntry": "New Journal Entry",
     "arAging": "AR Aging",
-    "apAging": "AP Aging"
+    "apAging": "AP Aging",
+    "ytd": "Year to date",
+    "needsAttention": "Needs attention",
+    "allCurrent": "All up to date"
   },
   "setup": {
     "title": "Organization Setup",

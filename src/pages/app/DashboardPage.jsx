@@ -9,6 +9,7 @@ import {
   Plus,
   BookOpen,
   BarChart2,
+  ChevronRight,
 } from 'lucide-react'
 import { useAuth } from '@/entities/auth/model/useAuth'
 import apiClient from '@/shared/api/client'
@@ -19,6 +20,7 @@ import { LoadingCard, LoadingRows } from '@/shared/components/LoadingState'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { formatCurrency, formatDate } from '@/shared/utils/formatters'
 import { ROUTES } from '@/shared/constants/routes'
+import { cn } from '@/shared/utils/cn'
 
 // ─── Status pill ─────────────────────────────────────────────────────────────
 
@@ -46,31 +48,46 @@ function StatusPill({ status, ns }) {
 // ─── Summary card ─────────────────────────────────────────────────────────────
 
 const ACCENT = {
-  blue: { wrap: 'bg-blue-50', icon: 'text-blue-600' },
-  orange: { wrap: 'bg-orange-50', icon: 'text-orange-600' },
-  green: { wrap: 'bg-green-50', icon: 'text-green-600' },
-  red: { wrap: 'bg-red-50', icon: 'text-red-600' },
-  default: { wrap: 'bg-primary-50', icon: 'text-primary' },
+  blue:    { wrap: 'bg-info-soft',    icon: 'text-info',    bar: 'bg-info' },
+  orange:  { wrap: 'bg-warning-soft', icon: 'text-warning', bar: 'bg-warning' },
+  green:   { wrap: 'bg-success-soft', icon: 'text-success', bar: 'bg-success' },
+  red:     { wrap: 'bg-error-soft',   icon: 'text-error',   bar: 'bg-error' },
+  default: { wrap: 'bg-primary-50',   icon: 'text-primary', bar: 'bg-primary' },
 }
 
-function SummaryCard({ label, value, icon: Icon, accent = 'default', onClick, isLoading }) {
+function SummaryCard({ label, value, icon: Icon, accent = 'default', subtext, onClick, isLoading }) {
   if (isLoading) return <LoadingCard />
 
   const a = ACCENT[accent] ?? ACCENT.default
 
   return (
     <Card
-      padding="md"
-      className={onClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''}
+      padding="none"
+      className={cn(
+        'overflow-hidden',
+        onClick && 'cursor-pointer hover:shadow-elevated transition-shadow group'
+      )}
       onClick={onClick}
     >
-      <div className="flex items-start gap-3">
-        <div className={`w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center ${a.wrap}`}>
-          <Icon size={18} className={a.icon} />
-        </div>
-        <div className="min-w-0">
-          <p className="text-xs text-text-secondary mb-1">{label}</p>
-          <p className="text-xl font-bold text-text-primary leading-tight">{value}</p>
+      <div className={`h-1 ${a.bar}`} />
+      <div className="p-5">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex items-start gap-3 min-w-0 flex-1">
+            <div className={`w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center ${a.wrap}`}>
+              <Icon size={20} className={a.icon} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs text-text-secondary mb-1">{label}</p>
+              <p className="text-2xl font-bold text-text-primary leading-tight">{value}</p>
+              {subtext && <p className="text-xs text-text-muted mt-1">{subtext}</p>}
+            </div>
+          </div>
+          {onClick && (
+            <ChevronRight
+              size={15}
+              className="text-text-muted mt-2 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity rtl:rotate-180"
+            />
+          )}
         </div>
       </div>
     </Card>
@@ -86,10 +103,10 @@ function RecentInvoices({ invoices, currency, isLoading }) {
   return (
     <Card padding="none">
       <div className="px-5 py-4 flex items-center justify-between border-b border-border">
-        <h3 className="text-sm font-semibold text-text-primary">{t('dashboard.recentInvoices')}</h3>
+        <h3 className="text-base font-semibold text-text-primary">{t('dashboard.recentInvoices')}</h3>
         <button
           onClick={() => navigate(ROUTES.INVOICES)}
-          className="text-xs text-primary hover:underline"
+          className="text-xs font-medium text-primary hover:underline"
         >
           {t('dashboard.viewAll')}
         </button>
@@ -110,10 +127,10 @@ function RecentInvoices({ invoices, currency, isLoading }) {
           {invoices.map((inv) => (
             <li
               key={inv._id}
-              className="px-5 py-3 hover:bg-surface-muted transition-colors cursor-pointer"
+              className="px-5 py-4 hover:bg-surface-muted transition-colors cursor-pointer"
               onClick={() => navigate(ROUTES.INVOICE_DETAIL(inv._id))}
             >
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center justify-between gap-4">
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-text-primary truncate">{inv.customerName}</p>
                   <p className="text-xs text-text-secondary mt-0.5">
@@ -144,10 +161,10 @@ function RecentBills({ bills, currency, isLoading }) {
   return (
     <Card padding="none">
       <div className="px-5 py-4 flex items-center justify-between border-b border-border">
-        <h3 className="text-sm font-semibold text-text-primary">{t('dashboard.recentBills')}</h3>
+        <h3 className="text-base font-semibold text-text-primary">{t('dashboard.recentBills')}</h3>
         <button
           onClick={() => navigate(ROUTES.BILLS)}
-          className="text-xs text-primary hover:underline"
+          className="text-xs font-medium text-primary hover:underline"
         >
           {t('dashboard.viewAll')}
         </button>
@@ -168,10 +185,10 @@ function RecentBills({ bills, currency, isLoading }) {
           {bills.map((bill) => (
             <li
               key={bill._id}
-              className="px-5 py-3 hover:bg-surface-muted transition-colors cursor-pointer"
+              className="px-5 py-4 hover:bg-surface-muted transition-colors cursor-pointer"
               onClick={() => navigate(ROUTES.BILL_DETAIL(bill._id))}
             >
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center justify-between gap-4">
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-text-primary truncate">{bill.supplierName}</p>
                   <p className="text-xs text-text-secondary mt-0.5">
@@ -212,21 +229,30 @@ function QuickActions() {
 
   return (
     <Card padding="md">
-      <h3 className="text-sm font-semibold text-text-primary mb-3">{t('dashboard.quickActions')}</h3>
-      <div className="flex flex-wrap gap-2">
-        {primary.map(({ label, icon: Icon, to }) => (
-          <Button key={to} variant="primary" size="sm" onClick={() => navigate(to)}>
-            <Plus size={13} />
-            {label}
-          </Button>
-        ))}
-        <span className="w-px bg-border self-stretch mx-1 hidden sm:block" aria-hidden />
-        {secondary.map(({ label, icon: Icon, to }) => (
-          <Button key={to} variant="secondary" size="sm" onClick={() => navigate(to)}>
-            <Icon size={13} />
-            {label}
-          </Button>
-        ))}
+      <h3 className="text-base font-semibold text-text-primary mb-4">{t('dashboard.quickActions')}</h3>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+        <div className="flex-1">
+          <p className="text-xs text-text-muted mb-2.5">{t('common.create')}</p>
+          <div className="flex flex-wrap gap-2">
+            {primary.map(({ label, to }) => (
+              <Button key={to} variant="primary" size="sm" onClick={() => navigate(to)}>
+                <Plus size={13} />
+                {label}
+              </Button>
+            ))}
+          </div>
+        </div>
+        <div className="sm:border-s sm:border-border sm:ps-6">
+          <p className="text-xs text-text-muted mb-2.5">{t('nav.reports')}</p>
+          <div className="flex flex-wrap gap-2">
+            {secondary.map(({ label, icon: Icon, to }) => (
+              <Button key={to} variant="secondary" size="sm" onClick={() => navigate(to)}>
+                <Icon size={13} />
+                {label}
+              </Button>
+            ))}
+          </div>
+        </div>
       </div>
     </Card>
   )
@@ -254,7 +280,7 @@ export default function DashboardPage() {
   const netIncomeAccent = netIncomeNum === null ? 'default' : netIncomeNum >= 0 ? 'green' : 'red'
 
   return (
-    <div className="p-4 sm:p-6 space-y-6 animate-fade-in">
+    <div className="p-4 sm:p-6 space-y-8 animate-fade-in">
       <PageHeader
         title={`${t('dashboard.welcome')}, ${user?.name?.split(' ')[0] || ''}`}
         subtitle={t('dashboard.subtitle')}
@@ -293,6 +319,7 @@ export default function DashboardPage() {
               value={financials ? formatCurrency(financials.netIncome, currency) : '—'}
               icon={TrendingUp}
               accent={netIncomeAccent}
+              subtext={financials ? t('dashboard.ytd') : undefined}
               isLoading={isLoading}
             />
             <SummaryCard
@@ -300,6 +327,7 @@ export default function DashboardPage() {
               value={arap != null ? String(arap.overdueInvoices) : '—'}
               icon={AlertCircle}
               accent={arap?.overdueInvoices > 0 ? 'red' : 'default'}
+              subtext={arap != null ? (arap.overdueInvoices > 0 ? t('dashboard.needsAttention') : t('dashboard.allCurrent')) : undefined}
               isLoading={isLoading}
               onClick={() => navigate(ROUTES.INVOICES)}
             />
