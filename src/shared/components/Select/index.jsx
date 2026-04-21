@@ -103,8 +103,16 @@ export function Select({
       if (!clickedTrigger && !clickedDropdown) close()
     }
 
-    // Close when the page scrolls (dropdown position would be stale)
-    function handleScroll() {
+    // Ignore the dropdown's own scroll events so long lists stay usable.
+    function handleScroll(e) {
+      const scrollTarget = e.target
+      if (
+        scrollTarget instanceof Node &&
+        (dropdownRef.current?.contains(scrollTarget) || triggerRef.current?.contains(scrollTarget))
+      ) {
+        return
+      }
+
       close()
     }
 
