@@ -5,6 +5,7 @@ import { Printer, ArrowLeft, ArrowRight } from 'lucide-react'
 import { useInvoice } from '@/features/invoices/hooks/useInvoices'
 import { useAuth } from '@/entities/auth/model/useAuth'
 import { InvoiceStatusBadge } from '@/features/invoices/components/InvoiceStatusBadge'
+import { PrintBrandHeader } from '@/shared/components/print/PrintBrandHeader'
 import { formatDate, formatCurrency } from '@/shared/utils/formatters'
 import { ROUTES } from '@/shared/constants/routes'
 
@@ -60,7 +61,8 @@ export default function InvoicePrintPage() {
     return () => document.head.removeChild(style)
   }, [])
 
-  const tenantName = user?.tenant?.name ?? t('invoices.companyFallback')
+  const tenant = user?.tenant ?? null
+  const tenantName = tenant?.name ?? t('invoices.companyFallback')
 
   if (isLoading) {
     return (
@@ -120,17 +122,13 @@ export default function InvoicePrintPage() {
         <div className="px-16 py-14 print:p-0">
 
           {/* Header */}
-          <div className="print-keep-together flex justify-between items-start gap-8 mb-12">
-            <p className="max-w-[55%] text-xl font-bold text-gray-900 leading-tight">{tenantName}</p>
-            <div className="text-end">
-              <p className="text-4xl font-extrabold uppercase tracking-widest text-primary-700 leading-none">
-                {t('invoices.documentTitle')}
-              </p>
-              <p className="text-sm font-semibold text-gray-500 mt-3 tracking-wider">
-                {invoice.invoiceNumber}
-              </p>
-            </div>
-          </div>
+          <PrintBrandHeader
+            tenant={tenant}
+            companyName={tenantName}
+            title={t('invoices.documentTitle')}
+            subtitle={invoice.invoiceNumber}
+            isRtl={isRtl}
+          />
 
           {/* Customer + Meta */}
           <div className="print-keep-together flex justify-between items-start gap-8 mb-10">

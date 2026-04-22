@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { Printer, ArrowLeft, ArrowRight } from 'lucide-react'
 import { customerApi } from '@/entities/customer/api/customerApi'
 import { useAuth } from '@/entities/auth/model/useAuth'
+import { PrintBrandHeader } from '@/shared/components/print/PrintBrandHeader'
 import { formatCurrency, formatDate } from '@/shared/utils/formatters'
 import { ROUTES } from '@/shared/constants/routes'
 
@@ -137,7 +138,8 @@ export default function CustomerStatementPrintPage() {
     return () => document.head.removeChild(style)
   }, [])
 
-  const tenantName = user?.tenant?.name ?? t('invoices.companyFallback')
+  const tenant = user?.tenant ?? null
+  const tenantName = tenant?.name ?? t('invoices.companyFallback')
 
   if (isLoading) {
     return (
@@ -187,15 +189,13 @@ export default function CustomerStatementPrintPage() {
 
       <div className="mx-auto my-8 print:my-0 max-w-[794px] print:max-w-full bg-white shadow-xl print:shadow-none">
         <div className="px-16 py-14 print:p-0">
-          <div className="print-keep-together flex justify-between items-start mb-12 gap-8">
-            <p className="max-w-[55%] text-xl font-bold text-gray-900 leading-tight">{tenantName}</p>
-            <div className="text-end">
-              <p className="text-4xl font-extrabold tracking-widest text-primary-700 leading-none">
-                {t('customers.statement')}
-              </p>
-              <p className="text-sm font-semibold text-gray-500 mt-3 tracking-wide">{customer.name}</p>
-            </div>
-          </div>
+          <PrintBrandHeader
+            tenant={tenant}
+            companyName={tenantName}
+            title={t('customers.statement')}
+            subtitle={customer.name}
+            isRtl={isRtl}
+          />
 
           <div className="print-keep-together flex justify-between items-start gap-8 mb-10">
             <div>

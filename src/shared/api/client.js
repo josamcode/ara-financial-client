@@ -12,6 +12,15 @@ const apiClient = axios.create({
 // --- Request: attach access token ---
 apiClient.interceptors.request.use(
   (config) => {
+    if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
+      if (typeof config.headers?.set === 'function') {
+        config.headers.set('Content-Type', undefined)
+      } else if (config.headers) {
+        delete config.headers['Content-Type']
+        delete config.headers['content-type']
+      }
+    }
+
     const token = storage.getAccessToken()
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
