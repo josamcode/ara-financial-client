@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Plus } from 'lucide-react'
 import { PageHeader } from '@/shared/components/PageHeader'
@@ -24,11 +24,15 @@ const STATUS_OPTIONS = [
   { value: 'cancelled', label: 'cancelled' },
 ]
 
+const STATUS_VALUES = new Set(STATUS_OPTIONS.map((option) => option.value).filter(Boolean))
+
 export default function InvoicesPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const [statusFilter, setStatusFilter] = useState('')
+  const [searchParams, setSearchParams] = useSearchParams()
   const [page, setPage] = useState(1)
+  const statusParam = searchParams.get('status') ?? ''
+  const statusFilter = STATUS_VALUES.has(statusParam) ? statusParam : ''
 
   const params = { page, limit: 20, ...(statusFilter ? { status: statusFilter } : {}) }
   const { data, isLoading, isError, refetch } = useInvoiceList(params)
@@ -41,6 +45,17 @@ export default function InvoicesPage() {
     value: o.value,
     label: o.value ? t(`invoices.status.${o.value}`) : t('common.filter'),
   }))
+
+  function handleStatusChange(nextStatus) {
+    const nextParams = new URLSearchParams(searchParams)
+    if (STATUS_VALUES.has(nextStatus) && nextStatus) {
+      nextParams.set('status', nextStatus)
+    } else {
+      nextParams.delete('status')
+    }
+    setPage(1)
+    setSearchParams(nextParams)
+  }
 
   function handleView(invoice) {
     navigate(ROUTES.INVOICE_DETAIL(invoice._id))
@@ -70,7 +85,7 @@ export default function InvoicesPage() {
       <div className="mb-4 flex items-center gap-3">
         <Select
           value={statusFilter}
-          onChange={(v) => { setStatusFilter(v); setPage(1) }}
+          onChange={handleStatusChange}
           options={statusOptions}
           wrapperClassName="w-40"
         />

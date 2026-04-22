@@ -132,6 +132,12 @@ const INSIGHT_ICONS = {
   danger: AlertCircle,
 }
 
+const DASHBOARD_TARGETS = {
+  overdueInvoices: `${ROUTES.INVOICES}?status=overdue`,
+  overdueBills: `${ROUTES.BILLS}?status=overdue`,
+  incomeStatement: ROUTES.REPORTS_INCOME_STATEMENT,
+}
+
 function getInsightContent(insight, t, currency) {
   switch (insight.id) {
     case 'overdue_invoices':
@@ -198,6 +204,39 @@ function getInsightContent(insight, t, currency) {
   }
 }
 
+function buildStatementInsightHref(href, basePath, buildStatementRoute) {
+  if (!href) {
+    return basePath
+  }
+
+  const detailPrefix = `${basePath}/`
+  if (!href.startsWith(detailPrefix)) {
+    return href
+  }
+
+  const entityId = href.slice(detailPrefix.length).split('/')[0]
+  return entityId ? buildStatementRoute(entityId) : href
+}
+
+function getInsightHref(insight) {
+  switch (insight.id) {
+    case 'overdue_invoices':
+      return DASHBOARD_TARGETS.overdueInvoices
+    case 'overdue_bills':
+      return DASHBOARD_TARGETS.overdueBills
+    case 'top_customer_outstanding':
+      return buildStatementInsightHref(insight.href, ROUTES.CUSTOMERS, ROUTES.CUSTOMER_STATEMENT)
+    case 'top_supplier_payable':
+      return buildStatementInsightHref(insight.href, ROUTES.SUPPLIERS, ROUTES.SUPPLIER_STATEMENT)
+    case 'net_income_positive':
+    case 'net_income_negative':
+    case 'net_income_neutral':
+      return DASHBOARD_TARGETS.incomeStatement
+    default:
+      return insight.href
+  }
+}
+
 function DashboardInsights({ insights, currency, isLoading }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -228,12 +267,13 @@ function DashboardInsights({ insights, currency, isLoading }) {
       {!isLoading && resolvedInsights.length > 0 && (
         <div className="mt-4 grid grid-cols-1 xl:grid-cols-2 gap-3">
           {resolvedInsights.map(({ insight, content }) => {
+            const href = getInsightHref(insight)
             const styles = INSIGHT_STYLES[insight.tone] ?? INSIGHT_STYLES.info
             const Icon = INSIGHT_ICONS[insight.tone] ?? INSIGHT_ICONS.info
             const panelClassName = cn(
               'w-full rounded-lg border px-4 py-3 text-start transition-shadow',
               styles.panel,
-              insight.href && 'cursor-pointer hover:shadow-sm'
+              href && 'cursor-pointer hover:shadow-sm'
             )
 
             const body = (
@@ -245,7 +285,7 @@ function DashboardInsights({ insights, currency, isLoading }) {
                   <p className={cn('text-sm font-semibold', styles.title)}>{content.title}</p>
                   <p className={cn('mt-1 text-sm', styles.description)}>{content.description}</p>
                 </div>
-                {insight.href && (
+                {href && (
                   <ChevronRight
                     size={16}
                     className="mt-1 flex-shrink-0 text-text-muted rtl:rotate-180"
@@ -254,13 +294,13 @@ function DashboardInsights({ insights, currency, isLoading }) {
               </div>
             )
 
-            if (insight.href) {
+            if (href) {
               return (
                 <button
                   key={insight.id}
                   type="button"
                   className={panelClassName}
-                  onClick={() => navigate(insight.href)}
+                  onClick={() => navigate(href)}
                 >
                   {body}
                 </button>
@@ -505,6 +545,7 @@ export default function DashboardPage() {
               accent={netIncomeAccent}
               subtext={financials ? t('dashboard.ytd') : undefined}
               isLoading={isLoading}
+              onClick={() => navigate(DASHBOARD_TARGETS.incomeStatement)}
             />
             <SummaryCard
               label={t('dashboard.overdueInvoices')}
@@ -513,7 +554,7 @@ export default function DashboardPage() {
               accent={arap?.overdueInvoices > 0 ? 'red' : 'default'}
               subtext={arap != null ? (arap.overdueInvoices > 0 ? t('dashboard.needsAttention') : t('dashboard.allCurrent')) : undefined}
               isLoading={isLoading}
-              onClick={() => navigate(ROUTES.INVOICES)}
+              onClick={() => navigate(DASHBOARD_TARGETS.overdueInvoices)}
             />
           </div>
 
