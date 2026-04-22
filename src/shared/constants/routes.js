@@ -57,6 +57,7 @@ export const ROUTES = {
   INVOICES: '/invoices',
   INVOICE_NEW: '/invoices/new',
   INVOICE_DETAIL: (id = ':id') => `/invoices/${id}`,
+  INVOICE_PRINT: (id = ':id') => `/invoices/${id}/print`,
 
   // Bills
   BILLS: '/bills',

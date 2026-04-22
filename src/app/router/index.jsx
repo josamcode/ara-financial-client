@@ -51,6 +51,7 @@ const SupplierStatementPage = lazy(() => import('@/pages/app/SupplierStatementPa
 const InvoicesPage = lazy(() => import('@/pages/app/InvoicesPage'))
 const InvoiceNewPage = lazy(() => import('@/pages/app/InvoiceNewPage'))
 const InvoiceDetailPage = lazy(() => import('@/pages/app/InvoiceDetailPage'))
+const InvoicePrintPage = lazy(() => import('@/pages/app/InvoicePrintPage'))
 const BillsPage = lazy(() => import('@/pages/app/BillsPage'))
 const BillNewPage = lazy(() => import('@/pages/app/BillNewPage'))
 const BillDetailPage = lazy(() => import('@/pages/app/BillDetailPage'))
@@ -356,6 +357,16 @@ export function AppRouter() {
 
             <Route path={ROUTES.SETTINGS} element={<SettingsPage />} />
           </Route>
+
+          {/* Invoice print — no AppLayout */}
+          <Route
+            path={ROUTES.INVOICE_PRINT()}
+            element={
+              <ProtectedRoute>
+                <InvoicePrintPage />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to={ROUTES.HOME} replace />} />

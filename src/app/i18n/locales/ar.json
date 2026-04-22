@@ -672,6 +672,10 @@
     "apAccount": "حساب الذمم الدائنة",
     "debitAccount": "حساب المدين",
     "postedEntry": "قيد الفاتورة",
+    "print": "طباعة / PDF",
+    "printBack": "عودة للفاتورة",
+    "documentTitle": "فاتورة",
+    "companyFallback": "الشركة",
     "status": {
       "draft": "مسودة",
       "sent": "مرسلة",

@@ -4,6 +4,9 @@ export const invoiceApi = {
   list: (params) =>
     apiClient.get('/invoices', { params }),
 
+  exportList: (params) =>
+    apiClient.get('/invoices/export', { params, responseType: 'blob' }),
+
   getById: (id) =>
     apiClient.get(`/invoices/${id}`),
 

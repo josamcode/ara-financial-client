@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Send, CreditCard, XCircle, Pencil } from 'lucide-react'
+import { Send, CreditCard, XCircle, Pencil, Printer } from 'lucide-react'
 import { PageHeader } from '@/shared/components/PageHeader'
 import { Button } from '@/shared/components/Button'
 import { LoadingState } from '@/shared/components/LoadingState'
@@ -138,6 +138,16 @@ export default function InvoiceDetailPage() {
         actions={
           <div className="flex items-center gap-2">
             <InvoiceStatusBadge status={invoice.status} />
+
+            <Link
+              to={ROUTES.INVOICE_PRINT(id)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 font-medium transition-colors duration-200 h-button-sm px-3 text-sm rounded-sm bg-surface text-text-primary border border-border hover:bg-surface-muted"
+            >
+              <Printer size={14} />
+              {t('invoices.print')}
+            </Link>
 
             {isDraft && (
               <PermissionGate permission={PERMISSIONS.INVOICE_UPDATE}>

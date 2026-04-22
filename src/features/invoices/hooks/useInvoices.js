@@ -20,6 +20,15 @@ export function useInvoiceList(params = {}) {
   })
 }
 
+export function useExportInvoices() {
+  const { t } = useTranslation()
+
+  return useMutation({
+    mutationFn: (params) => invoiceApi.exportList(params),
+    onError: (err) => toast.error(err?.message || t('common.somethingWentWrong')),
+  })
+}
+
 export function useInvoice(id) {
   return useQuery({
     queryKey: KEYS.detail(id),

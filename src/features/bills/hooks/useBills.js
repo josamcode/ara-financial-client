@@ -20,6 +20,15 @@ export function useBillList(params = {}) {
   })
 }
 
+export function useExportBills() {
+  const { t } = useTranslation()
+
+  return useMutation({
+    mutationFn: (params) => billApi.exportList(params),
+    onError: (error) => toast.error(error?.message || t('common.somethingWentWrong')),
+  })
+}
+
 export function useBill(id) {
   return useQuery({
     queryKey: KEYS.detail(id),

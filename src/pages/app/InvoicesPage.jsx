@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Plus } from 'lucide-react'
+import { Download, Plus } from 'lucide-react'
 import { PageHeader } from '@/shared/components/PageHeader'
 import { Button } from '@/shared/components/Button'
 import { Checkbox } from '@/shared/components/Checkbox'
@@ -14,7 +14,9 @@ import { Input } from '@/shared/components/Input'
 import { Select } from '@/shared/components/Select'
 import { PERMISSIONS } from '@/shared/constants/permissions'
 import { ROUTES } from '@/shared/constants/routes'
+import { downloadBlob } from '@/shared/utils/downloadBlob'
 import {
+  useExportInvoices,
   useInvoiceList,
   useDeleteInvoice,
   useBulkCancelInvoices,
@@ -58,9 +60,7 @@ export default function InvoicesPage() {
     setSelectedInvoiceIds([])
   }, [searchParamsKey])
 
-  const params = {
-    page,
-    limit: 20,
+  const filterParams = {
     ...(statusFilter ? { status: statusFilter } : {}),
     ...(searchFilter ? { search: searchFilter } : {}),
     ...(dateFromFilter ? { dateFrom: dateFromFilter } : {}),
@@ -68,7 +68,13 @@ export default function InvoicesPage() {
     ...(minAmountFilter ? { minAmount: minAmountFilter } : {}),
     ...(maxAmountFilter ? { maxAmount: maxAmountFilter } : {}),
   }
-  const { data, isLoading, isError, refetch } = useInvoiceList(params)
+  const listParams = {
+    page,
+    limit: 20,
+    ...filterParams,
+  }
+  const { data, isLoading, isError, refetch } = useInvoiceList(listParams)
+  const exportMutation = useExportInvoices()
   const deleteMutation = useDeleteInvoice()
   const bulkCancelMutation = useBulkCancelInvoices()
   const bulkDeleteMutation = useBulkDeleteInvoices()
@@ -138,6 +144,15 @@ export default function InvoicesPage() {
   function handleDelete(invoice) {
     if (window.confirm(t('invoices.confirmDelete', { number: invoice.invoiceNumber }))) {
       deleteMutation.mutate(invoice._id)
+    }
+  }
+
+  async function handleExport() {
+    try {
+      const blob = await exportMutation.mutateAsync(filterParams)
+      downloadBlob(blob, 'invoices.csv')
+    } catch (_error) {
+      // Error feedback is handled by the mutation.
     }
   }
 
@@ -234,6 +249,15 @@ export default function InvoicesPage() {
         />
         <Button variant="secondary" size="sm" onClick={handleClearFilters} disabled={!hasActiveFilters}>
           {t('common.clear')}
+        </Button>
+        <Button
+          variant="secondary"
+          size="sm"
+          isLoading={exportMutation.isPending}
+          onClick={handleExport}
+        >
+          {!exportMutation.isPending && <Download size={14} />}
+          {t('common.export')}
         </Button>
       </div>
 

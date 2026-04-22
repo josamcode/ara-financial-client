@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Plus } from 'lucide-react'
+import { Download, Plus } from 'lucide-react'
 import { PageHeader } from '@/shared/components/PageHeader'
 import { Button } from '@/shared/components/Button'
 import { Checkbox } from '@/shared/components/Checkbox'
@@ -14,8 +14,9 @@ import { Input } from '@/shared/components/Input'
 import { Select } from '@/shared/components/Select'
 import { ROUTES } from '@/shared/constants/routes'
 import { PERMISSIONS } from '@/shared/constants/permissions'
+import { downloadBlob } from '@/shared/utils/downloadBlob'
 import { BillList } from '@/features/bills/components/BillList'
-import { useBillList, useBulkCancelBills } from '@/features/bills/hooks/useBills'
+import { useBillList, useBulkCancelBills, useExportBills } from '@/features/bills/hooks/useBills'
 
 const STATUS_OPTIONS = [
   { value: '', label: '' },
@@ -53,16 +54,20 @@ export default function BillsPage() {
     setSelectedBillIds([])
   }, [searchParamsKey])
 
-  const { data, isLoading, isError, refetch } = useBillList({
-    page,
-    limit: 20,
+  const filterParams = {
     ...(statusFilter ? { status: statusFilter } : {}),
     ...(searchFilter ? { search: searchFilter } : {}),
     ...(dateFromFilter ? { dateFrom: dateFromFilter } : {}),
     ...(dateToFilter ? { dateTo: dateToFilter } : {}),
     ...(minAmountFilter ? { minAmount: minAmountFilter } : {}),
     ...(maxAmountFilter ? { maxAmount: maxAmountFilter } : {}),
+  }
+  const { data, isLoading, isError, refetch } = useBillList({
+    page,
+    limit: 20,
+    ...filterParams,
   })
+  const exportMutation = useExportBills()
   const bulkCancelMutation = useBulkCancelBills()
   const bills = data?.data ?? []
   const pagination = data?.meta?.pagination
@@ -122,6 +127,15 @@ export default function BillsPage() {
 
   function handleToggleSelectAll(checked) {
     setSelectedBillIds(checked ? allBillIds : [])
+  }
+
+  async function handleExport() {
+    try {
+      const blob = await exportMutation.mutateAsync(filterParams)
+      downloadBlob(blob, 'bills.csv')
+    } catch (_error) {
+      // Error feedback is handled by the mutation.
+    }
   }
 
   async function handleBulkCancel() {
@@ -206,6 +220,15 @@ export default function BillsPage() {
         />
         <Button variant="secondary" size="sm" onClick={handleClearFilters} disabled={!hasActiveFilters}>
           {t('common.clear')}
+        </Button>
+        <Button
+          variant="secondary"
+          size="sm"
+          isLoading={exportMutation.isPending}
+          onClick={handleExport}
+        >
+          {!exportMutation.isPending && <Download size={14} />}
+          {t('common.export')}
         </Button>
       </div>
 
