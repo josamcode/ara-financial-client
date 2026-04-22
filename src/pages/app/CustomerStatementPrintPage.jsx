@@ -46,9 +46,9 @@ async function getPrintableCustomerStatement(id) {
 
 function SummaryCard({ label, value }) {
   return (
-    <div className="rounded-xl border border-gray-200 bg-gray-50 px-5 py-4">
+    <div className="h-full rounded-xl border border-gray-200 bg-gray-50 px-5 py-4">
       <p className="text-[10px] uppercase tracking-widest font-semibold text-gray-400 mb-2">{label}</p>
-      <p className="text-lg font-bold text-gray-900 tabular-nums">{value}</p>
+      <p className="text-lg font-bold text-gray-900 tabular-nums whitespace-nowrap">{value}</p>
     </div>
   )
 }
@@ -57,7 +57,7 @@ function TransactionTypeLabel({ type, label }) {
   return (
     <span
       className={[
-        'inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold',
+        'print-badge inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold',
         type === 'invoice' ? 'bg-primary/10 text-primary-700' : 'bg-emerald-500/10 text-emerald-700',
       ].join(' ')}
     >
@@ -68,7 +68,7 @@ function TransactionTypeLabel({ type, label }) {
 
 function AmountCell({ value, currency, locale }) {
   return (
-    <span dir="ltr" className="inline-block min-w-[110px] text-right tabular-nums">
+    <span dir="ltr" className="inline-block min-w-[110px] whitespace-nowrap text-right tabular-nums">
       {formatCurrency(value, currency, locale)}
     </span>
   )
@@ -95,12 +95,42 @@ export default function CustomerStatementPrintPage() {
     style.textContent = `
       @page { size: A4; margin: 15mm 20mm; }
       @media print {
-        body { background: white !important; }
-        html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        table { page-break-inside: auto; }
+        html, body {
+          background: white !important;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+        *, *::before, *::after {
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          page-break-inside: auto;
+        }
         thead { display: table-header-group; }
         tfoot { display: table-footer-group; }
-        tr { page-break-inside: avoid; break-inside: avoid; }
+        tr,
+        .print-keep-together {
+          page-break-inside: avoid;
+          break-inside: avoid;
+        }
+        .print-table th {
+          padding-top: 0;
+          padding-bottom: 0.95rem;
+        }
+        .print-table td {
+          padding-top: 0.9rem;
+          padding-bottom: 0.9rem;
+          vertical-align: top;
+        }
+        .print-summary-grid {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 0.9rem;
+        }
+        .print-badge { white-space: nowrap; }
       }
     `
     document.head.appendChild(style)
@@ -157,17 +187,17 @@ export default function CustomerStatementPrintPage() {
 
       <div className="mx-auto my-8 print:my-0 max-w-[794px] print:max-w-full bg-white shadow-xl print:shadow-none">
         <div className="px-16 py-14 print:p-0">
-          <div className="flex justify-between items-start mb-12 gap-8">
-            <p className="text-xl font-bold text-gray-900 leading-tight">{tenantName}</p>
+          <div className="print-keep-together flex justify-between items-start mb-12 gap-8">
+            <p className="max-w-[55%] text-xl font-bold text-gray-900 leading-tight">{tenantName}</p>
             <div className="text-end">
               <p className="text-4xl font-extrabold tracking-widest text-primary-700 leading-none">
                 {t('customers.statement')}
               </p>
-              <p className="text-sm font-semibold text-gray-500 mt-2 tracking-wide">{customer.name}</p>
+              <p className="text-sm font-semibold text-gray-500 mt-3 tracking-wide">{customer.name}</p>
             </div>
           </div>
 
-          <div className="flex justify-between items-start gap-8 mb-10">
+          <div className="print-keep-together flex justify-between items-start gap-8 mb-10">
             <div>
               <p className="text-[10px] uppercase tracking-widest font-semibold text-gray-400 mb-2">
                 {t('invoices.customer')}
@@ -203,7 +233,7 @@ export default function CustomerStatementPrintPage() {
 
           <div className="h-px bg-gray-200 mb-8" />
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+          <div className="print-keep-together print-summary-grid grid grid-cols-1 gap-4 mb-8 sm:grid-cols-3 print:grid-cols-3">
             <SummaryCard
               label={t('customers.totalInvoiced')}
               value={formatCurrency(summary.totalInvoiced, currency, locale)}
@@ -219,11 +249,11 @@ export default function CustomerStatementPrintPage() {
           </div>
 
           {transactions.length === 0 ? (
-            <div className="border border-dashed border-gray-300 rounded-2xl px-6 py-10 text-center text-sm text-gray-500">
+            <div className="print-keep-together border border-dashed border-gray-300 rounded-2xl px-6 py-10 text-center text-sm text-gray-500">
               {t('customers.statementEmptyDesc')}
             </div>
           ) : (
-            <table className="w-full text-sm">
+            <table className="print-table w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-200">
                   <th className="pb-3 text-start text-[10px] uppercase tracking-widest text-gray-400 font-semibold">

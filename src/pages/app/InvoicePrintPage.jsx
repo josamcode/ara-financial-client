@@ -24,8 +24,36 @@ export default function InvoicePrintPage() {
     style.textContent = `
       @page { size: A4; margin: 15mm 20mm; }
       @media print {
-        body { background: white !important; }
-        html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        html, body {
+          background: white !important;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+        *, *::before, *::after {
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          page-break-inside: auto;
+        }
+        thead { display: table-header-group; }
+        tfoot { display: table-footer-group; }
+        tr,
+        .print-keep-together {
+          page-break-inside: avoid;
+          break-inside: avoid;
+        }
+        .print-table th {
+          padding-top: 0;
+          padding-bottom: 0.95rem;
+        }
+        .print-table td {
+          padding-top: 0.9rem;
+          padding-bottom: 0.9rem;
+          vertical-align: top;
+        }
       }
     `
     document.head.appendChild(style)
@@ -92,20 +120,20 @@ export default function InvoicePrintPage() {
         <div className="px-16 py-14 print:p-0">
 
           {/* Header */}
-          <div className="flex justify-between items-start mb-12">
-            <p className="text-xl font-bold text-gray-900 leading-tight">{tenantName}</p>
+          <div className="print-keep-together flex justify-between items-start gap-8 mb-12">
+            <p className="max-w-[55%] text-xl font-bold text-gray-900 leading-tight">{tenantName}</p>
             <div className="text-end">
               <p className="text-4xl font-extrabold uppercase tracking-widest text-primary-700 leading-none">
                 {t('invoices.documentTitle')}
               </p>
-              <p className="text-sm font-semibold text-gray-500 mt-2 tracking-wider">
+              <p className="text-sm font-semibold text-gray-500 mt-3 tracking-wider">
                 {invoice.invoiceNumber}
               </p>
             </div>
           </div>
 
           {/* Customer + Meta */}
-          <div className="flex justify-between items-start mb-10">
+          <div className="print-keep-together flex justify-between items-start gap-8 mb-10">
             <div>
               <p className="text-[10px] uppercase tracking-widest font-semibold text-gray-400 mb-2">
                 {t('invoices.customer')}
@@ -140,7 +168,7 @@ export default function InvoicePrintPage() {
           <div className="h-px bg-gray-200 mb-8" />
 
           {/* Line items */}
-          <table className="w-full text-sm mb-8">
+          <table className="print-table w-full text-sm mb-8">
             <thead>
               <tr className="border-b border-gray-200">
                 <th className="pb-3 text-start text-[10px] uppercase tracking-widest text-gray-400 font-semibold">
@@ -163,12 +191,14 @@ export default function InvoicePrintPage() {
                   key={item._id ?? index}
                   className="border-b border-gray-100 last:border-0"
                 >
-                  <td className="py-3 text-gray-800 leading-snug">{item.description}</td>
-                  <td className="py-3 text-end text-gray-500 tabular-nums">{item.quantity}</td>
-                  <td className="py-3 text-end text-gray-500 tabular-nums">
+                  <td className="py-3 text-gray-800 leading-6">{item.description}</td>
+                  <td className="py-3 text-end text-gray-500 tabular-nums whitespace-nowrap">
+                    {item.quantity}
+                  </td>
+                  <td className="py-3 text-end text-gray-500 tabular-nums whitespace-nowrap">
                     {formatCurrency(item.unitPrice, invoice.currency, locale)}
                   </td>
-                  <td className="py-3 text-end font-semibold text-gray-800 tabular-nums">
+                  <td className="py-3 text-end font-semibold text-gray-800 tabular-nums whitespace-nowrap">
                     {formatCurrency(item.lineTotal, invoice.currency, locale)}
                   </td>
                 </tr>
@@ -177,33 +207,33 @@ export default function InvoicePrintPage() {
           </table>
 
           {/* Summary */}
-          <div className="flex justify-end mb-8">
-            <div className="w-72 space-y-2">
-              <div className="flex justify-between text-sm text-gray-600">
+          <div className="print-keep-together flex justify-end mb-8">
+            <div className="w-72 space-y-2.5">
+              <div className="flex items-baseline justify-between gap-6 text-sm text-gray-600">
                 <span>{t('invoices.subtotal')}</span>
-                <span className="tabular-nums font-medium">
+                <span className="tabular-nums font-medium whitespace-nowrap">
                   {formatCurrency(invoice.subtotal, invoice.currency, locale)}
                 </span>
               </div>
               {paidAmount > 0 && (
-                <div className="flex justify-between text-sm text-gray-600">
+                <div className="flex items-baseline justify-between gap-6 text-sm text-gray-600">
                   <span>{t('invoices.paidAmount')}</span>
-                  <span className="tabular-nums font-medium">
+                  <span className="tabular-nums font-medium whitespace-nowrap">
                     {formatCurrency(paidAmount, invoice.currency, locale)}
                   </span>
                 </div>
               )}
               {remainingAmount > 0 && remainingAmount !== totalAmount && (
-                <div className="flex justify-between text-sm text-gray-600">
+                <div className="flex items-baseline justify-between gap-6 text-sm text-gray-600">
                   <span>{t('invoices.remainingAmount')}</span>
-                  <span className="tabular-nums font-medium">
+                  <span className="tabular-nums font-medium whitespace-nowrap">
                     {formatCurrency(remainingAmount, invoice.currency, locale)}
                   </span>
                 </div>
               )}
-              <div className="flex justify-between border-t-2 border-gray-900 pt-3 mt-1">
+              <div className="flex items-baseline justify-between gap-6 border-t-2 border-gray-900 pt-3 mt-1">
                 <span className="text-base font-bold text-gray-900">{t('invoices.total')}</span>
-                <span className="text-lg font-bold text-gray-900 tabular-nums">
+                <span className="text-lg font-bold text-gray-900 tabular-nums whitespace-nowrap">
                   {formatCurrency(invoice.total, invoice.currency, locale)}
                 </span>
               </div>
@@ -212,7 +242,7 @@ export default function InvoicePrintPage() {
 
           {/* Notes */}
           {invoice.notes && (
-            <div className="border-t border-gray-200 pt-6">
+            <div className="print-keep-together border-t border-gray-200 pt-6">
               <p className="text-[10px] uppercase tracking-widest font-semibold text-gray-400 mb-2">
                 {t('common.notes')}
               </p>

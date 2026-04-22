@@ -281,45 +281,47 @@ export default function InvoicesPage() {
 
       {!isLoading && !isError && invoices.length > 0 && (
         <>
-          <div className="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-surface px-4 py-3">
-            <div className="flex flex-wrap items-center gap-3">
-              <Checkbox
-                checked={allSelected}
-                onChange={handleToggleSelectAll}
-                label={t('common.selectCurrentPage')}
-              />
-              <span className="text-sm text-text-secondary">
-                {t('common.selectedCount', { count: selectedCount })}
-              </span>
-              <Button variant="ghost" size="sm" onClick={clearSelection} disabled={!selectedCount}>
-                {t('common.clear')}
-              </Button>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              <PermissionGate permission={PERMISSIONS.INVOICE_DELETE}>
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={() => setBulkAction('delete')}
-                  disabled={!canBulkDelete || bulkDeleteMutation.isPending}
-                >
-                  {t('invoices.deleteSelected')}
+          {selectedCount > 0 && (
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-surface px-4 py-3">
+              <div className="flex flex-wrap items-center gap-3">
+                <Checkbox
+                  checked={allSelected}
+                  onChange={handleToggleSelectAll}
+                  label={t('common.selectCurrentPage')}
+                />
+                <span className="text-sm text-text-secondary">
+                  {t('common.selectedCount', { count: selectedCount })}
+                </span>
+                <Button variant="ghost" size="sm" onClick={clearSelection} disabled={!selectedCount}>
+                  {t('common.clear')}
                 </Button>
-              </PermissionGate>
+              </div>
 
-              <PermissionGate permission={PERMISSIONS.INVOICE_UPDATE}>
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={() => setBulkAction('cancel')}
-                  disabled={!canBulkCancel || bulkCancelMutation.isPending}
-                >
-                  {t('invoices.cancelSelected')}
-                </Button>
-              </PermissionGate>
+              <div className="flex flex-wrap items-center gap-2">
+                <PermissionGate permission={PERMISSIONS.INVOICE_DELETE}>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => setBulkAction('delete')}
+                    disabled={!canBulkDelete || bulkDeleteMutation.isPending}
+                  >
+                    {t('invoices.deleteSelected')}
+                  </Button>
+                </PermissionGate>
+
+                <PermissionGate permission={PERMISSIONS.INVOICE_UPDATE}>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => setBulkAction('cancel')}
+                    disabled={!canBulkCancel || bulkCancelMutation.isPending}
+                  >
+                    {t('invoices.cancelSelected')}
+                  </Button>
+                </PermissionGate>
+              </div>
             </div>
-          </div>
+          )}
 
           <InvoiceList
             invoices={invoices}

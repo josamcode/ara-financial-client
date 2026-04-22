@@ -245,34 +245,36 @@ export default function BillsPage() {
 
       {!isLoading && !isError && bills.length > 0 && (
         <>
-          <div className="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-surface px-4 py-3">
-            <div className="flex flex-wrap items-center gap-3">
-              <Checkbox
-                checked={allSelected}
-                onChange={handleToggleSelectAll}
-                label={t('common.selectCurrentPage')}
-              />
-              <span className="text-sm text-text-secondary">
-                {t('common.selectedCount', { count: selectedCount })}
-              </span>
-              <Button variant="ghost" size="sm" onClick={clearSelection} disabled={!selectedCount}>
-                {t('common.clear')}
-              </Button>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              <PermissionGate permission={PERMISSIONS.BILL_CREATE}>
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={() => setCancelDialog(true)}
-                  disabled={!canBulkCancel || bulkCancelMutation.isPending}
-                >
-                  {t('bills.cancelSelected')}
+          {selectedCount > 0 && (
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-surface px-4 py-3">
+              <div className="flex flex-wrap items-center gap-3">
+                <Checkbox
+                  checked={allSelected}
+                  onChange={handleToggleSelectAll}
+                  label={t('common.selectCurrentPage')}
+                />
+                <span className="text-sm text-text-secondary">
+                  {t('common.selectedCount', { count: selectedCount })}
+                </span>
+                <Button variant="ghost" size="sm" onClick={clearSelection} disabled={!selectedCount}>
+                  {t('common.clear')}
                 </Button>
-              </PermissionGate>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <PermissionGate permission={PERMISSIONS.BILL_CREATE}>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => setCancelDialog(true)}
+                    disabled={!canBulkCancel || bulkCancelMutation.isPending}
+                  >
+                    {t('bills.cancelSelected')}
+                  </Button>
+                </PermissionGate>
+              </div>
             </div>
-          </div>
+          )}
 
           <BillList
             bills={bills}
