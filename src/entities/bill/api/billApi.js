@@ -7,4 +7,5 @@ export const billApi = {
   post: (id, data) => apiClient.post(`/bills/${id}/post`, data),
   pay: (id, data) => apiClient.post(`/bills/${id}/pay`, data),
   cancel: (id) => apiClient.post(`/bills/${id}/cancel`),
+  bulkCancel: (ids) => apiClient.post('/bills/bulk/cancel', { ids }),
 }

@@ -97,6 +97,19 @@ export function useCancelInvoice() {
   })
 }
 
+export function useBulkCancelInvoices() {
+  const qc = useQueryClient()
+  const { t } = useTranslation()
+  return useMutation({
+    mutationFn: (ids) => invoiceApi.bulkCancel(ids),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: KEYS.all })
+      toast.success(t('invoices.bulkCancelled'))
+    },
+    onError: (err) => toast.error(err?.message || t('common.somethingWentWrong')),
+  })
+}
+
 export function useDeleteInvoice() {
   const qc = useQueryClient()
   const { t } = useTranslation()
@@ -105,6 +118,19 @@ export function useDeleteInvoice() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: KEYS.all })
       toast.success(t('invoices.deleted'))
+    },
+    onError: (err) => toast.error(err?.message || t('common.somethingWentWrong')),
+  })
+}
+
+export function useBulkDeleteInvoices() {
+  const qc = useQueryClient()
+  const { t } = useTranslation()
+  return useMutation({
+    mutationFn: (ids) => invoiceApi.bulkRemove(ids),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: KEYS.all })
+      toast.success(t('invoices.bulkDeleted'))
     },
     onError: (err) => toast.error(err?.message || t('common.somethingWentWrong')),
   })

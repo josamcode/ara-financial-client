@@ -13,7 +13,7 @@ import { cn } from '@/shared/utils/cn'
  *   error     – shows error message below
  *   className – extra classes on the wrapper
  */
-export function Checkbox({ checked = false, onChange, label, disabled = false, error, className }) {
+export function Checkbox({ checked = false, onChange, label, ariaLabel, disabled = false, error, className }) {
   function handleToggle() {
     if (!disabled) onChange?.(!checked)
   }
@@ -37,6 +37,7 @@ export function Checkbox({ checked = false, onChange, label, disabled = false, e
           type="button"
           role="checkbox"
           aria-checked={checked}
+          aria-label={ariaLabel || (typeof label === 'string' ? label : undefined)}
           disabled={disabled}
           onClick={handleToggle}
           onKeyDown={handleKeyDown}

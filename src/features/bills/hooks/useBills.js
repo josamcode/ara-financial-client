@@ -86,3 +86,17 @@ export function useCancelBill() {
     onError: (error) => toast.error(error?.message || t('common.somethingWentWrong')),
   })
 }
+
+export function useBulkCancelBills() {
+  const qc = useQueryClient()
+  const { t } = useTranslation()
+
+  return useMutation({
+    mutationFn: (ids) => billApi.bulkCancel(ids),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: KEYS.all })
+      toast.success(t('bills.bulkCancelled'))
+    },
+    onError: (error) => toast.error(error?.message || t('common.somethingWentWrong')),
+  })
+}

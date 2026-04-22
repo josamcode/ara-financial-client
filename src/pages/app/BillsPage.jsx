@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next'
 import { Plus } from 'lucide-react'
 import { PageHeader } from '@/shared/components/PageHeader'
 import { Button } from '@/shared/components/Button'
+import { Checkbox } from '@/shared/components/Checkbox'
+import { ConfirmDialog } from '@/shared/components/ConfirmDialog'
 import { EmptyState } from '@/shared/components/EmptyState'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
@@ -13,7 +15,7 @@ import { Select } from '@/shared/components/Select'
 import { ROUTES } from '@/shared/constants/routes'
 import { PERMISSIONS } from '@/shared/constants/permissions'
 import { BillList } from '@/features/bills/components/BillList'
-import { useBillList } from '@/features/bills/hooks/useBills'
+import { useBillList, useBulkCancelBills } from '@/features/bills/hooks/useBills'
 
 const STATUS_OPTIONS = [
   { value: '', label: '' },
@@ -32,6 +34,8 @@ export default function BillsPage() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const [page, setPage] = useState(1)
+  const [selectedBillIds, setSelectedBillIds] = useState([])
+  const [cancelDialog, setCancelDialog] = useState(false)
   const statusParam = searchParams.get('status') ?? ''
   const statusFilter = STATUS_VALUES.has(statusParam) ? statusParam : ''
   const searchFilter = searchParams.get('search') ?? ''
@@ -46,6 +50,7 @@ export default function BillsPage() {
 
   useEffect(() => {
     setPage(1)
+    setSelectedBillIds([])
   }, [searchParamsKey])
 
   const { data, isLoading, isError, refetch } = useBillList({
@@ -58,8 +63,14 @@ export default function BillsPage() {
     ...(minAmountFilter ? { minAmount: minAmountFilter } : {}),
     ...(maxAmountFilter ? { maxAmount: maxAmountFilter } : {}),
   })
+  const bulkCancelMutation = useBulkCancelBills()
   const bills = data?.data ?? []
   const pagination = data?.meta?.pagination
+  const allBillIds = bills.map((bill) => bill._id)
+  const selectedBills = bills.filter((bill) => selectedBillIds.includes(bill._id))
+  const selectedCount = selectedBillIds.length
+  const allSelected = allBillIds.length > 0 && allBillIds.every((id) => selectedBillIds.includes(id))
+  const canBulkCancel = selectedCount > 0 && selectedBills.every((bill) => !['paid', 'cancelled'].includes(bill.status))
   const statusOptions = STATUS_OPTIONS.map((option) => ({
     value: option.value,
     label: option.value ? t(`bills.status.${option.value}`) : t('common.filter'),
@@ -93,6 +104,43 @@ export default function BillsPage() {
   function handleClearFilters() {
     setPage(1)
     setSearchParams({}, { replace: true })
+  }
+
+  function clearSelection() {
+    setSelectedBillIds([])
+  }
+
+  function handleToggleSelect(billId, checked) {
+    setSelectedBillIds((current) => {
+      if (checked) {
+        return current.includes(billId) ? current : [...current, billId]
+      }
+
+      return current.filter((id) => id !== billId)
+    })
+  }
+
+  function handleToggleSelectAll(checked) {
+    setSelectedBillIds(checked ? allBillIds : [])
+  }
+
+  async function handleBulkCancel() {
+    if (!selectedCount) return
+
+    await bulkCancelMutation.mutateAsync(selectedBillIds)
+    setCancelDialog(false)
+    clearSelection()
+    await refetch()
+  }
+
+  function handlePreviousPage() {
+    clearSelection()
+    setPage((value) => value - 1)
+  }
+
+  function handleNextPage() {
+    clearSelection()
+    setPage((value) => value + 1)
   }
 
   const createAction = (
@@ -174,7 +222,41 @@ export default function BillsPage() {
 
       {!isLoading && !isError && bills.length > 0 && (
         <>
-          <BillList bills={bills} onView={handleView} />
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-surface px-4 py-3">
+            <div className="flex flex-wrap items-center gap-3">
+              <Checkbox
+                checked={allSelected}
+                onChange={handleToggleSelectAll}
+                label={t('common.selectCurrentPage')}
+              />
+              <span className="text-sm text-text-secondary">
+                {t('common.selectedCount', { count: selectedCount })}
+              </span>
+              <Button variant="ghost" size="sm" onClick={clearSelection} disabled={!selectedCount}>
+                {t('common.clear')}
+              </Button>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <PermissionGate permission={PERMISSIONS.BILL_CREATE}>
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={() => setCancelDialog(true)}
+                  disabled={!canBulkCancel || bulkCancelMutation.isPending}
+                >
+                  {t('bills.cancelSelected')}
+                </Button>
+              </PermissionGate>
+            </div>
+          </div>
+
+          <BillList
+            bills={bills}
+            selectedIds={selectedBillIds}
+            onToggleSelect={handleToggleSelect}
+            onView={handleView}
+          />
 
           {pagination && pagination.totalPages > 1 && (
             <div className="mt-4 flex items-center justify-between text-sm text-text-secondary">
@@ -190,7 +272,7 @@ export default function BillsPage() {
                   variant="secondary"
                   size="sm"
                   disabled={!pagination.hasPrevPage}
-                  onClick={() => setPage((value) => value - 1)}
+                  onClick={handlePreviousPage}
                 >
                   {t('common.previous')}
                 </Button>
@@ -198,7 +280,7 @@ export default function BillsPage() {
                   variant="secondary"
                   size="sm"
                   disabled={!pagination.hasNextPage}
-                  onClick={() => setPage((value) => value + 1)}
+                  onClick={handleNextPage}
                 >
                   {t('common.next')}
                 </Button>
@@ -207,6 +289,17 @@ export default function BillsPage() {
           )}
         </>
       )}
+
+      <ConfirmDialog
+        open={cancelDialog}
+        title={t('bills.cancelSelected')}
+        message={t('bills.confirmBulkCancel', { count: selectedCount })}
+        confirmLabel={t('bills.cancelSelected')}
+        confirmVariant="danger"
+        isLoading={bulkCancelMutation.isPending}
+        onConfirm={handleBulkCancel}
+        onCancel={() => setCancelDialog(false)}
+      />
     </div>
   )
 }

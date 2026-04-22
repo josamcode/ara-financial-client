@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next'
 import { Plus } from 'lucide-react'
 import { PageHeader } from '@/shared/components/PageHeader'
 import { Button } from '@/shared/components/Button'
+import { Checkbox } from '@/shared/components/Checkbox'
+import { ConfirmDialog } from '@/shared/components/ConfirmDialog'
 import { LoadingState } from '@/shared/components/LoadingState'
 import { EmptyState } from '@/shared/components/EmptyState'
 import { ErrorState } from '@/shared/components/ErrorState'
@@ -12,7 +14,12 @@ import { Input } from '@/shared/components/Input'
 import { Select } from '@/shared/components/Select'
 import { PERMISSIONS } from '@/shared/constants/permissions'
 import { ROUTES } from '@/shared/constants/routes'
-import { useInvoiceList, useDeleteInvoice } from '@/features/invoices/hooks/useInvoices'
+import {
+  useInvoiceList,
+  useDeleteInvoice,
+  useBulkCancelInvoices,
+  useBulkDeleteInvoices,
+} from '@/features/invoices/hooks/useInvoices'
 import { InvoiceList } from '@/features/invoices/components/InvoiceList'
 
 const STATUS_OPTIONS = [
@@ -32,6 +39,8 @@ export default function InvoicesPage() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const [page, setPage] = useState(1)
+  const [selectedInvoiceIds, setSelectedInvoiceIds] = useState([])
+  const [bulkAction, setBulkAction] = useState(null)
   const statusParam = searchParams.get('status') ?? ''
   const statusFilter = STATUS_VALUES.has(statusParam) ? statusParam : ''
   const searchFilter = searchParams.get('search') ?? ''
@@ -46,6 +55,7 @@ export default function InvoicesPage() {
 
   useEffect(() => {
     setPage(1)
+    setSelectedInvoiceIds([])
   }, [searchParamsKey])
 
   const params = {
@@ -60,9 +70,17 @@ export default function InvoicesPage() {
   }
   const { data, isLoading, isError, refetch } = useInvoiceList(params)
   const deleteMutation = useDeleteInvoice()
+  const bulkCancelMutation = useBulkCancelInvoices()
+  const bulkDeleteMutation = useBulkDeleteInvoices()
 
   const invoices = data?.data ?? []
   const pagination = data?.meta?.pagination
+  const allInvoiceIds = invoices.map((invoice) => invoice._id)
+  const selectedInvoices = invoices.filter((invoice) => selectedInvoiceIds.includes(invoice._id))
+  const selectedCount = selectedInvoiceIds.length
+  const allSelected = allInvoiceIds.length > 0 && allInvoiceIds.every((id) => selectedInvoiceIds.includes(id))
+  const canBulkDelete = selectedCount > 0 && selectedInvoices.every((invoice) => invoice.status === 'draft')
+  const canBulkCancel = selectedCount > 0 && selectedInvoices.every((invoice) => !['paid', 'cancelled'].includes(invoice.status))
 
   const statusOptions = STATUS_OPTIONS.map((o) => ({
     value: o.value,
@@ -95,6 +113,24 @@ export default function InvoicesPage() {
     setSearchParams({}, { replace: true })
   }
 
+  function clearSelection() {
+    setSelectedInvoiceIds([])
+  }
+
+  function handleToggleSelect(invoiceId, checked) {
+    setSelectedInvoiceIds((current) => {
+      if (checked) {
+        return current.includes(invoiceId) ? current : [...current, invoiceId]
+      }
+
+      return current.filter((id) => id !== invoiceId)
+    })
+  }
+
+  function handleToggleSelectAll(checked) {
+    setSelectedInvoiceIds(checked ? allInvoiceIds : [])
+  }
+
   function handleView(invoice) {
     navigate(ROUTES.INVOICE_DETAIL(invoice._id))
   }
@@ -104,6 +140,34 @@ export default function InvoicesPage() {
       deleteMutation.mutate(invoice._id)
     }
   }
+
+  async function handleBulkConfirm() {
+    if (!selectedCount || !bulkAction) return
+
+    if (bulkAction === 'delete') {
+      await bulkDeleteMutation.mutateAsync(selectedInvoiceIds)
+    }
+
+    if (bulkAction === 'cancel') {
+      await bulkCancelMutation.mutateAsync(selectedInvoiceIds)
+    }
+
+    setBulkAction(null)
+    clearSelection()
+    await refetch()
+  }
+
+  function handlePreviousPage() {
+    clearSelection()
+    setPage((currentPage) => currentPage - 1)
+  }
+
+  function handleNextPage() {
+    clearSelection()
+    setPage((currentPage) => currentPage + 1)
+  }
+
+  const bulkMutation = bulkAction === 'delete' ? bulkDeleteMutation : bulkCancelMutation
 
   return (
     <div className="p-4 sm:p-6">
@@ -193,7 +257,53 @@ export default function InvoicesPage() {
 
       {!isLoading && !isError && invoices.length > 0 && (
         <>
-          <InvoiceList invoices={invoices} onView={handleView} onDelete={handleDelete} />
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-surface px-4 py-3">
+            <div className="flex flex-wrap items-center gap-3">
+              <Checkbox
+                checked={allSelected}
+                onChange={handleToggleSelectAll}
+                label={t('common.selectCurrentPage')}
+              />
+              <span className="text-sm text-text-secondary">
+                {t('common.selectedCount', { count: selectedCount })}
+              </span>
+              <Button variant="ghost" size="sm" onClick={clearSelection} disabled={!selectedCount}>
+                {t('common.clear')}
+              </Button>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <PermissionGate permission={PERMISSIONS.INVOICE_DELETE}>
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={() => setBulkAction('delete')}
+                  disabled={!canBulkDelete || bulkDeleteMutation.isPending}
+                >
+                  {t('invoices.deleteSelected')}
+                </Button>
+              </PermissionGate>
+
+              <PermissionGate permission={PERMISSIONS.INVOICE_UPDATE}>
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={() => setBulkAction('cancel')}
+                  disabled={!canBulkCancel || bulkCancelMutation.isPending}
+                >
+                  {t('invoices.cancelSelected')}
+                </Button>
+              </PermissionGate>
+            </div>
+          </div>
+
+          <InvoiceList
+            invoices={invoices}
+            selectedIds={selectedInvoiceIds}
+            onToggleSelect={handleToggleSelect}
+            onView={handleView}
+            onDelete={handleDelete}
+          />
 
           {pagination && pagination.totalPages > 1 && (
             <div className="mt-4 flex items-center justify-between text-sm text-text-secondary">
@@ -203,7 +313,7 @@ export default function InvoicesPage() {
                   variant="secondary"
                   size="sm"
                   disabled={!pagination.hasPrevPage}
-                  onClick={() => setPage((p) => p - 1)}
+                  onClick={handlePreviousPage}
                 >
                   {t('common.previous')}
                 </Button>
@@ -211,7 +321,7 @@ export default function InvoicesPage() {
                   variant="secondary"
                   size="sm"
                   disabled={!pagination.hasNextPage}
-                  onClick={() => setPage((p) => p + 1)}
+                  onClick={handleNextPage}
                 >
                   {t('common.next')}
                 </Button>
@@ -220,6 +330,28 @@ export default function InvoicesPage() {
           )}
         </>
       )}
+
+      <ConfirmDialog
+        open={bulkAction === 'delete'}
+        title={t('invoices.deleteSelected')}
+        message={t('invoices.confirmBulkDelete', { count: selectedCount })}
+        confirmLabel={t('invoices.deleteSelected')}
+        confirmVariant="danger"
+        isLoading={bulkMutation.isPending}
+        onConfirm={handleBulkConfirm}
+        onCancel={() => setBulkAction(null)}
+      />
+
+      <ConfirmDialog
+        open={bulkAction === 'cancel'}
+        title={t('invoices.cancelSelected')}
+        message={t('invoices.confirmBulkCancel', { count: selectedCount })}
+        confirmLabel={t('invoices.cancelSelected')}
+        confirmVariant="danger"
+        isLoading={bulkMutation.isPending}
+        onConfirm={handleBulkConfirm}
+        onCancel={() => setBulkAction(null)}
+      />
     </div>
   )
 }

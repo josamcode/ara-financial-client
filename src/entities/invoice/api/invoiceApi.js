@@ -22,6 +22,12 @@ export const invoiceApi = {
   cancel: (id) =>
     apiClient.post(`/invoices/${id}/cancel`),
 
+  bulkCancel: (ids) =>
+    apiClient.post('/invoices/bulk/cancel', { ids }),
+
   remove: (id) =>
     apiClient.delete(`/invoices/${id}`),
+
+  bulkRemove: (ids) =>
+    apiClient.post('/invoices/bulk/delete', { ids }),
 }
