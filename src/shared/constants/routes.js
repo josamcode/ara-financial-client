@@ -53,6 +53,7 @@ export const ROUTES = {
   SUPPLIERS: '/suppliers',
   SUPPLIER_DETAIL: (id = ':id') => `/suppliers/${id}`,
   SUPPLIER_STATEMENT: (id = ':id') => `/suppliers/${id}/statement`,
+  SUPPLIER_STATEMENT_PRINT: (id = ':id') => `/suppliers/${id}/statement/print`,
 
   // Invoices
   INVOICES: '/invoices',

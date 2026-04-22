@@ -620,6 +620,8 @@
     "statementEmptyDesc": "Bills and payments for this supplier will appear here",
     "statementBill": "Bill",
     "statementPayment": "Payment",
+    "printBack": "Back to Statement",
+    "printDate": "Print Date",
     "noBills": "No bills yet",
     "noBillsDesc": "No bills have been created for this supplier"
   },

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ArrowLeft, ExternalLink } from 'lucide-react'
+import { ArrowLeft, ExternalLink, Printer } from 'lucide-react'
 import { PageHeader } from '@/shared/components/PageHeader'
 import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
@@ -64,10 +64,16 @@ export default function SupplierStatementPage() {
           { label: t('suppliers.statement') },
         ]}
         actions={
-          <Button variant="secondary" size="sm" onClick={() => navigate(ROUTES.SUPPLIER_DETAIL(supplier._id))}>
-            <ArrowLeft size={14} className="me-1" />
-            {t('common.back')}
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button size="sm" onClick={() => navigate(ROUTES.SUPPLIER_STATEMENT_PRINT(supplier._id))}>
+              <Printer size={14} className="me-1" />
+              {t('invoices.print')}
+            </Button>
+            <Button variant="secondary" size="sm" onClick={() => navigate(ROUTES.SUPPLIER_DETAIL(supplier._id))}>
+              <ArrowLeft size={14} className="me-1" />
+              {t('common.back')}
+            </Button>
+          </div>
         }
       />
 
