@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Plus } from 'lucide-react'
@@ -8,6 +8,7 @@ import { LoadingState } from '@/shared/components/LoadingState'
 import { EmptyState } from '@/shared/components/EmptyState'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { PermissionGate } from '@/shared/components/PermissionGate'
+import { Input } from '@/shared/components/Input'
 import { Select } from '@/shared/components/Select'
 import { PERMISSIONS } from '@/shared/constants/permissions'
 import { ROUTES } from '@/shared/constants/routes'
@@ -33,8 +34,30 @@ export default function InvoicesPage() {
   const [page, setPage] = useState(1)
   const statusParam = searchParams.get('status') ?? ''
   const statusFilter = STATUS_VALUES.has(statusParam) ? statusParam : ''
+  const searchFilter = searchParams.get('search') ?? ''
+  const dateFromFilter = searchParams.get('dateFrom') ?? searchParams.get('startDate') ?? ''
+  const dateToFilter = searchParams.get('dateTo') ?? searchParams.get('endDate') ?? ''
+  const minAmountFilter = searchParams.get('minAmount') ?? ''
+  const maxAmountFilter = searchParams.get('maxAmount') ?? ''
+  const searchParamsKey = searchParams.toString()
+  const hasActiveFilters = Boolean(
+    statusFilter || searchFilter || dateFromFilter || dateToFilter || minAmountFilter || maxAmountFilter
+  )
 
-  const params = { page, limit: 20, ...(statusFilter ? { status: statusFilter } : {}) }
+  useEffect(() => {
+    setPage(1)
+  }, [searchParamsKey])
+
+  const params = {
+    page,
+    limit: 20,
+    ...(statusFilter ? { status: statusFilter } : {}),
+    ...(searchFilter ? { search: searchFilter } : {}),
+    ...(dateFromFilter ? { dateFrom: dateFromFilter } : {}),
+    ...(dateToFilter ? { dateTo: dateToFilter } : {}),
+    ...(minAmountFilter ? { minAmount: minAmountFilter } : {}),
+    ...(maxAmountFilter ? { maxAmount: maxAmountFilter } : {}),
+  }
   const { data, isLoading, isError, refetch } = useInvoiceList(params)
   const deleteMutation = useDeleteInvoice()
 
@@ -46,15 +69,30 @@ export default function InvoicesPage() {
     label: o.value ? t(`invoices.status.${o.value}`) : t('common.filter'),
   }))
 
-  function handleStatusChange(nextStatus) {
+  function updateFilters(updates) {
     const nextParams = new URLSearchParams(searchParams)
-    if (STATUS_VALUES.has(nextStatus) && nextStatus) {
-      nextParams.set('status', nextStatus)
-    } else {
-      nextParams.delete('status')
-    }
+    nextParams.delete('startDate')
+    nextParams.delete('endDate')
+
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value) {
+        nextParams.set(key, value)
+      } else {
+        nextParams.delete(key)
+      }
+    })
+
     setPage(1)
-    setSearchParams(nextParams)
+    setSearchParams(nextParams, { replace: true })
+  }
+
+  function handleStatusChange(nextStatus) {
+    updateFilters({ status: STATUS_VALUES.has(nextStatus) ? nextStatus : '' })
+  }
+
+  function handleClearFilters() {
+    setPage(1)
+    setSearchParams({}, { replace: true })
   }
 
   function handleView(invoice) {
@@ -82,13 +120,57 @@ export default function InvoicesPage() {
       />
 
       {/* Filters */}
-      <div className="mb-4 flex items-center gap-3">
+      <div className="mb-4 flex flex-wrap items-end gap-3">
+        <Input
+          type="search"
+          value={searchFilter}
+          onChange={(event) => updateFilters({ search: event.target.value })}
+          placeholder={t('common.search')}
+          wrapperClassName="w-full sm:w-56"
+        />
         <Select
           value={statusFilter}
           onChange={handleStatusChange}
           options={statusOptions}
-          wrapperClassName="w-40"
+          wrapperClassName="w-full sm:w-40"
         />
+        <Input
+          type="date"
+          value={dateFromFilter}
+          onChange={(event) => updateFilters({ dateFrom: event.target.value })}
+          aria-label={t('common.from')}
+          wrapperClassName="w-full sm:w-40"
+        />
+        <Input
+          type="date"
+          value={dateToFilter}
+          onChange={(event) => updateFilters({ dateTo: event.target.value })}
+          aria-label={t('common.to')}
+          wrapperClassName="w-full sm:w-40"
+        />
+        <Input
+          type="number"
+          min="0"
+          step="0.01"
+          inputMode="decimal"
+          value={minAmountFilter}
+          onChange={(event) => updateFilters({ minAmount: event.target.value })}
+          placeholder={`${t('common.from')} ${t('common.amount')}`}
+          wrapperClassName="w-full sm:w-36"
+        />
+        <Input
+          type="number"
+          min="0"
+          step="0.01"
+          inputMode="decimal"
+          value={maxAmountFilter}
+          onChange={(event) => updateFilters({ maxAmount: event.target.value })}
+          placeholder={`${t('common.to')} ${t('common.amount')}`}
+          wrapperClassName="w-full sm:w-36"
+        />
+        <Button variant="secondary" size="sm" onClick={handleClearFilters} disabled={!hasActiveFilters}>
+          {t('common.clear')}
+        </Button>
       </div>
 
       {isLoading && <LoadingState />}

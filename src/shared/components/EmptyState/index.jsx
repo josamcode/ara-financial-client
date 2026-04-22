@@ -23,10 +23,10 @@ export function EmptyState({
         </div>
       )}
       <h3 className="text-base font-semibold text-text-primary mb-1">{title}</h3>
-      {message && <p className="text-sm text-text-secondary max-w-sm">{message}</p>}
+      {message && <p className="text-sm text-text-secondary max-w-sm mb-5">{message}</p>}
       {actions}
       {!actions && action && actionLabel && (
-        <Button onClick={action} className="mt-5" size="sm">
+        <Button onClick={action} size="sm">
           {actionLabel}
         </Button>
       )}
