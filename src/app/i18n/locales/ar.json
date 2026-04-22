@@ -586,6 +586,8 @@
     "statementEmptyDesc": "ستظهر هنا الفواتير والمدفوعات الخاصة بهذا العميل",
     "statementInvoice": "فاتورة",
     "statementPayment": "دفعة",
+    "printBack": "العودة إلى كشف الحساب",
+    "printDate": "تاريخ الطباعة",
     "noInvoices": "لا توجد فواتير بعد",
     "noInvoicesDesc": "لم يتم إنشاء أي فواتير لهذا العميل"
   },

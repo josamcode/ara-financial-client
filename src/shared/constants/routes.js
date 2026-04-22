@@ -47,6 +47,7 @@ export const ROUTES = {
   CUSTOMERS: '/customers',
   CUSTOMER_DETAIL: (id = ':id') => `/customers/${id}`,
   CUSTOMER_STATEMENT: (id = ':id') => `/customers/${id}/statement`,
+  CUSTOMER_STATEMENT_PRINT: (id = ':id') => `/customers/${id}/statement/print`,
 
   // Suppliers
   SUPPLIERS: '/suppliers',
