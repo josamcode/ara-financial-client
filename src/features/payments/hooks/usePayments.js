@@ -65,6 +65,25 @@ export function useCreateMyFatoorahPayment() {
   })
 }
 
+export function useResolvePaymentByPaymentId(paymentId) {
+  return useQuery({
+    queryKey: ['payments', 'myfatoorah', 'resolve', paymentId],
+    queryFn: () =>
+      paymentApi.resolveByPaymentId(paymentId).then((res) => {
+        const data = res?.data ?? res ?? {}
+        return {
+          status: data.status ?? 'failed',
+          verified: data.verified ?? false,
+          paymentAttempt: data.paymentAttempt ?? null,
+          message: data.message ?? null,
+        }
+      }),
+    enabled: !!paymentId,
+    retry: 1,
+    staleTime: 30_000,
+  })
+}
+
 export function useVerifyPaymentAttempt() {
   const qc = useQueryClient()
   const { t } = useTranslation()

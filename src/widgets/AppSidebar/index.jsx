@@ -15,6 +15,7 @@ import {
   CreditCard,
   Contact,
   Briefcase,
+  Package,
 } from 'lucide-react'
 import { cn } from '@/shared/utils/cn'
 import { ROUTES } from '@/shared/constants/routes'
@@ -123,6 +124,13 @@ const navGroups = [
   {
     label: 'nav.system',
     items: [
+      {
+        key: 'billing',
+        label: 'nav.billingSubscription',
+        icon: Package,
+        to: ROUTES.BILLING,
+        permission: [PERMISSIONS.BILLING_READ, PERMISSIONS.BILLING_MANAGE],
+      },
       {
         key: 'users',
         label: 'nav.users',

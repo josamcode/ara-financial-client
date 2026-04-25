@@ -58,6 +58,8 @@ const InvoicePrintPage = lazy(() => import('@/pages/app/InvoicePrintPage'))
 const BillsPage = lazy(() => import('@/pages/app/BillsPage'))
 const BillNewPage = lazy(() => import('@/pages/app/BillNewPage'))
 const BillDetailPage = lazy(() => import('@/pages/app/BillDetailPage'))
+const BillingPage = lazy(() => import('@/pages/app/BillingPage'))
+const PaymentResultPage = lazy(() => import('@/pages/app/PaymentResultPage'))
 
 function PageLoader() {
   return (
@@ -363,6 +365,24 @@ export function AppRouter() {
               element={
                 <ProtectedRoute permission={PERMISSIONS.INVOICE_READ}>
                   <InvoiceDetailPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path={ROUTES.BILLING}
+              element={
+                <ProtectedRoute permission={[PERMISSIONS.BILLING_READ, PERMISSIONS.BILLING_MANAGE]}>
+                  <BillingPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path={ROUTES.BILLING_PAYMENT_RESULT}
+              element={
+                <ProtectedRoute permission={[PERMISSIONS.BILLING_READ, PERMISSIONS.BILLING_MANAGE]}>
+                  <PaymentResultPage />
                 </ProtectedRoute>
               }
             />

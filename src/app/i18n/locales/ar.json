@@ -124,7 +124,8 @@
     "suppliers": "الموردون",
     "invoices": "الفواتير",
     "bills": "فواتير الموردين",
-    "payments": "المدفوعات"
+    "payments": "المدفوعات",
+    "billingSubscription": "الاشتراك"
   },
   "landing": {
     "getStarted": "ابدأ الآن",
@@ -742,6 +743,113 @@
     "cancelled": "تم إلغاء العملية",
     "cancel": "إلغاء",
     "confirmCancel": "هل أنت متأكد من إلغاء العملية؟"
+  },
+  "billing": {
+    "title": "الاشتراك",
+    "subtitle": "إدارة الاشتراك والمدفوعات",
+    "currentSubscription": "الاشتراك الحالي",
+    "availablePlans": "الخطط المتاحة",
+    "currentPlan": "الخطة الحالية",
+    "checkout": "الدفع",
+    "upgrade": "ترقية",
+    "openPaymentPage": "فتح صفحة الدفع",
+    "syncPayment": "مزامنة الدفع",
+    "syncPaymentSuccess": "تمت مزامنة الدفع بنجاح",
+    "checkoutStarted": "تم بدء الدفع",
+    "plan": "الخطة",
+    "status": "الحالة",
+    "billingCycle": "دورة الفوترة",
+    "currentPeriod": "الفترة الحالية",
+    "trialEndsAt": "تنتهي التجربة في",
+    "cancelAtPeriodEnd": "يلغى في نهاية الفترة",
+    "noSubscription": "لا يوجد اشتراك نشط",
+    "noPlans": "لا توجد خطط متاحة",
+    "recentPayments": "مدفوعات الاشتراك الأخيرة",
+    "manageSubscription": "إدارة الاشتراك",
+    "free": "مجاني",
+    "custom": "مخصص",
+    "noActiveSubscription": "لا يوجد اشتراك نشط حتى الآن",
+    "choosePlanHint": "اختر خطة أدناه للبدء.",
+    "upgradeToPlan": "الترقية إلى {{name}}",
+    "included": "مشمول",
+    "contactSales": "تواصل مع المبيعات",
+    "planCodeMissing": "رمز الخطة مفقود",
+    "trialEnds": "تنتهي التجربة",
+    "nextRenewal": "التجديد القادم",
+    "paymentsEmptyHint": "محاولات الدفع الخاصة باشتراكك ستظهر هنا.",
+    "paymentResult": "نتيجة الدفع",
+    "paymentSuccess": "تم الدفع بنجاح",
+    "paymentSuccessDesc": "تم استلام دفعتك وتحديث اشتراكك.",
+    "paymentPending": "الدفع قيد المعالجة",
+    "paymentPendingDesc": "جاري معالجة دفعتك. قد يستغرق هذا بعض الوقت.",
+    "paymentFailed": "فشل الدفع",
+    "paymentFailedDesc": "تعذّر معالجة دفعتك. يرجى المحاولة مرة أخرى.",
+    "paymentCancelled": "تم إلغاء الدفع",
+    "paymentCancelledDesc": "لقد ألغيت عملية الدفع. يمكنك المحاولة مجدداً في أي وقت.",
+    "verifyingPayment": "جاري التحقق من الدفع",
+    "verifyingPaymentDesc": "يتم التحقق من حالة دفعتك مع بوابة الدفع...",
+    "invalidPaymentRequest": "رابط دفع غير صالح",
+    "invalidPaymentRequestDesc": "رابط الدفع هذا يفتقر إلى معلومات ضرورية. يرجى العودة إلى صفحة الاشتراك والمحاولة مجدداً.",
+    "returnToBilling": "العودة إلى الاشتراك",
+    "retryPayment": "إعادة محاولة الدفع",
+    "freePlanMessage": "أنت حاليًا على الخطة المجانية",
+    "companyEmailRequired": "البريد الإلكتروني للشركة مطلوب",
+    "companyEmailRequiredDesc": "يرجى إضافة البريد الإلكتروني للشركة في الإعدادات قبل الترقية.",
+    "goToSettings": "الذهاب إلى الإعدادات",
+    "planNames": {
+      "free": "مجاني",
+      "basic": "الأساسية",
+      "pro": "الاحترافية",
+      "enterprise": "المؤسسات"
+    },
+    "planDescriptions": {
+      "free": "ابدأ بالأدوات المحاسبية الأساسية مجاناً",
+      "basic": "كل ما تحتاجه لإدارة مالية شركتك الصغيرة",
+      "pro": "ميزات متقدمة للفرق والشركات النامية",
+      "enterprise": "حل متكامل للمؤسسات الكبيرة"
+    },
+    "planFeatures": {
+      "free": [
+        "مستخدم واحد فقط",
+        "دليل حسابات أساسي",
+        "قيود يومية",
+        "تقارير أساسية"
+      ],
+      "basic": [
+        "حتى 3 مستخدمين",
+        "دليل حسابات كامل",
+        "الفواتير والمصروفات",
+        "متابعة الذمم المدينة والدائنة",
+        "تقارير معيارية"
+      ],
+      "pro": [
+        "حتى 10 مستخدمين",
+        "جميع ميزات الأساسية",
+        "تعدد العملات",
+        "تقارير متقدمة",
+        "دعم ذو أولوية"
+      ],
+      "enterprise": [
+        "مستخدمون غير محدودين",
+        "جميع ميزات الاحترافية",
+        "تكاملات مخصصة",
+        "مدير حساب مخصص",
+        "ضمان مستوى الخدمة"
+      ]
+    },
+    "cycleLabel": {
+      "monthly": "/ شهر",
+      "yearly": "/ سنة",
+      "annual": "/ سنة"
+    },
+    "statusLabel": {
+      "trialing": "تجريبي",
+      "active": "نشط",
+      "cancelled": "ملغى",
+      "canceled": "ملغى",
+      "expired": "منتهي",
+      "past_due": "متأخر"
+    }
   },
   "payments": {
     "title": "المدفوعات",

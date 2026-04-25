@@ -64,6 +64,10 @@ export const PERMISSIONS = {
 
   // Audit
   AUDIT_READ: 'audit:read',
+
+  // Billing (SaaS subscription)
+  BILLING_READ: 'billing:read',
+  BILLING_MANAGE: 'billing:manage',
 }
 
 function getUserPermissions(user) {

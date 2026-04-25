@@ -124,7 +124,8 @@
     "suppliers": "Suppliers",
     "invoices": "Invoices",
     "bills": "Bills",
-    "payments": "Payments"
+    "payments": "Payments",
+    "billingSubscription": "Billing"
   },
   "landing": {
     "getStarted": "Get Started",
@@ -736,6 +737,113 @@
       "paid": "Paid",
       "overdue": "Overdue",
       "cancelled": "Cancelled"
+    }
+  },
+  "billing": {
+    "title": "Billing",
+    "subtitle": "Manage your subscription and payments",
+    "currentSubscription": "Current Subscription",
+    "availablePlans": "Available Plans",
+    "currentPlan": "Current Plan",
+    "checkout": "Checkout",
+    "upgrade": "Upgrade",
+    "openPaymentPage": "Open Payment Page",
+    "syncPayment": "Sync Payment",
+    "syncPaymentSuccess": "Payment synced successfully",
+    "checkoutStarted": "Checkout initiated",
+    "plan": "Plan",
+    "status": "Status",
+    "billingCycle": "Billing Cycle",
+    "currentPeriod": "Current Period",
+    "trialEndsAt": "Trial Ends At",
+    "cancelAtPeriodEnd": "Cancels at Period End",
+    "noSubscription": "No active subscription found",
+    "noPlans": "No plans available",
+    "recentPayments": "Recent Subscription Payments",
+    "manageSubscription": "Manage Subscription",
+    "free": "Free",
+    "custom": "Custom",
+    "noActiveSubscription": "No active subscription yet",
+    "choosePlanHint": "Choose a plan below to start.",
+    "upgradeToPlan": "Upgrade to {{name}}",
+    "included": "Included",
+    "contactSales": "Contact Sales",
+    "planCodeMissing": "Plan code is missing",
+    "trialEnds": "Trial Ends",
+    "nextRenewal": "Next Renewal",
+    "paymentsEmptyHint": "Payment attempts for your subscription will appear here.",
+    "paymentResult": "Payment Result",
+    "paymentSuccess": "Payment Successful",
+    "paymentSuccessDesc": "Your payment was received and your subscription has been updated.",
+    "paymentPending": "Payment Pending",
+    "paymentPendingDesc": "Your payment is being processed. This may take a few moments.",
+    "paymentFailed": "Payment Failed",
+    "paymentFailedDesc": "We were unable to process your payment. Please try again.",
+    "paymentCancelled": "Payment Cancelled",
+    "paymentCancelledDesc": "You cancelled the payment. You can try again whenever you are ready.",
+    "verifyingPayment": "Verifying Payment",
+    "verifyingPaymentDesc": "Checking the status of your payment with the gateway...",
+    "invalidPaymentRequest": "Invalid Payment Link",
+    "invalidPaymentRequestDesc": "This payment link is missing required information. Please return to Billing and try again.",
+    "returnToBilling": "Return to Billing",
+    "retryPayment": "Try Payment Again",
+    "freePlanMessage": "You are currently on the free plan",
+    "companyEmailRequired": "Company email required",
+    "companyEmailRequiredDesc": "Please add your company email in Settings before upgrading.",
+    "goToSettings": "Go to Settings",
+    "planNames": {
+      "free": "Free",
+      "basic": "Basic",
+      "pro": "Pro",
+      "enterprise": "Enterprise"
+    },
+    "planDescriptions": {
+      "free": "Get started with essential accounting tools at no cost",
+      "basic": "Everything you need to run your small business finances",
+      "pro": "Advanced features for growing teams and businesses",
+      "enterprise": "Full-featured solution for large organizations"
+    },
+    "planFeatures": {
+      "free": [
+        "Up to 1 user",
+        "Basic chart of accounts",
+        "Journal entries",
+        "Basic reports"
+      ],
+      "basic": [
+        "Up to 3 users",
+        "Full chart of accounts",
+        "Invoices & bills",
+        "AR/AP tracking",
+        "Standard reports"
+      ],
+      "pro": [
+        "Up to 10 users",
+        "Everything in Basic",
+        "Multi-currency",
+        "Advanced reports",
+        "Priority support"
+      ],
+      "enterprise": [
+        "Unlimited users",
+        "Everything in Pro",
+        "Custom integrations",
+        "Dedicated account manager",
+        "SLA guarantee"
+      ]
+    },
+    "cycleLabel": {
+      "monthly": "/ month",
+      "yearly": "/ year",
+      "annual": "/ year"
+    },
+    "statusLabel": {
+      "trialing": "Trial",
+      "active": "Active",
+      "cancelled": "Cancelled",
+      "canceled": "Cancelled",
+      "expired": "Expired",
+      "past_due": "Past Due"
     }
   },
   "payments": {

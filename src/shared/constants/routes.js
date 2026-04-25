@@ -69,6 +69,10 @@ export const ROUTES = {
   BILL_NEW: '/bills/new',
   BILL_DETAIL: (id = ':id') => `/bills/${id}`,
 
+  // Billing (SaaS subscription)
+  BILLING: '/billing',
+  BILLING_PAYMENT_RESULT: '/billing/payment-result',
+
   // Settings
   SETTINGS: '/settings',
   SETTINGS_GENERAL: '/settings/general',

@@ -12,4 +12,7 @@ export const paymentApi = {
 
   verify: (id) =>
     apiClient.post(`/payments/${id}/verify`),
+
+  resolveByPaymentId: (paymentId) =>
+    apiClient.get('/payments/myfatoorah/resolve', { params: { paymentId } }),
 }
