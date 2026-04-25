@@ -18,12 +18,15 @@ React 18 + Vite frontend for ARA Financial.
 
 ```bash
 npm install
+cp .env.example .env
 npm run dev
 npm run build
 ```
 
 The dev server is provided by Vite. Configure API access through `.env` using the existing
 environment variables in `.env.example`.
+
+`npm run verify` currently runs the production build because no lint/check tooling is configured.
 
 ## Current Route Surface
 
