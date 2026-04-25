@@ -753,7 +753,11 @@
     "description": "Description",
     "providerInvoiceId": "Provider Invoice ID",
     "providerPaymentId": "Provider Payment ID",
-    "paymentUrl": "Payment URL"
+    "paymentUrl": "Payment URL",
+    "recentAttempts": "Recent payment attempts",
+    "noAttempts": "No payment attempts yet",
+    "verify": "Verify",
+    "paymentVerified": "Payment verified"
   },
   "settings": {
     "title": "Settings",

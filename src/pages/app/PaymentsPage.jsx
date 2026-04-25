@@ -1,17 +1,23 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { CreditCard, ExternalLink } from 'lucide-react'
+import { CreditCard, ExternalLink, RefreshCw } from 'lucide-react'
 import { PageHeader } from '@/shared/components/PageHeader'
 import { Button } from '@/shared/components/Button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/Card'
 import { Input } from '@/shared/components/Input'
 import { Select } from '@/shared/components/Select'
 import { Badge } from '@/shared/components/Badge'
+import { ErrorState } from '@/shared/components/ErrorState'
+import { LoadingState } from '@/shared/components/LoadingState'
 import { PermissionGate } from '@/shared/components/PermissionGate'
 import { CURRENCIES } from '@/shared/constants/app'
 import { PERMISSIONS, hasPermission } from '@/shared/constants/permissions'
 import { useAuth } from '@/entities/auth/model/useAuth'
-import { useCreateMyFatoorahPayment } from '@/features/payments/hooks/usePayments'
+import {
+  useCreateMyFatoorahPayment,
+  usePaymentAttempts,
+  useVerifyPaymentAttempt,
+} from '@/features/payments/hooks/usePayments'
 
 const INITIAL_FORM = {
   amount: '',
@@ -53,10 +59,30 @@ function DetailRow({ label, value, children }) {
   )
 }
 
+function formatDateTime(value) {
+  if (!value) return '-'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return '-'
+  return date.toLocaleString()
+}
+
+function openUrl(url) {
+  if (!url) return
+  window.open(url, '_blank', 'noopener,noreferrer')
+}
+
 export default function PaymentsPage() {
   const { t } = useTranslation()
   const { user } = useAuth()
   const createPayment = useCreateMyFatoorahPayment()
+  const verifyPayment = useVerifyPaymentAttempt()
+  const canRead = hasPermission(user, PERMISSIONS.PAYMENT_READ)
+  const {
+    data: attemptsResponse,
+    isLoading: attemptsLoading,
+    isError: attemptsError,
+    refetch: refetchAttempts,
+  } = usePaymentAttempts({ page: 1, limit: 20 }, { enabled: canRead })
   const [form, setForm] = useState(INITIAL_FORM)
   const [lastResult, setLastResult] = useState(null)
   const canCreate = hasPermission(user, PERMISSIONS.PAYMENT_CREATE)
@@ -71,6 +97,7 @@ export default function PaymentsPage() {
 
   const paymentAttempt = lastResult?.paymentAttempt
   const paymentUrl = lastResult?.paymentUrl || paymentAttempt?.paymentUrl
+  const paymentAttempts = attemptsResponse?.data ?? []
 
   function updateField(field, value) {
     setForm((current) => ({ ...current, [field]: value }))
@@ -93,13 +120,30 @@ export default function PaymentsPage() {
       payload.description = description
     }
 
-    const result = await createPayment.mutateAsync(payload)
-    setLastResult(result)
+    try {
+      const result = await createPayment.mutateAsync(payload)
+      setLastResult(result)
+    } catch (_error) {
+      // Mutation error feedback is handled by the hook toast.
+    }
   }
 
   function openPaymentPage() {
-    if (!paymentUrl) return
-    window.open(paymentUrl, '_blank', 'noopener,noreferrer')
+    openUrl(paymentUrl)
+  }
+
+  async function handleVerify(attempt) {
+    try {
+      const result = await verifyPayment.mutateAsync(attempt._id)
+      if (result?.paymentAttempt) {
+        setLastResult({
+          paymentAttempt: result.paymentAttempt,
+          paymentUrl: result.paymentAttempt.paymentUrl,
+        })
+      }
+    } catch (_error) {
+      // Mutation error feedback is handled by the hook toast.
+    }
   }
 
   return (
@@ -236,6 +280,103 @@ export default function PaymentsPage() {
           </Card>
         )}
       </div>
+
+      {canRead && (
+        <Card className="mt-5">
+          <CardHeader>
+            <CardTitle>{t('payments.recentAttempts')}</CardTitle>
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => refetchAttempts()}
+              disabled={attemptsLoading}
+            >
+              <RefreshCw size={14} />
+              {t('common.refresh')}
+            </Button>
+          </CardHeader>
+          <CardContent>
+            {attemptsLoading && <LoadingState />}
+            {attemptsError && <ErrorState onRetry={refetchAttempts} />}
+
+            {!attemptsLoading && !attemptsError && paymentAttempts.length === 0 && (
+              <div className="rounded-md border border-dashed border-border py-8 text-center text-sm text-text-secondary">
+                {t('payments.noAttempts')}
+              </div>
+            )}
+
+            {!attemptsLoading && !attemptsError && paymentAttempts.length > 0 && (
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[960px] text-sm">
+                  <thead>
+                    <tr className="border-b border-border text-start text-xs uppercase text-text-muted">
+                      <th className="px-3 py-2 text-start font-semibold">{t('common.createdAt')}</th>
+                      <th className="px-3 py-2 text-start font-semibold">{t('payments.amount')}</th>
+                      <th className="px-3 py-2 text-start font-semibold">{t('payments.currency')}</th>
+                      <th className="px-3 py-2 text-start font-semibold">{t('payments.customerName')}</th>
+                      <th className="px-3 py-2 text-start font-semibold">{t('payments.status')}</th>
+                      <th className="px-3 py-2 text-start font-semibold">{t('payments.providerInvoiceId')}</th>
+                      <th className="px-3 py-2 text-start font-semibold">{t('payments.providerPaymentId')}</th>
+                      <th className="px-3 py-2 text-end font-semibold">{t('common.actions')}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paymentAttempts.map((attempt) => (
+                      <tr key={attempt._id} className="border-b border-border last:border-b-0">
+                        <td className="px-3 py-3 text-text-secondary">
+                          {formatDateTime(attempt.createdAt)}
+                        </td>
+                        <td className="px-3 py-3 text-text-primary">{attempt.amount}</td>
+                        <td className="px-3 py-3 text-text-primary">{attempt.currency}</td>
+                        <td className="px-3 py-3 text-text-primary">{attempt.customerName || '-'}</td>
+                        <td className="px-3 py-3">
+                          <Badge variant={getStatusVariant(attempt.status)}>
+                            {attempt.status || '-'}
+                          </Badge>
+                        </td>
+                        <td className="max-w-36 truncate px-3 py-3 text-text-secondary">
+                          {attempt.providerInvoiceId || '-'}
+                        </td>
+                        <td className="max-w-36 truncate px-3 py-3 text-text-secondary">
+                          {attempt.providerPaymentId || '-'}
+                        </td>
+                        <td className="px-3 py-3">
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => openUrl(attempt.paymentUrl)}
+                              disabled={!attempt.paymentUrl}
+                            >
+                              <ExternalLink size={14} />
+                              {t('payments.openPaymentPage')}
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => handleVerify(attempt)}
+                              isLoading={verifyPayment.isPending && verifyPayment.variables === attempt._id}
+                              disabled={verifyPayment.isPending}
+                            >
+                              {!(verifyPayment.isPending && verifyPayment.variables === attempt._id) && (
+                                <RefreshCw size={14} />
+                              )}
+                              {t('payments.verify')}
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }

@@ -758,7 +758,11 @@
     "description": "الوصف",
     "providerInvoiceId": "معرّف فاتورة المزود",
     "providerPaymentId": "معرّف دفعة المزود",
-    "paymentUrl": "رابط الدفع"
+    "paymentUrl": "رابط الدفع",
+    "recentAttempts": "محاولات الدفع الأخيرة",
+    "noAttempts": "لا توجد محاولات دفع بعد",
+    "verify": "تحقق",
+    "paymentVerified": "تم التحقق من الدفعة"
   },
   "settings": {
     "title": "الإعدادات",
