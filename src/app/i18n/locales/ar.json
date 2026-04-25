@@ -849,7 +849,23 @@
       "canceled": "ملغى",
       "expired": "منتهي",
       "past_due": "متأخر"
-    }
+    },
+    "usage": "استخدام الخطة",
+    "usageSubtitle": "تابع حدود الاستخدام الحالية حسب خطتك.",
+    "usersUsage": "المستخدمون",
+    "usersUsageDescription": "عدد المستخدمين النشطين داخل الشركة.",
+    "invoicesUsage": "فواتير هذا الشهر",
+    "invoicesUsageDescription": "عدد الفواتير المنشأة خلال الشهر الحالي.",
+    "usedOfLimit": "{{used}} من {{limit}}",
+    "remainingCount": "متبقي {{count}}",
+    "unlimited": "غير محدود",
+    "limitReached": "تم الوصول للحد",
+    "nearLimit": "اقتربت من الحد",
+    "usageNormal": "الاستخدام طبيعي",
+    "usageUnavailable": "بيانات الاستخدام غير متاحة حاليًا",
+    "subscriptionInactive": "الاشتراك غير نشط",
+    "subscriptionInactiveDescription": "بعض العمليات قد تكون متوقفة حتى يتم تجديد أو تفعيل الاشتراك.",
+    "renewPlan": "تجديد الخطة"
   },
   "payments": {
     "title": "المدفوعات",

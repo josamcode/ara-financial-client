@@ -16,6 +16,7 @@ import { useAuth } from '@/entities/auth/model/useAuth'
 import {
   useBillingPlans,
   useCurrentSubscription,
+  useBillingUsage,
   useCheckoutPlan,
   useSyncBillingPayment,
 } from '@/features/billing/hooks/useBilling'
@@ -502,6 +503,243 @@ function RecentPaymentsCard({
   )
 }
 
+// ─── Subscription Inactive Warning ────────────────────────────────────────────
+const INACTIVE_STATUSES = ['expired', 'cancelled', 'canceled', 'past_due']
+
+function SubscriptionInactiveWarning({ subscription }) {
+  const { t } = useTranslation()
+  if (!subscription) return null
+  const status = String(subscription.status ?? '').toLowerCase()
+  if (!INACTIVE_STATUSES.includes(status)) return null
+
+  return (
+    <div className="flex items-start gap-3 rounded-lg border border-red-300 bg-red-50 px-4 py-4">
+      <AlertTriangle size={18} className="mt-0.5 shrink-0 text-red-600" />
+      <div className="flex-1">
+        <p className="text-sm font-semibold text-red-900">
+          {t('billing.subscriptionInactive')}
+        </p>
+        <p className="mt-0.5 text-sm text-red-800">
+          {t('billing.subscriptionInactiveDescription')}
+        </p>
+        <p className="mt-2 text-sm font-medium text-red-800">
+          {t('billing.renewPlan')}
+        </p>
+      </div>
+    </div>
+  )
+}
+
+// ─── Usage Metric Card ────────────────────────────────────────────────────────
+function getUsagePayload(usageData) {
+  if (!usageData) return null
+  return usageData?.data?.usage ? usageData.data : usageData
+}
+
+function hasUsageMetric(metric) {
+  return !!metric && typeof metric === 'object' && Object.keys(metric).length > 0
+}
+
+function toMetricNumber(value, fallback = 0) {
+  const number = Number(value)
+  return Number.isFinite(number) ? number : fallback
+}
+
+function UsageMetricCard({ title, description, metric }) {
+  const { t } = useTranslation()
+
+  const hasMetric = hasUsageMetric(metric)
+  const unlimited = Boolean(metric?.unlimited)
+  const hasLimit = unlimited || metric?.limit != null
+
+  if (!hasMetric || !hasLimit) {
+    return (
+      <div className="rounded-xl border border-dashed border-border bg-card p-5 shadow-sm">
+        <p className="text-sm font-semibold text-text-primary">{title}</p>
+        {description && (
+          <p className="mt-0.5 text-xs text-text-secondary">{description}</p>
+        )}
+        <p className="mt-4 text-sm text-text-secondary">{t('billing.usageUnavailable')}</p>
+      </div>
+    )
+  }
+
+  const used = toMetricNumber(metric?.used)
+  const limit = toMetricNumber(metric?.limit)
+  const remaining =
+    metric?.remaining != null
+      ? toMetricNumber(metric.remaining)
+      : Math.max(limit - used, 0)
+  const rawPercent =
+    metric?.percent != null
+      ? toMetricNumber(metric.percent)
+      : limit > 0
+        ? (used / limit) * 100
+        : 0
+  const clampedPercent = Math.min(100, Math.max(0, rawPercent))
+  const isLimitReached = !unlimited && clampedPercent >= 100
+  const isNearLimit = !unlimited && clampedPercent >= 80 && clampedPercent < 100
+
+  let barColor = 'bg-green-500'
+  let statusText = t('billing.usageNormal')
+  let statusTextClass = 'text-text-secondary'
+
+  if (isLimitReached) {
+    barColor = 'bg-red-500'
+    statusText = t('billing.limitReached')
+    statusTextClass = 'text-red-600 font-semibold'
+  } else if (isNearLimit) {
+    barColor = 'bg-amber-500'
+    statusText = t('billing.nearLimit')
+    statusTextClass = 'text-amber-600 font-medium'
+  }
+
+  return (
+    <div
+      className={[
+        'rounded-xl border bg-card p-5 shadow-sm',
+        isLimitReached ? 'border-red-300' : isNearLimit ? 'border-amber-300' : 'border-border',
+      ].join(' ')}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-sm font-semibold text-text-primary">{title}</p>
+          {description && (
+            <p className="mt-0.5 text-xs text-text-secondary">{description}</p>
+          )}
+        </div>
+        {(isLimitReached || isNearLimit) && (
+          <AlertTriangle
+            size={16}
+            className={[
+              'shrink-0',
+              isLimitReached ? 'text-red-500' : 'text-amber-500',
+            ].join(' ')}
+          />
+        )}
+      </div>
+
+      <div className="mt-4">
+        {unlimited ? (
+          <>
+            <div className="flex items-baseline justify-between gap-2">
+              <span className="text-2xl font-bold text-text-primary">{used}</span>
+              <span className="rounded-full border border-green-200 bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700">
+                {t('billing.unlimited')}
+              </span>
+            </div>
+
+            <div className="mt-3" dir="ltr">
+              <div className="h-2 w-full overflow-hidden rounded-full bg-muted" />
+            </div>
+
+            <p className="mt-2 text-xs text-text-secondary">{t('billing.unlimited')}</p>
+          </>
+        ) : (
+          <>
+            <div className="flex items-baseline justify-between gap-2">
+              <span className="text-2xl font-bold text-text-primary">
+                {t('billing.usedOfLimit', { used, limit })}
+              </span>
+              <span className="text-xs text-text-secondary">
+                {t('billing.remainingCount', { count: remaining })}
+              </span>
+            </div>
+
+            <div className="mt-3" dir="ltr">
+              <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                <div
+                  className={['h-full rounded-full transition-all', barColor].join(' ')}
+                  style={{ width: `${clampedPercent}%` }}
+                />
+              </div>
+            </div>
+
+            <p className={['mt-2 text-xs', statusTextClass].join(' ')}>{statusText}</p>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ─── Plan Usage Section ───────────────────────────────────────────────────────
+function PlanUsageSection({ usageData, isLoading, isError, refetch }) {
+  const { t } = useTranslation()
+
+  const sectionHeader = (
+    <div className="mb-4">
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-text-muted">
+        {t('billing.usage')}
+      </h2>
+      <p className="mt-0.5 text-xs text-text-secondary">{t('billing.usageSubtitle')}</p>
+    </div>
+  )
+
+  if (isLoading) {
+    return (
+      <div>
+        {sectionHeader}
+        <div className="grid gap-5 sm:grid-cols-2">
+          {[1, 2].map((i) => (
+            <div key={i} className="animate-pulse rounded-xl border border-border bg-card p-5 shadow-sm">
+              <div className="space-y-3">
+                <div className="h-4 w-2/5 rounded bg-muted" />
+                <div className="h-3 w-3/5 rounded bg-muted" />
+                <div className="mt-4 h-8 w-1/3 rounded bg-muted" />
+                <div className="h-2 w-full rounded bg-muted" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div>
+        {sectionHeader}
+        <ErrorState onRetry={refetch} />
+      </div>
+    )
+  }
+
+  const usagePayload = getUsagePayload(usageData)
+  const usage = usagePayload?.usage ?? null
+
+  if (!usage) {
+    return (
+      <div>
+        {sectionHeader}
+        <div className="rounded-lg border border-dashed border-border py-8 text-center">
+          <p className="text-sm text-text-secondary">{t('billing.usageUnavailable')}</p>
+        </div>
+      </div>
+    )
+  }
+
+  const { users = null, invoicesPerMonth = null } = usage
+
+  return (
+    <div>
+      {sectionHeader}
+      <div className="grid gap-5 sm:grid-cols-2">
+        <UsageMetricCard
+          title={t('billing.usersUsage')}
+          description={t('billing.usersUsageDescription')}
+          metric={users}
+        />
+        <UsageMetricCard
+          title={t('billing.invoicesUsage')}
+          description={t('billing.invoicesUsageDescription')}
+          metric={invoicesPerMonth}
+        />
+      </div>
+    </div>
+  )
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function BillingPage() {
   const { t } = useTranslation()
@@ -522,6 +760,13 @@ export default function BillingPage() {
     isError: subError,
     refetch: refetchSub,
   } = useCurrentSubscription()
+
+  const {
+    data: usageData,
+    isLoading: usageLoading,
+    isError: usageError,
+    refetch: refetchUsage,
+  } = useBillingUsage()
 
   const checkout = useCheckoutPlan()
   const syncPayment = useSyncBillingPayment()
@@ -544,6 +789,8 @@ export default function BillingPage() {
   const currentPlanId = subscription?.planId ?? subscription?.plan?._id ?? subscription?.plan
   const planList = Array.isArray(plansData) ? plansData : (plansData?.plans ?? [])
   const recentAttempts = recentPaymentsResponse?.data ?? []
+  const usagePayload = getUsagePayload(usageData)
+  const inactiveWarningSubscription = subscription ?? usagePayload?.subscription ?? null
 
   async function handleCheckout(plan) {
     if (!canManage) return
@@ -603,6 +850,15 @@ export default function BillingPage() {
           isLoading={subLoading}
           isError={subError}
           refetch={refetchSub}
+        />
+
+        <SubscriptionInactiveWarning subscription={inactiveWarningSubscription} />
+
+        <PlanUsageSection
+          usageData={usageData}
+          isLoading={usageLoading}
+          isError={usageError}
+          refetch={refetchUsage}
         />
 
         {checkoutResult && (

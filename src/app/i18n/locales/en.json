@@ -844,7 +844,23 @@
       "canceled": "Cancelled",
       "expired": "Expired",
       "past_due": "Past Due"
-    }
+    },
+    "usage": "Plan usage",
+    "usageSubtitle": "Track your current plan limits and usage.",
+    "usersUsage": "Users",
+    "usersUsageDescription": "Active users in this tenant.",
+    "invoicesUsage": "Invoices this month",
+    "invoicesUsageDescription": "Invoices created during the current month.",
+    "usedOfLimit": "{{used}} of {{limit}}",
+    "remainingCount": "{{count}} remaining",
+    "unlimited": "Unlimited",
+    "limitReached": "Limit reached",
+    "nearLimit": "Near limit",
+    "usageNormal": "Usage is normal",
+    "usageUnavailable": "Usage data is currently unavailable",
+    "subscriptionInactive": "Subscription inactive",
+    "subscriptionInactiveDescription": "Some actions may be restricted until the subscription is renewed or activated.",
+    "renewPlan": "Renew plan"
   },
   "payments": {
     "title": "Payments",

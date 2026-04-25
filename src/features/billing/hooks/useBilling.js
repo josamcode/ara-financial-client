@@ -6,6 +6,7 @@ import { billingApi } from '@/entities/billing/api/billingApi'
 const KEYS = {
   plans: ['billing', 'plans'],
   subscription: ['billing', 'subscription'],
+  usage: ['billing', 'usage'],
 }
 
 function extractData(response) {
@@ -26,6 +27,17 @@ export function useCurrentSubscription() {
       billingApi.getSubscription().then((res) => {
         const data = res?.data ?? res ?? null
         return data?.subscription ?? null
+      }),
+  })
+}
+
+export function useBillingUsage() {
+  return useQuery({
+    queryKey: KEYS.usage,
+    queryFn: () =>
+      billingApi.getUsage().then((res) => {
+        const data = res?.data ?? res ?? null
+        return data?.data ?? data ?? null
       }),
   })
 }
