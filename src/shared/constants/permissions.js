@@ -51,6 +51,10 @@ export const PERMISSIONS = {
   INVOICE_DELETE: 'invoice:delete',
   INVOICE_SEND: 'invoice:send',
 
+  // Payments
+  PAYMENT_READ: 'payment:read',
+  PAYMENT_CREATE: 'payment:create',
+
   // Bills
   BILL_READ: 'bill:read',
   BILL_CREATE: 'bill:create',

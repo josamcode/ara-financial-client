@@ -39,6 +39,7 @@ const CashFlowPage = lazy(() => import('@/pages/app/reports/CashFlowPage'))
 const ARAgingPage = lazy(() => import('@/pages/app/reports/ARAgingPage'))
 const APAgingPage = lazy(() => import('@/pages/app/reports/APAgingPage'))
 const FiscalPeriodsPage = lazy(() => import('@/pages/app/FiscalPeriodsPage'))
+const PaymentsPage = lazy(() => import('@/pages/app/PaymentsPage'))
 const UsersPage = lazy(() => import('@/pages/app/UsersPage'))
 const AuditLogsPage = lazy(() => import('@/pages/app/AuditLogsPage'))
 const SettingsPage = lazy(() => import('@/pages/app/SettingsPage'))
@@ -227,6 +228,15 @@ export function AppRouter() {
               element={
                 <ProtectedRoute permission={PERMISSIONS.FISCAL_READ}>
                   <FiscalPeriodsPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path={ROUTES.PAYMENTS}
+              element={
+                <ProtectedRoute permission={[PERMISSIONS.PAYMENT_READ, PERMISSIONS.PAYMENT_CREATE]}>
+                  <PaymentsPage />
                 </ProtectedRoute>
               }
             />

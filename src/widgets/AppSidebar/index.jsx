@@ -12,6 +12,7 @@ import {
   Settings,
   X,
   Receipt,
+  CreditCard,
   Contact,
   Briefcase,
 } from 'lucide-react'
@@ -109,6 +110,13 @@ const navGroups = [
         icon: Calendar,
         to: ROUTES.FISCAL_PERIODS,
         permission: PERMISSIONS.FISCAL_READ,
+      },
+      {
+        key: 'payments',
+        label: 'nav.payments',
+        icon: CreditCard,
+        to: ROUTES.PAYMENTS,
+        permission: [PERMISSIONS.PAYMENT_READ, PERMISSIONS.PAYMENT_CREATE],
       },
     ],
   },

@@ -123,7 +123,8 @@
     "customers": "Customers",
     "suppliers": "Suppliers",
     "invoices": "Invoices",
-    "bills": "Bills"
+    "bills": "Bills",
+    "payments": "Payments"
   },
   "landing": {
     "getStarted": "Get Started",
@@ -736,6 +737,23 @@
       "overdue": "Overdue",
       "cancelled": "Cancelled"
     }
+  },
+  "payments": {
+    "title": "Payments",
+    "subtitle": "MyFatoorah gateway testing console",
+    "createPayment": "Create Payment",
+    "openPaymentPage": "Open Payment Page",
+    "paymentCreated": "Payment created",
+    "status": "Status",
+    "amount": "Amount",
+    "currency": "Currency",
+    "customerName": "Customer Name",
+    "customerEmail": "Customer Email",
+    "customerMobile": "Customer Mobile",
+    "description": "Description",
+    "providerInvoiceId": "Provider Invoice ID",
+    "providerPaymentId": "Provider Payment ID",
+    "paymentUrl": "Payment URL"
   },
   "settings": {
     "title": "Settings",

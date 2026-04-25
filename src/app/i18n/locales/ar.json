@@ -123,7 +123,8 @@
     "customers": "العملاء",
     "suppliers": "الموردون",
     "invoices": "الفواتير",
-    "bills": "فواتير الموردين"
+    "bills": "فواتير الموردين",
+    "payments": "المدفوعات"
   },
   "landing": {
     "getStarted": "ابدأ الآن",
@@ -741,6 +742,23 @@
     "cancelled": "تم إلغاء العملية",
     "cancel": "إلغاء",
     "confirmCancel": "هل أنت متأكد من إلغاء العملية؟"
+  },
+  "payments": {
+    "title": "المدفوعات",
+    "subtitle": "وحدة اختبار بوابة MyFatoorah",
+    "createPayment": "إنشاء دفعة",
+    "openPaymentPage": "فتح صفحة الدفع",
+    "paymentCreated": "تم إنشاء الدفعة",
+    "status": "الحالة",
+    "amount": "المبلغ",
+    "currency": "العملة",
+    "customerName": "اسم العميل",
+    "customerEmail": "البريد الإلكتروني للعميل",
+    "customerMobile": "هاتف العميل",
+    "description": "الوصف",
+    "providerInvoiceId": "معرّف فاتورة المزود",
+    "providerPaymentId": "معرّف دفعة المزود",
+    "paymentUrl": "رابط الدفع"
   },
   "settings": {
     "title": "الإعدادات",

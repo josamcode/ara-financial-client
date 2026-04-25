@@ -37,6 +37,9 @@ export const ROUTES = {
   // Fiscal Periods
   FISCAL_PERIODS: '/fiscal-periods',
 
+  // Payments
+  PAYMENTS: '/payments',
+
   // Users
   USERS: '/users',
 
