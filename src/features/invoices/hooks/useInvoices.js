@@ -92,6 +92,19 @@ export function usePayInvoice() {
   })
 }
 
+export function useEmailInvoice() {
+  const qc = useQueryClient()
+  const { t } = useTranslation()
+  return useMutation({
+    mutationFn: (id) => invoiceApi.email(id),
+    onSuccess: (_data, id) => {
+      qc.invalidateQueries({ queryKey: KEYS.detail(id) })
+      toast.success(t('invoices.emailSent'))
+    },
+    onError: (err) => toast.error(err?.message || t('common.somethingWentWrong')),
+  })
+}
+
 export function useCancelInvoice() {
   const qc = useQueryClient()
   const { t } = useTranslation()

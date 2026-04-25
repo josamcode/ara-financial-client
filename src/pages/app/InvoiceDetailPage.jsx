@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Send, CreditCard, XCircle, Pencil, Printer } from 'lucide-react'
+import { Send, CreditCard, XCircle, Pencil, Printer, Mail } from 'lucide-react'
 import { PageHeader } from '@/shared/components/PageHeader'
 import { Button } from '@/shared/components/Button'
 import { LoadingState } from '@/shared/components/LoadingState'
@@ -13,7 +13,7 @@ import { PermissionGate } from '@/shared/components/PermissionGate'
 import { PERMISSIONS } from '@/shared/constants/permissions'
 import { ROUTES } from '@/shared/constants/routes'
 import { formatDate, formatCurrency } from '@/shared/utils/formatters'
-import { useInvoice, useSendInvoice, usePayInvoice, useCancelInvoice, useUpdateInvoice } from '@/features/invoices/hooks/useInvoices'
+import { useInvoice, useSendInvoice, usePayInvoice, useCancelInvoice, useUpdateInvoice, useEmailInvoice } from '@/features/invoices/hooks/useInvoices'
 import { InvoiceStatusBadge } from '@/features/invoices/components/InvoiceStatusBadge'
 import { InvoiceForm } from '@/features/invoices/components/InvoiceForm'
 import { useAccountList } from '@/features/accounts/hooks/useAccounts'
@@ -55,6 +55,7 @@ export default function InvoiceDetailPage() {
   const payMutation = usePayInvoice()
   const cancelMutation = useCancelInvoice()
   const updateMutation = useUpdateInvoice()
+  const emailMutation = useEmailInvoice()
 
   const [editing, setEditing] = useState(false)
   const [sendDialog, setSendDialog] = useState(false)
@@ -148,6 +149,20 @@ export default function InvoiceDetailPage() {
               <Printer size={14} />
               {t('invoices.print')}
             </Link>
+
+            {invoice.customerEmail && invoice.status !== 'cancelled' && (
+              <PermissionGate permission={PERMISSIONS.INVOICE_SEND}>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => emailMutation.mutate(id)}
+                  isLoading={emailMutation.isPending}
+                >
+                  <Mail size={14} className="me-1" />
+                  {t('invoices.sendEmail')}
+                </Button>
+              </PermissionGate>
+            )}
 
             {isDraft && (
               <PermissionGate permission={PERMISSIONS.INVOICE_UPDATE}>

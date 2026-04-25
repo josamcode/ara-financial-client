@@ -22,6 +22,9 @@ export const invoiceApi = {
   pay: (id, data) =>
     apiClient.post(`/invoices/${id}/pay`, data),
 
+  email: (id) =>
+    apiClient.post(`/invoices/${id}/email`),
+
   cancel: (id) =>
     apiClient.post(`/invoices/${id}/cancel`),
 
