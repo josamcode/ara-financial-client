@@ -9,6 +9,7 @@ import { Select } from '@/shared/components/Select'
 import { Toggle } from '@/shared/components/Toggle'
 import { useCreateAccount, useUpdateAccount } from '@/features/accounts/hooks/useAccounts'
 import { ACCOUNT_TYPES } from '@/shared/constants/app'
+import { getAccountDisplayName } from '@/entities/account/lib/accountName'
 
 const schema = z.object({
   code: z.string().min(1, 'errors.required'),
@@ -21,7 +22,7 @@ const schema = z.object({
 })
 
 export function AccountForm({ account, defaultParentId, flatAccounts, onSuccess, onCancel }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const createAccount = useCreateAccount()
   const updateAccount = useUpdateAccount()
   const isEditing = !!account
@@ -47,7 +48,7 @@ export function AccountForm({ account, defaultParentId, flatAccounts, onSuccess,
     if (account) {
       reset({
         code: account.code || '',
-        name: account.name || account.nameAr || account.nameEn || '',
+        name: getAccountDisplayName(account, i18n.language),
         type: account.type || 'asset',
         parentId: account.parentId || null,
         isActive: account.isActive !== false,
@@ -61,7 +62,7 @@ export function AccountForm({ account, defaultParentId, flatAccounts, onSuccess,
         isActive: true,
       })
     }
-  }, [account, defaultParentId, reset])
+  }, [account, defaultParentId, i18n.language, reset])
 
   async function onSubmit(values) {
     if (isEditing) {
@@ -98,7 +99,7 @@ export function AccountForm({ account, defaultParentId, flatAccounts, onSuccess,
     { value: '', label: t('accounts.noParent') },
     ...availableParents.map((a) => ({
       value: a._id,
-      label: `${a.code} — ${a.name}`,
+      label: `${a.code} - ${getAccountDisplayName(a, i18n.language)}`,
     })),
   ]
 

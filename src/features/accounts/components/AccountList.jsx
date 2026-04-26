@@ -6,9 +6,10 @@ import { Badge } from '@/shared/components/Badge'
 import { PermissionGate } from '@/shared/components/PermissionGate'
 import { PERMISSIONS } from '@/shared/constants/permissions'
 import { formatAccountingAmount } from '@/shared/utils/formatters'
+import { getAccountDisplayName } from '@/entities/account/lib/accountName'
 
 export function AccountList({ accounts, onEdit, onDelete, onToggleActive }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
 
   if (!accounts?.length) return null
 
@@ -39,7 +40,7 @@ export function AccountList({ accounts, onEdit, onDelete, onToggleActive }) {
             </span>
 
             <span className="text-sm font-medium text-text-primary truncate">
-              {account.name}
+              {getAccountDisplayName(account, i18n.language)}
             </span>
 
             <span className="hidden sm:block w-24">

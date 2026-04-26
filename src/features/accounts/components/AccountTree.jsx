@@ -6,12 +6,14 @@ import { AccountTypeBadge } from './AccountTypeBadge'
 import { PermissionGate } from '@/shared/components/PermissionGate'
 import { PERMISSIONS } from '@/shared/constants/permissions'
 import { formatAccountingAmount } from '@/shared/utils/formatters'
+import { getAccountDisplayName } from '@/entities/account/lib/accountName'
 
 function AccountTreeNode({ node, depth = 0, onEdit, onDelete, onAddChild, onToggleActive }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [expanded, setExpanded] = useState(depth < 2)
   const [menuOpen, setMenuOpen] = useState(false)
   const hasChildren = node.children && node.children.length > 0
+  const accountName = getAccountDisplayName(node, i18n.language)
 
   return (
     <div>
@@ -43,7 +45,7 @@ function AccountTreeNode({ node, depth = 0, onEdit, onDelete, onAddChild, onTogg
 
         {/* Name */}
         <span className="flex-1 text-sm font-medium text-text-primary truncate">
-          {node.name}
+          {accountName}
         </span>
 
         {/* Type badge */}

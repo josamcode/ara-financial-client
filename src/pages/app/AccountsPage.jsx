@@ -18,6 +18,7 @@ import { PERMISSIONS } from '@/shared/constants/permissions'
 import { cn } from '@/shared/utils/cn'
 import { BookOpen } from 'lucide-react'
 import { ACCOUNT_TYPES } from '@/shared/constants/app'
+import { getAccountDisplayName } from '@/entities/account/lib/accountName'
 
 // Flatten a tree of accounts into a single array
 function flattenTree(nodes, result = []) {
@@ -29,7 +30,7 @@ function flattenTree(nodes, result = []) {
 }
 
 export default function AccountsPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
 
   // View mode
   const [view, setView] = useState('tree')
@@ -70,14 +71,18 @@ export default function AccountsPage() {
     const data = listQuery.data || []
     if (!search && !typeFilter) return data
     return data.filter((a) => {
+      const query = search.toLowerCase()
+      const displayName = getAccountDisplayName(a, i18n.language).toLowerCase()
       const matchesSearch =
         !search ||
-        a.code?.toLowerCase().includes(search.toLowerCase()) ||
-        a.name?.toLowerCase().includes(search.toLowerCase())
+        a.code?.toLowerCase().includes(query) ||
+        displayName.includes(query) ||
+        a.nameAr?.toLowerCase().includes(query) ||
+        a.nameEn?.toLowerCase().includes(query)
       const matchesType = !typeFilter || a.type === typeFilter
       return matchesSearch && matchesType
     })
-  }, [listQuery.data, search, typeFilter])
+  }, [listQuery.data, search, typeFilter, i18n.language])
 
   function openCreate(parentNode) {
     setEditingAccount(null)
