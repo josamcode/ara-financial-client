@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { CheckCircle2, CreditCard, XCircle } from 'lucide-react'
+import { CheckCircle2, CreditCard, XCircle, AlertTriangle } from 'lucide-react'
 import { PageHeader } from '@/shared/components/PageHeader'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
@@ -45,6 +45,93 @@ function getPaymentAccountLabel(account) {
   return account.code ? `${account.code} - ${account.nameAr || account.nameEn}` : account.nameAr || account.nameEn || '-'
 }
 
+function CurrencySnapshotCard({ bill, t, locale }) {
+  const docCurrency = bill.documentCurrency || bill.currency
+  const baseCurr = bill.baseCurrency
+  const isForeign = docCurrency && baseCurr && docCurrency !== baseCurr
+
+  if (!docCurrency) return null
+
+  const hasBaseAmounts = bill.baseSubtotal != null || bill.baseTotal != null
+
+  return (
+    <div className="rounded-lg border border-border bg-surface p-4 space-y-3">
+      <h3 className="text-sm font-semibold text-text-primary">{t('multiCurrency.currencySnapshot')}</h3>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
+        <div>
+          <p className="text-xs text-text-muted mb-0.5">{t('multiCurrency.billCurrency')}</p>
+          <p className="font-semibold font-mono text-text-primary">{docCurrency}</p>
+        </div>
+        {baseCurr && (
+          <div>
+            <p className="text-xs text-text-muted mb-0.5">{t('multiCurrency.companyBaseCurrency')}</p>
+            <p className="font-semibold font-mono text-text-primary">{baseCurr}</p>
+          </div>
+        )}
+        {isForeign && bill.exchangeRate != null && (
+          <div>
+            <p className="text-xs text-text-muted mb-0.5">{t('multiCurrency.exchangeRate')}</p>
+            <p className="font-medium tabular-nums">
+              1 {docCurrency} = {String(bill.exchangeRate)} {baseCurr}
+            </p>
+          </div>
+        )}
+        {isForeign && bill.exchangeRateDate && (
+          <div>
+            <p className="text-xs text-text-muted mb-0.5">{t('multiCurrency.exchangeRateDate')}</p>
+            <p className="font-medium tabular-nums">{formatDate(bill.exchangeRateDate, 'ar')}</p>
+          </div>
+        )}
+        {isForeign && bill.exchangeRateSource && (
+          <div>
+            <p className="text-xs text-text-muted mb-0.5">{t('multiCurrency.exchangeRateSource')}</p>
+            <p className="font-medium">{bill.exchangeRateSource}</p>
+          </div>
+        )}
+      </div>
+
+      {isForeign && hasBaseAmounts && (
+        <div className="border-t border-border pt-3">
+          <p className="text-xs font-medium text-text-muted mb-2">{t('multiCurrency.amountsInBaseCurrency')} ({baseCurr})</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
+            {bill.baseSubtotal != null && (
+              <div>
+                <p className="text-xs text-text-muted mb-0.5">{t('bills.subtotal')}</p>
+                <p className="font-medium tabular-nums">
+                  {formatCurrency(bill.baseSubtotal, baseCurr, locale)}
+                </p>
+              </div>
+            )}
+            {bill.baseTaxTotal != null && Number(bill.baseTaxTotal) > 0 && (
+              <div>
+                <p className="text-xs text-text-muted mb-0.5">{t('bills.taxTotal', 'ضريبة')}</p>
+                <p className="font-medium tabular-nums">
+                  {formatCurrency(bill.baseTaxTotal, baseCurr, locale)}
+                </p>
+              </div>
+            )}
+            {bill.baseTotal != null && (
+              <div>
+                <p className="text-xs text-text-muted mb-0.5">{t('bills.total')}</p>
+                <p className="font-semibold tabular-nums">
+                  {formatCurrency(bill.baseTotal, baseCurr, locale)}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {isForeign && (
+        <div className="flex items-start gap-2 pt-2 border-t border-border text-sm text-warning bg-warning/5 rounded px-3 py-2">
+          <AlertTriangle size={14} className="mt-0.5 shrink-0" />
+          <span>{t('multiCurrency.foreignPaymentUnsupported')}</span>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function BillDetailPage() {
   const { id } = useParams()
   const { t, i18n } = useTranslation()
@@ -82,6 +169,9 @@ export default function BillDetailPage() {
       : Math.max(totalAmount - paidAmount, 0)
   const payments = Array.isArray(bill.payments) ? bill.payments : []
   const accountList = accounts ?? []
+
+  const docCurrency = bill.documentCurrency || bill.currency
+  const isForeignCurrency = docCurrency && bill.baseCurrency && docCurrency !== bill.baseCurrency
 
   const canPost = bill.status === 'draft'
   const canPay = ['posted', 'partially_paid', 'overdue'].includes(bill.status)
@@ -155,7 +245,12 @@ export default function BillDetailPage() {
 
             {canPay && (
               <PermissionGate permission={PERMISSIONS.BILL_CREATE}>
-                <Button size="sm" onClick={openPayDialog}>
+                <Button
+                  size="sm"
+                  onClick={isForeignCurrency ? undefined : openPayDialog}
+                  disabled={!!isForeignCurrency}
+                  title={isForeignCurrency ? t('multiCurrency.foreignPaymentUnsupported') : undefined}
+                >
                   <CreditCard size={14} className="me-1" />
                   {t('bills.recordPayment')}
                 </Button>
@@ -193,25 +288,25 @@ export default function BillDetailPage() {
               <p className="font-medium tabular-nums">{formatDate(bill.dueDate, i18n.language)}</p>
             </div>
             <div>
-              <p className="mb-1 text-text-muted">{t('bills.currency')}</p>
-              <p className="font-medium text-text-primary">{bill.currency}</p>
+              <p className="mb-1 text-text-muted">{t('multiCurrency.billCurrency')}</p>
+              <p className="font-medium font-mono text-text-primary">{docCurrency}</p>
             </div>
             <div>
               <p className="mb-1 text-text-muted">{t('bills.total')}</p>
               <p className="text-lg font-semibold tabular-nums text-text-primary">
-                {formatCurrency(bill.total, bill.currency, locale)}
+                {formatCurrency(bill.total, docCurrency, locale)}
               </p>
             </div>
             <div>
               <p className="mb-1 text-text-muted">{t('bills.paidAmount')}</p>
               <p className="text-lg font-semibold tabular-nums text-text-primary">
-                {formatCurrency(paidAmount, bill.currency, locale)}
+                {formatCurrency(paidAmount, docCurrency, locale)}
               </p>
             </div>
             <div>
               <p className="mb-1 text-text-muted">{t('bills.remainingAmount')}</p>
               <p className="text-lg font-semibold tabular-nums text-text-primary">
-                {formatCurrency(remainingAmount, bill.currency, locale)}
+                {formatCurrency(remainingAmount, docCurrency, locale)}
               </p>
             </div>
           </div>
@@ -223,6 +318,8 @@ export default function BillDetailPage() {
             </div>
           )}
         </div>
+
+        <CurrencySnapshotCard bill={bill} t={t} locale={locale} />
 
         <div className="overflow-hidden rounded-lg border border-border bg-surface">
           <div className="border-b border-border bg-surface-subtle px-4 py-3">
@@ -242,11 +339,11 @@ export default function BillDetailPage() {
             <div className="w-48 space-y-1 text-sm">
               <div className="flex justify-between text-text-secondary">
                 <span>{t('bills.subtotal')}</span>
-                <span className="tabular-nums">{formatCurrency(bill.subtotal, bill.currency, locale)}</span>
+                <span className="tabular-nums">{formatCurrency(bill.subtotal, docCurrency, locale)}</span>
               </div>
               <div className="flex justify-between border-t border-border pt-1 font-semibold text-text-primary">
                 <span>{t('bills.total')}</span>
-                <span className="tabular-nums">{formatCurrency(bill.total, bill.currency, locale)}</span>
+                <span className="tabular-nums">{formatCurrency(bill.total, docCurrency, locale)}</span>
               </div>
             </div>
           </div>
@@ -264,7 +361,7 @@ export default function BillDetailPage() {
                 <div key={payment._id || `${payment.date}-${payment.amount}`} className="flex items-start justify-between gap-4 px-4 py-3 text-sm">
                   <div className="min-w-0 space-y-1">
                     <p className="font-medium tabular-nums text-text-primary">
-                      {formatCurrency(payment.amount, bill.currency, locale)}
+                      {formatCurrency(payment.amount, docCurrency, locale)}
                     </p>
                     <p className="text-text-secondary">{formatDate(payment.date, i18n.language)}</p>
                     <p className="break-words text-text-secondary">{getPaymentAccountLabel(payment.accountId)}</p>
@@ -342,7 +439,7 @@ export default function BillDetailPage() {
               step="0.000001"
               value={paymentAmount}
               onChange={(event) => setPaymentAmount(event.target.value)}
-              hint={`${t('bills.remainingAmount')}: ${formatCurrency(remainingAmount, bill.currency, locale)}`}
+              hint={`${t('bills.remainingAmount')}: ${formatCurrency(remainingAmount, docCurrency, locale)}`}
             />
             <Input
               label={t('common.date')}

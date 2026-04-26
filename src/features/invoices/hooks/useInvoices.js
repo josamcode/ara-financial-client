@@ -9,10 +9,13 @@ const KEYS = {
   detail: (id) => ['invoices', 'detail', id],
 }
 
-const BILLING_WRITE_ERROR_KEYS = {
+const MUTATION_ERROR_KEYS = {
   PLAN_LIMIT_EXCEEDED: 'planLimit.error.planLimitExceeded',
   SUBSCRIPTION_REQUIRED: 'planLimit.error.subscriptionRequired',
   SUBSCRIPTION_INACTIVE: 'planLimit.error.subscriptionInactive',
+  EXCHANGE_RATE_REQUIRED: 'multiCurrency.exchangeRateRequired',
+  INVALID_CURRENCY: 'multiCurrency.invalidCurrency',
+  FOREIGN_CURRENCY_PAYMENT_UNSUPPORTED: 'multiCurrency.foreignPaymentUnsupported',
 }
 
 function extractInvoice(response) {
@@ -20,8 +23,8 @@ function extractInvoice(response) {
 }
 
 function getMutationErrorMessage(error, t) {
-  const billingErrorKey = BILLING_WRITE_ERROR_KEYS[error?.code]
-  if (billingErrorKey) return t(billingErrorKey)
+  const key = MUTATION_ERROR_KEYS[error?.code]
+  if (key) return t(key)
   return error?.message || t('common.somethingWentWrong')
 }
 

@@ -9,8 +9,23 @@ const KEYS = {
   detail: (id) => ['bills', 'detail', id],
 }
 
+const MUTATION_ERROR_KEYS = {
+  PLAN_LIMIT_EXCEEDED: 'planLimit.error.planLimitExceeded',
+  SUBSCRIPTION_REQUIRED: 'planLimit.error.subscriptionRequired',
+  SUBSCRIPTION_INACTIVE: 'planLimit.error.subscriptionInactive',
+  EXCHANGE_RATE_REQUIRED: 'multiCurrency.exchangeRateRequired',
+  INVALID_CURRENCY: 'multiCurrency.invalidCurrency',
+  FOREIGN_CURRENCY_PAYMENT_UNSUPPORTED: 'multiCurrency.foreignPaymentUnsupported',
+}
+
 function extractBill(response) {
   return response?.data?.bill ?? response?.bill ?? null
+}
+
+function getMutationErrorMessage(error, t) {
+  const key = MUTATION_ERROR_KEYS[error?.code]
+  if (key) return t(key)
+  return error?.message || t('common.somethingWentWrong')
 }
 
 export function useBillList(params = {}) {
@@ -25,7 +40,7 @@ export function useExportBills() {
 
   return useMutation({
     mutationFn: (params) => billApi.exportList(params),
-    onError: (error) => toast.error(error?.message || t('common.somethingWentWrong')),
+    onError: (error) => toast.error(getMutationErrorMessage(error, t)),
   })
 }
 
@@ -47,7 +62,7 @@ export function useCreateBill() {
       qc.invalidateQueries({ queryKey: KEYS.all })
       toast.success(t('bills.created'))
     },
-    onError: (error) => toast.error(error?.message || t('common.somethingWentWrong')),
+    onError: (error) => toast.error(getMutationErrorMessage(error, t)),
   })
 }
 
@@ -62,7 +77,7 @@ export function usePostBill() {
       qc.invalidateQueries({ queryKey: KEYS.all })
       toast.success(t('bills.posted'))
     },
-    onError: (error) => toast.error(error?.message || t('common.somethingWentWrong')),
+    onError: (error) => toast.error(getMutationErrorMessage(error, t)),
   })
 }
 
@@ -77,7 +92,7 @@ export function usePayBill() {
       qc.invalidateQueries({ queryKey: KEYS.all })
       toast.success(t('bills.paid'))
     },
-    onError: (error) => toast.error(error?.message || t('common.somethingWentWrong')),
+    onError: (error) => toast.error(getMutationErrorMessage(error, t)),
   })
 }
 
@@ -92,7 +107,7 @@ export function useCancelBill() {
       qc.invalidateQueries({ queryKey: KEYS.all })
       toast.success(t('bills.cancelled'))
     },
-    onError: (error) => toast.error(error?.message || t('common.somethingWentWrong')),
+    onError: (error) => toast.error(getMutationErrorMessage(error, t)),
   })
 }
 
@@ -106,6 +121,6 @@ export function useBulkCancelBills() {
       qc.invalidateQueries({ queryKey: KEYS.all })
       toast.success(t('bills.bulkCancelled'))
     },
-    onError: (error) => toast.error(error?.message || t('common.somethingWentWrong')),
+    onError: (error) => toast.error(getMutationErrorMessage(error, t)),
   })
 }

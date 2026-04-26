@@ -5,6 +5,9 @@ import { Input } from '@/shared/components/Input'
 import { Button } from '@/shared/components/Button'
 import { Select } from '@/shared/components/Select'
 import { useAllCustomers } from '@/features/customers/hooks/useCustomers'
+import { useAuth } from '@/entities/auth/model/useAuth'
+import { useCurrencies } from '@/features/currency/hooks/useCurrencies'
+import { CurrencyPanel } from '@/features/multiCurrency/components/CurrencyPanel'
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10)
@@ -20,8 +23,14 @@ const DEFAULT_LINE = { description: '', quantity: '1', unitPrice: '0', lineTotal
 
 export function InvoiceForm({ defaultValues, onSubmit, isSubmitting }) {
   const { t } = useTranslation()
+  const { user } = useAuth()
+  const tenantBaseCurrency = user?.tenant?.baseCurrency ?? 'SAR'
+
   const { data: customersData } = useAllCustomers()
   const customers = customersData?.customers ?? []
+
+  const { data: currenciesData, isLoading: loadingCurrencies } = useCurrencies({ isActive: true })
+  const currencies = currenciesData?.data?.currencies ?? currenciesData?.currencies ?? []
 
   const {
     register,
@@ -29,6 +38,8 @@ export function InvoiceForm({ defaultValues, onSubmit, isSubmitting }) {
     handleSubmit,
     watch,
     setValue,
+    setError,
+    clearErrors,
     formState: { errors },
   } = useForm({
     defaultValues: defaultValues ?? {
@@ -37,7 +48,12 @@ export function InvoiceForm({ defaultValues, onSubmit, isSubmitting }) {
       customerEmail: '',
       issueDate: todayISO(),
       dueDate: addDays(30),
-      currency: 'EGP',
+      documentCurrency: tenantBaseCurrency,
+      exchangeRate: '',
+      exchangeRateDate: todayISO(),
+      exchangeRateSource: 'manual',
+      exchangeRateProvider: '',
+      isExchangeRateManualOverride: false,
       notes: '',
       lineItems: [{ ...DEFAULT_LINE }],
       subtotal: '0',
@@ -100,10 +116,39 @@ export function InvoiceForm({ defaultValues, onSubmit, isSubmitting }) {
     recalculate(remaining)
   }
 
+  const documentCurrency = watch('documentCurrency') || tenantBaseCurrency
+  const exchangeRate = watch('exchangeRate')
+  const exchangeRateDate = watch('exchangeRateDate')
+  const exchangeRateSource = watch('exchangeRateSource')
+  const isManualOverride = watch('isExchangeRateManualOverride')
+  const issueDate = watch('issueDate')
   const subtotal = watch('subtotal')
+  const total = watch('total')
+
+  function handleFormSubmit(data) {
+    const docCurrency = data.documentCurrency || tenantBaseCurrency
+    const isForeign = docCurrency !== tenantBaseCurrency
+    if (isForeign && (!data.exchangeRate || Number(data.exchangeRate) <= 0)) {
+      setError('exchangeRate', {
+        type: 'manual',
+        message: t('multiCurrency.exchangeRateRequired'),
+      })
+      return
+    }
+    clearErrors('exchangeRate')
+    onSubmit(data)
+  }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+      {/* Hidden currency fields managed by CurrencyPanel */}
+      <input type="hidden" {...register('documentCurrency')} />
+      <input type="hidden" {...register('exchangeRate')} />
+      <input type="hidden" {...register('exchangeRateDate')} />
+      <input type="hidden" {...register('exchangeRateSource')} />
+      <input type="hidden" {...register('exchangeRateProvider')} />
+      <input type="hidden" {...register('isExchangeRateManualOverride')} />
+
       {/* Customer */}
       <div className="space-y-3">
         {customers.length > 0 && (
@@ -136,8 +181,8 @@ export function InvoiceForm({ defaultValues, onSubmit, isSubmitting }) {
         <input type="hidden" {...register('customerId')} />
       </div>
 
-      {/* Dates + currency */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {/* Dates */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Input
           label={t('invoices.issueDate')}
           type="date"
@@ -152,11 +197,30 @@ export function InvoiceForm({ defaultValues, onSubmit, isSubmitting }) {
           error={errors.dueDate?.message}
           {...register('dueDate', { required: t('errors.required') })}
         />
-        <Input
-          label={t('invoices.currency')}
-          {...register('currency')}
-        />
       </div>
+
+      {/* Currency */}
+      <CurrencyPanel
+        documentCurrency={documentCurrency}
+        baseCurrency={tenantBaseCurrency}
+        exchangeRate={exchangeRate}
+        exchangeRateDate={exchangeRateDate}
+        exchangeRateSource={exchangeRateSource}
+        isManualOverride={Boolean(isManualOverride)}
+        issueDate={issueDate}
+        subtotal={subtotal}
+        total={total}
+        currencies={currencies}
+        isLoadingCurrencies={loadingCurrencies}
+        exchangeRateError={errors.exchangeRate?.message}
+        currencyLabel={t('multiCurrency.invoiceCurrency')}
+        onCurrencyChange={(code) => setValue('documentCurrency', code)}
+        onRateChange={(v) => setValue('exchangeRate', v)}
+        onRateDateChange={(v) => setValue('exchangeRateDate', v)}
+        onSourceChange={(v) => setValue('exchangeRateSource', v)}
+        onManualOverrideChange={(v) => setValue('isExchangeRateManualOverride', v)}
+        onProviderChange={(v) => setValue('exchangeRateProvider', v || '')}
+      />
 
       {/* Line items */}
       <div>
@@ -169,7 +233,6 @@ export function InvoiceForm({ defaultValues, onSubmit, isSubmitting }) {
         </div>
 
         <div className="rounded-lg border border-border overflow-hidden">
-          {/* Header */}
           <div className="hidden sm:grid grid-cols-[1fr_5rem_6rem_6rem_2.5rem] gap-2 px-3 py-2 bg-surface-subtle text-xs font-semibold text-text-muted border-b border-border">
             <span>{t('common.description')}</span>
             <span className="text-end">{t('invoices.qty')}</span>

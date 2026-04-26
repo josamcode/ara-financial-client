@@ -5,6 +5,9 @@ import { Input } from '@/shared/components/Input'
 import { Button } from '@/shared/components/Button'
 import { Select } from '@/shared/components/Select'
 import { useAllSuppliers } from '@/features/suppliers/hooks/useSuppliers'
+import { useAuth } from '@/entities/auth/model/useAuth'
+import { useCurrencies } from '@/features/currency/hooks/useCurrencies'
+import { CurrencyPanel } from '@/features/multiCurrency/components/CurrencyPanel'
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10)
@@ -20,8 +23,14 @@ const DEFAULT_LINE = { description: '', quantity: '1', unitPrice: '0', lineTotal
 
 export function BillForm({ defaultValues, onSubmit, isSubmitting }) {
   const { t } = useTranslation()
+  const { user } = useAuth()
+  const tenantBaseCurrency = user?.tenant?.baseCurrency ?? 'SAR'
+
   const { data: suppliersData } = useAllSuppliers()
   const suppliers = suppliersData?.suppliers ?? []
+
+  const { data: currenciesData, isLoading: loadingCurrencies } = useCurrencies({ isActive: true })
+  const currencies = currenciesData?.data?.currencies ?? currenciesData?.currencies ?? []
 
   const {
     register,
@@ -29,6 +38,8 @@ export function BillForm({ defaultValues, onSubmit, isSubmitting }) {
     handleSubmit,
     watch,
     setValue,
+    setError,
+    clearErrors,
     formState: { errors },
   } = useForm({
     defaultValues: defaultValues ?? {
@@ -37,7 +48,12 @@ export function BillForm({ defaultValues, onSubmit, isSubmitting }) {
       supplierEmail: '',
       issueDate: todayISO(),
       dueDate: addDays(30),
-      currency: 'EGP',
+      documentCurrency: tenantBaseCurrency,
+      exchangeRate: '',
+      exchangeRateDate: todayISO(),
+      exchangeRateSource: 'manual',
+      exchangeRateProvider: '',
+      isExchangeRateManualOverride: false,
       notes: '',
       lineItems: [{ ...DEFAULT_LINE }],
       subtotal: '0',
@@ -64,7 +80,6 @@ export function BillForm({ defaultValues, onSubmit, isSubmitting }) {
       }
       return
     }
-
     setValue('supplierName', '')
     setValue('supplierEmail', '')
   }
@@ -102,10 +117,40 @@ export function BillForm({ defaultValues, onSubmit, isSubmitting }) {
     recalculate(remaining)
   }
 
+  const documentCurrency = watch('documentCurrency') || tenantBaseCurrency
+  const exchangeRate = watch('exchangeRate')
+  const exchangeRateDate = watch('exchangeRateDate')
+  const exchangeRateSource = watch('exchangeRateSource')
+  const isManualOverride = watch('isExchangeRateManualOverride')
+  const issueDate = watch('issueDate')
   const subtotal = watch('subtotal')
+  const total = watch('total')
+
+  function handleFormSubmit(data) {
+    const docCurrency = data.documentCurrency || tenantBaseCurrency
+    const isForeign = docCurrency !== tenantBaseCurrency
+    if (isForeign && (!data.exchangeRate || Number(data.exchangeRate) <= 0)) {
+      setError('exchangeRate', {
+        type: 'manual',
+        message: t('multiCurrency.exchangeRateRequired'),
+      })
+      return
+    }
+    clearErrors('exchangeRate')
+    onSubmit(data)
+  }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+      {/* Hidden currency fields managed by CurrencyPanel */}
+      <input type="hidden" {...register('documentCurrency')} />
+      <input type="hidden" {...register('exchangeRate')} />
+      <input type="hidden" {...register('exchangeRateDate')} />
+      <input type="hidden" {...register('exchangeRateSource')} />
+      <input type="hidden" {...register('exchangeRateProvider')} />
+      <input type="hidden" {...register('isExchangeRateManualOverride')} />
+
+      {/* Supplier */}
       <div className="space-y-3">
         {suppliers.length > 0 && (
           <Select
@@ -137,7 +182,8 @@ export function BillForm({ defaultValues, onSubmit, isSubmitting }) {
         <input type="hidden" {...register('supplierId')} />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      {/* Dates */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Input
           label={t('bills.issueDate')}
           type="date"
@@ -152,9 +198,32 @@ export function BillForm({ defaultValues, onSubmit, isSubmitting }) {
           error={errors.dueDate?.message}
           {...register('dueDate', { required: t('errors.required') })}
         />
-        <Input label={t('bills.currency')} {...register('currency')} />
       </div>
 
+      {/* Currency */}
+      <CurrencyPanel
+        documentCurrency={documentCurrency}
+        baseCurrency={tenantBaseCurrency}
+        exchangeRate={exchangeRate}
+        exchangeRateDate={exchangeRateDate}
+        exchangeRateSource={exchangeRateSource}
+        isManualOverride={Boolean(isManualOverride)}
+        issueDate={issueDate}
+        subtotal={subtotal}
+        total={total}
+        currencies={currencies}
+        isLoadingCurrencies={loadingCurrencies}
+        exchangeRateError={errors.exchangeRate?.message}
+        currencyLabel={t('multiCurrency.billCurrency')}
+        onCurrencyChange={(code) => setValue('documentCurrency', code)}
+        onRateChange={(v) => setValue('exchangeRate', v)}
+        onRateDateChange={(v) => setValue('exchangeRateDate', v)}
+        onSourceChange={(v) => setValue('exchangeRateSource', v)}
+        onManualOverrideChange={(v) => setValue('isExchangeRateManualOverride', v)}
+        onProviderChange={(v) => setValue('exchangeRateProvider', v || '')}
+      />
+
+      {/* Line items */}
       <div>
         <div className="mb-3 flex items-center justify-between">
           <h3 className="text-sm font-semibold text-text-primary">{t('bills.lineItems')}</h3>
@@ -221,6 +290,7 @@ export function BillForm({ defaultValues, onSubmit, isSubmitting }) {
         </div>
       </div>
 
+      {/* Totals */}
       <div className="flex justify-end">
         <div className="w-48 space-y-1.5 text-sm">
           <div className="flex justify-between text-text-secondary">
@@ -234,6 +304,7 @@ export function BillForm({ defaultValues, onSubmit, isSubmitting }) {
         </div>
       </div>
 
+      {/* Notes */}
       <div>
         <label className="mb-1.5 block text-sm font-medium text-text-primary">{t('common.notes')}</label>
         <textarea
@@ -243,6 +314,7 @@ export function BillForm({ defaultValues, onSubmit, isSubmitting }) {
         />
       </div>
 
+      {/* Actions */}
       <div className="flex justify-end gap-3 border-t border-border pt-2">
         <Button type="submit" isLoading={isSubmitting}>
           {t('common.save')}
