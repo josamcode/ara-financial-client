@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Download, Plus } from 'lucide-react'
+import { toast } from 'react-hot-toast'
 import { PageHeader } from '@/shared/components/PageHeader'
 import { Button } from '@/shared/components/Button'
 import { Checkbox } from '@/shared/components/Checkbox'
@@ -12,9 +13,11 @@ import { ErrorState } from '@/shared/components/ErrorState'
 import { PermissionGate } from '@/shared/components/PermissionGate'
 import { Input } from '@/shared/components/Input'
 import { Select } from '@/shared/components/Select'
+import { PlanLimitNotice } from '@/shared/components/PlanLimitNotice'
 import { PERMISSIONS } from '@/shared/constants/permissions'
 import { ROUTES } from '@/shared/constants/routes'
 import { downloadBlob } from '@/shared/utils/downloadBlob'
+import { useBillingUsage } from '@/features/billing/hooks/useBilling'
 import {
   useExportInvoices,
   useInvoiceList,
@@ -35,6 +38,30 @@ const STATUS_OPTIONS = [
 ]
 
 const STATUS_VALUES = new Set(STATUS_OPTIONS.map((option) => option.value).filter(Boolean))
+const INACTIVE_SUBSCRIPTION_STATUSES = new Set(['expired', 'cancelled', 'canceled', 'past_due'])
+
+function getBillingUsagePayload(usageData) {
+  if (!usageData) return null
+  return usageData?.data?.usage ? usageData.data : usageData
+}
+
+function toMetricNumber(value, fallback = 0) {
+  const number = Number(value)
+  return Number.isFinite(number) ? number : fallback
+}
+
+function isUsageLimitReached(metric) {
+  if (!metric || metric.unlimited) return false
+  const percent = metric.percent != null ? toMetricNumber(metric.percent) : 0
+  const used = toMetricNumber(metric.used)
+  const limit = toMetricNumber(metric.limit)
+  return percent >= 100 || (limit > 0 && used >= limit)
+}
+
+function isSubscriptionBlocked(subscription) {
+  if (!subscription?.status) return false
+  return INACTIVE_SUBSCRIPTION_STATUSES.has(String(subscription.status).toLowerCase())
+}
 
 export default function InvoicesPage() {
   const { t } = useTranslation()
@@ -43,6 +70,7 @@ export default function InvoicesPage() {
   const [page, setPage] = useState(1)
   const [selectedInvoiceIds, setSelectedInvoiceIds] = useState([])
   const [bulkAction, setBulkAction] = useState(null)
+  const [forceInvoicesLimitNotice, setForceInvoicesLimitNotice] = useState(false)
   const statusParam = searchParams.get('status') ?? ''
   const statusFilter = STATUS_VALUES.has(statusParam) ? statusParam : ''
   const searchFilter = searchParams.get('search') ?? ''
@@ -74,12 +102,25 @@ export default function InvoicesPage() {
     ...filterParams,
   }
   const { data, isLoading, isError, refetch } = useInvoiceList(listParams)
+  const billingUsageQuery = useBillingUsage()
   const exportMutation = useExportInvoices()
   const deleteMutation = useDeleteInvoice()
   const bulkCancelMutation = useBulkCancelInvoices()
   const bulkDeleteMutation = useBulkDeleteInvoices()
 
   const invoices = data?.data ?? []
+  const billingUsagePayload = getBillingUsagePayload(billingUsageQuery.data)
+  const invoicesUsage = billingUsagePayload?.usage?.invoicesPerMonth ?? null
+  const billingSubscription = billingUsagePayload?.subscription ?? null
+  const billingPlan =
+    billingUsagePayload?.plan ??
+    billingSubscription?.planId ??
+    billingSubscription?.plan ??
+    null
+  const invoicesLimitReached = isUsageLimitReached(invoicesUsage)
+  const subscriptionBlocked = isSubscriptionBlocked(billingSubscription)
+  const invoiceCreateBlocked = invoicesLimitReached || subscriptionBlocked
+  const showInvoicesLimitNotice = subscriptionBlocked || invoicesLimitReached || forceInvoicesLimitNotice
   const pagination = data?.meta?.pagination
   const allInvoiceIds = invoices.map((invoice) => invoice._id)
   const selectedInvoices = invoices.filter((invoice) => selectedInvoiceIds.includes(invoice._id))
@@ -92,6 +133,24 @@ export default function InvoicesPage() {
     value: o.value,
     label: o.value ? t(`invoices.status.${o.value}`) : t('common.filter'),
   }))
+
+  function getBlockedInvoiceToastKey() {
+    return subscriptionBlocked
+      ? 'planLimit.error.subscriptionInactive'
+      : 'planLimit.error.planLimitExceeded'
+  }
+
+  function handleCreateInvoice() {
+    if (invoiceCreateBlocked) {
+      if (invoicesLimitReached) {
+        setForceInvoicesLimitNotice(true)
+      }
+      toast.error(t(getBlockedInvoiceToastKey()))
+      return
+    }
+
+    navigate(ROUTES.INVOICE_NEW)
+  }
 
   function updateFilters(updates) {
     const nextParams = new URLSearchParams(searchParams)
@@ -190,13 +249,32 @@ export default function InvoicesPage() {
         title={t('nav.invoices')}
         actions={
           <PermissionGate permission={PERMISSIONS.INVOICE_CREATE}>
-            <Button onClick={() => navigate(ROUTES.INVOICE_NEW)}>
+            <Button
+              variant={invoiceCreateBlocked ? 'secondary' : 'primary'}
+              className={
+                invoiceCreateBlocked
+                  ? 'border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100'
+                  : undefined
+              }
+              onClick={handleCreateInvoice}
+            >
               <Plus size={16} className="me-2" />
               {t('invoices.new')}
             </Button>
           </PermissionGate>
         }
       />
+
+      {showInvoicesLimitNotice && (
+        <div className="mb-5">
+          <PlanLimitNotice
+            type={subscriptionBlocked ? 'subscriptionInactive' : 'invoicesPerMonth'}
+            usageItem={invoicesUsage}
+            plan={billingPlan}
+            subscription={billingSubscription}
+          />
+        </div>
+      )}
 
       {/* Filters */}
       <div className="mb-4 flex flex-wrap items-end gap-3">
@@ -270,7 +348,15 @@ export default function InvoicesPage() {
           description={t('invoices.emptyDescription')}
           action={
             <PermissionGate permission={PERMISSIONS.INVOICE_CREATE}>
-              <Button onClick={() => navigate(ROUTES.INVOICE_NEW)}>
+              <Button
+                variant={invoiceCreateBlocked ? 'secondary' : 'primary'}
+                className={
+                  invoiceCreateBlocked
+                    ? 'border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100'
+                    : undefined
+                }
+                onClick={handleCreateInvoice}
+              >
                 <Plus size={16} className="me-2" />
                 {t('invoices.new')}
               </Button>

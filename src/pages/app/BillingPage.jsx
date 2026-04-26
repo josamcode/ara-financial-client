@@ -722,7 +722,7 @@ function PlanUsageSection({ usageData, isLoading, isError, refetch }) {
   const { users = null, invoicesPerMonth = null } = usage
 
   return (
-    <div>
+    <div id="usage">
       {sectionHeader}
       <div className="grid gap-5 sm:grid-cols-2">
         <UsageMetricCard

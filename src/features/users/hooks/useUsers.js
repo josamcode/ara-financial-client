@@ -9,8 +9,20 @@ const KEYS = {
   detail: (id) => ['users', 'detail', id],
 }
 
+const BILLING_WRITE_ERROR_KEYS = {
+  PLAN_LIMIT_EXCEEDED: 'planLimit.error.planLimitExceeded',
+  SUBSCRIPTION_REQUIRED: 'planLimit.error.subscriptionRequired',
+  SUBSCRIPTION_INACTIVE: 'planLimit.error.subscriptionInactive',
+}
+
 function extractUser(response) {
   return response?.data?.user ?? response?.user ?? null
+}
+
+function getMutationErrorMessage(error, t) {
+  const billingErrorKey = BILLING_WRITE_ERROR_KEYS[error?.code]
+  if (billingErrorKey) return t(billingErrorKey)
+  return error?.message || t('common.somethingWentWrong')
 }
 
 export function useUsers(params) {
@@ -39,7 +51,7 @@ export function useChangeUserRole() {
       toast.success(t('users.roleChanged'))
     },
     onError: (error) => {
-      toast.error(error?.message || t('common.somethingWentWrong'))
+      toast.error(getMutationErrorMessage(error, t))
     },
   })
 }
@@ -54,7 +66,7 @@ export function useInviteUser() {
       queryClient.invalidateQueries({ queryKey: KEYS.all })
     },
     onError: (error) => {
-      toast.error(error?.message || t('common.somethingWentWrong'))
+      toast.error(getMutationErrorMessage(error, t))
     },
   })
 }
@@ -73,7 +85,7 @@ export function useDeactivateUser() {
       toast.success(t('users.userDeactivated'))
     },
     onError: (error) => {
-      toast.error(error?.message || t('common.somethingWentWrong'))
+      toast.error(getMutationErrorMessage(error, t))
     },
   })
 }

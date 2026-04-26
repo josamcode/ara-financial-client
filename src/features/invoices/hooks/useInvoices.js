@@ -9,8 +9,20 @@ const KEYS = {
   detail: (id) => ['invoices', 'detail', id],
 }
 
+const BILLING_WRITE_ERROR_KEYS = {
+  PLAN_LIMIT_EXCEEDED: 'planLimit.error.planLimitExceeded',
+  SUBSCRIPTION_REQUIRED: 'planLimit.error.subscriptionRequired',
+  SUBSCRIPTION_INACTIVE: 'planLimit.error.subscriptionInactive',
+}
+
 function extractInvoice(response) {
   return response?.data?.invoice ?? response?.invoice ?? null
+}
+
+function getMutationErrorMessage(error, t) {
+  const billingErrorKey = BILLING_WRITE_ERROR_KEYS[error?.code]
+  if (billingErrorKey) return t(billingErrorKey)
+  return error?.message || t('common.somethingWentWrong')
 }
 
 export function useInvoiceList(params = {}) {
@@ -25,7 +37,7 @@ export function useExportInvoices() {
 
   return useMutation({
     mutationFn: (params) => invoiceApi.exportList(params),
-    onError: (err) => toast.error(err?.message || t('common.somethingWentWrong')),
+    onError: (err) => toast.error(getMutationErrorMessage(err, t)),
   })
 }
 
@@ -46,7 +58,7 @@ export function useCreateInvoice() {
       qc.invalidateQueries({ queryKey: KEYS.all })
       toast.success(t('invoices.created'))
     },
-    onError: (err) => toast.error(err?.message || t('common.somethingWentWrong')),
+    onError: (err) => toast.error(getMutationErrorMessage(err, t)),
   })
 }
 
@@ -60,7 +72,7 @@ export function useUpdateInvoice() {
       qc.invalidateQueries({ queryKey: KEYS.all })
       toast.success(t('invoices.updated'))
     },
-    onError: (err) => toast.error(err?.message || t('common.somethingWentWrong')),
+    onError: (err) => toast.error(getMutationErrorMessage(err, t)),
   })
 }
 
@@ -74,7 +86,7 @@ export function useSendInvoice() {
       qc.invalidateQueries({ queryKey: KEYS.all })
       toast.success(t('invoices.sent'))
     },
-    onError: (err) => toast.error(err?.message || t('common.somethingWentWrong')),
+    onError: (err) => toast.error(getMutationErrorMessage(err, t)),
   })
 }
 
@@ -88,7 +100,7 @@ export function usePayInvoice() {
       qc.invalidateQueries({ queryKey: KEYS.all })
       toast.success(t('invoices.paid'))
     },
-    onError: (err) => toast.error(err?.message || t('common.somethingWentWrong')),
+    onError: (err) => toast.error(getMutationErrorMessage(err, t)),
   })
 }
 
@@ -101,7 +113,7 @@ export function useEmailInvoice() {
       qc.invalidateQueries({ queryKey: KEYS.detail(id) })
       toast.success(t('invoices.emailSent'))
     },
-    onError: (err) => toast.error(err?.message || t('common.somethingWentWrong')),
+    onError: (err) => toast.error(getMutationErrorMessage(err, t)),
   })
 }
 
@@ -115,7 +127,7 @@ export function useCancelInvoice() {
       qc.invalidateQueries({ queryKey: KEYS.all })
       toast.success(t('invoices.cancelled'))
     },
-    onError: (err) => toast.error(err?.message || t('common.somethingWentWrong')),
+    onError: (err) => toast.error(getMutationErrorMessage(err, t)),
   })
 }
 
@@ -128,7 +140,7 @@ export function useBulkCancelInvoices() {
       qc.invalidateQueries({ queryKey: KEYS.all })
       toast.success(t('invoices.bulkCancelled'))
     },
-    onError: (err) => toast.error(err?.message || t('common.somethingWentWrong')),
+    onError: (err) => toast.error(getMutationErrorMessage(err, t)),
   })
 }
 
@@ -141,7 +153,7 @@ export function useDeleteInvoice() {
       qc.invalidateQueries({ queryKey: KEYS.all })
       toast.success(t('invoices.deleted'))
     },
-    onError: (err) => toast.error(err?.message || t('common.somethingWentWrong')),
+    onError: (err) => toast.error(getMutationErrorMessage(err, t)),
   })
 }
 
@@ -154,6 +166,6 @@ export function useBulkDeleteInvoices() {
       qc.invalidateQueries({ queryKey: KEYS.all })
       toast.success(t('invoices.bulkDeleted'))
     },
-    onError: (err) => toast.error(err?.message || t('common.somethingWentWrong')),
+    onError: (err) => toast.error(getMutationErrorMessage(err, t)),
   })
 }

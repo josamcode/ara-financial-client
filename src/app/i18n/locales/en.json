@@ -862,6 +862,29 @@
     "subscriptionInactiveDescription": "Some actions may be restricted until the subscription is renewed or activated.",
     "renewPlan": "Renew plan"
   },
+  "planLimit": {
+    "title": {
+      "users": "User limit reached",
+      "invoicesPerMonth": "Monthly invoice limit reached",
+      "subscriptionInactive": "Subscription inactive"
+    },
+    "description": {
+      "users": "Your current plan has reached the maximum number of active users. Manage billing before inviting another team member.",
+      "invoicesPerMonth": "Your current plan has reached this month's invoice allowance. Manage billing before creating more invoices.",
+      "subscriptionInactive": "Write actions are paused because your subscription is not active. Renew or activate your subscription from Billing to continue."
+    },
+    "usedOfLimit": "{{used}} of {{limit}} used",
+    "remaining": "{{count}} remaining",
+    "limitReached": "Limit reached",
+    "nearLimit": "Near limit",
+    "manageBilling": "Manage billing",
+    "viewUsage": "View usage",
+    "error": {
+      "planLimitExceeded": "You reached your current plan limit. Review billing to upgrade.",
+      "subscriptionRequired": "An active subscription is required to use this feature.",
+      "subscriptionInactive": "Your subscription is not active. Please renew or activate your subscription."
+    }
+  },
   "payments": {
     "title": "Payments",
     "subtitle": "MyFatoorah gateway testing console",

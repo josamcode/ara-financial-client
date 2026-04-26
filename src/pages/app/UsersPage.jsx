@@ -4,8 +4,10 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useTranslation } from 'react-i18next'
 import { Shield, UserX, Users, UserPlus, Search, Copy, CheckCircle2 } from 'lucide-react'
+import { toast } from 'react-hot-toast'
 import { useAuth } from '@/entities/auth/model/useAuth'
 import { useChangeUserRole, useDeactivateUser, useInviteUser, useUsers } from '@/features/users/hooks/useUsers'
+import { useBillingUsage } from '@/features/billing/hooks/useBilling'
 import { PageHeader } from '@/shared/components/PageHeader'
 import { Badge } from '@/shared/components/Badge'
 import { Button } from '@/shared/components/Button'
@@ -16,6 +18,7 @@ import { ConfirmDialog } from '@/shared/components/ConfirmDialog'
 import { EmptyState } from '@/shared/components/EmptyState'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
+import { PlanLimitNotice } from '@/shared/components/PlanLimitNotice'
 import { PERMISSIONS, hasPermission } from '@/shared/constants/permissions'
 import { formatDateTime } from '@/shared/utils/formatters'
 import { buildInvitationAcceptUrl } from '@/pages/setup/utils/invitationUrl'
@@ -26,6 +29,45 @@ const ROLE_RANK = {
   accountant: 1,
   admin: 2,
   owner: 3,
+}
+
+const BILLING_WRITE_ERROR_KEYS = {
+  PLAN_LIMIT_EXCEEDED: 'planLimit.error.planLimitExceeded',
+  SUBSCRIPTION_REQUIRED: 'planLimit.error.subscriptionRequired',
+  SUBSCRIPTION_INACTIVE: 'planLimit.error.subscriptionInactive',
+}
+
+const INACTIVE_SUBSCRIPTION_STATUSES = new Set(['expired', 'cancelled', 'canceled', 'past_due'])
+
+function getBillingUsagePayload(usageData) {
+  if (!usageData) return null
+  return usageData?.data?.usage ? usageData.data : usageData
+}
+
+function toMetricNumber(value, fallback = 0) {
+  const number = Number(value)
+  return Number.isFinite(number) ? number : fallback
+}
+
+function isUsageLimitReached(metric) {
+  if (!metric || metric.unlimited) return false
+  const percent = metric.percent != null ? toMetricNumber(metric.percent) : 0
+  const used = toMetricNumber(metric.used)
+  const limit = toMetricNumber(metric.limit)
+  return percent >= 100 || (limit > 0 && used >= limit)
+}
+
+function isSubscriptionBlocked(subscription) {
+  if (!subscription?.status) return false
+  return INACTIVE_SUBSCRIPTION_STATUSES.has(String(subscription.status).toLowerCase())
+}
+
+function getBillingWriteErrorKey(error) {
+  return BILLING_WRITE_ERROR_KEYS[error?.code] ?? null
+}
+
+function isBillingWriteError(error) {
+  return Boolean(getBillingWriteErrorKey(error))
 }
 
 function resolveRoleName(member) {
@@ -97,7 +139,7 @@ const inviteSchema = z.object({
   roleName: z.enum(['admin', 'accountant']),
 })
 
-function InviteForm({ onClose, t }) {
+function InviteForm({ onClose, t, onBillingWriteError }) {
   const inviteMutation = useInviteUser()
   const [inviteResult, setInviteResult] = useState(null)
   const [copied, setCopied] = useState(false)
@@ -120,8 +162,11 @@ function InviteForm({ onClose, t }) {
       const acceptUrl = buildInvitationAcceptUrl(invitation)
       setInviteResult({ ...values, acceptUrl })
       reset({ roleName: 'accountant' })
-    } catch {
-      // handled in mutation onError
+    } catch (error) {
+      if (isBillingWriteError(error)) {
+        onBillingWriteError?.(error)
+      }
+      // toast feedback is handled in mutation onError
     }
   }
 
@@ -236,14 +281,28 @@ export default function UsersPage() {
   const [search, setSearch] = useState('')
   const [deactivateTarget, setDeactivateTarget] = useState(null)
   const [invitePanelOpen, setInvitePanelOpen] = useState(false)
+  const [forceUsersLimitNotice, setForceUsersLimitNotice] = useState(false)
 
   const queryParams = useMemo(() => ({ page, limit: PAGE_SIZE }), [page])
 
   const usersQuery = useUsers(queryParams)
+  const billingUsageQuery = useBillingUsage()
   const roleMutation = useChangeUserRole()
   const deactivateMutation = useDeactivateUser()
 
   const allMembers = usersQuery.data?.users || []
+  const billingUsagePayload = getBillingUsagePayload(billingUsageQuery.data)
+  const usersUsage = billingUsagePayload?.usage?.users ?? null
+  const billingSubscription = billingUsagePayload?.subscription ?? null
+  const billingPlan =
+    billingUsagePayload?.plan ??
+    billingSubscription?.planId ??
+    billingSubscription?.plan ??
+    null
+  const usersLimitReached = isUsageLimitReached(usersUsage)
+  const subscriptionBlocked = isSubscriptionBlocked(billingSubscription)
+  const userWriteBlocked = usersLimitReached || subscriptionBlocked
+  const showUsersLimitNotice = subscriptionBlocked || usersLimitReached || forceUsersLimitNotice
   const pagination = usersQuery.data?.pagination
   const currentRoleName = resolveRoleName(currentUser)
   const canUpdateRoles = hasPermission(currentUser, PERMISSIONS.USER_UPDATE)
@@ -273,6 +332,31 @@ export default function UsersPage() {
     setDeactivateTarget(null)
   }
 
+  function getBlockedInviteToastKey() {
+    return subscriptionBlocked
+      ? 'planLimit.error.subscriptionInactive'
+      : 'planLimit.error.planLimitExceeded'
+  }
+
+  function handleInviteClick() {
+    if (userWriteBlocked) {
+      if (usersLimitReached) {
+        setForceUsersLimitNotice(true)
+      }
+      toast.error(t(getBlockedInviteToastKey()))
+      return
+    }
+
+    setInvitePanelOpen(true)
+  }
+
+  function handleBillingWriteError(error) {
+    if (error?.code === 'PLAN_LIMIT_EXCEEDED') {
+      setForceUsersLimitNotice(true)
+    }
+    billingUsageQuery.refetch()
+  }
+
   return (
     <div className="animate-fade-in">
       <PageHeader
@@ -280,13 +364,33 @@ export default function UsersPage() {
         subtitle={t('users.subtitle')}
         actions={
           canInvite && (
-            <Button size="sm" onClick={() => setInvitePanelOpen(true)}>
+            <Button
+              size="sm"
+              variant={userWriteBlocked ? 'secondary' : 'primary'}
+              className={
+                userWriteBlocked
+                  ? 'border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100'
+                  : undefined
+              }
+              onClick={handleInviteClick}
+            >
               <UserPlus size={15} />
               {t('users.inviteUser') || (i18n.language === 'ar' ? 'دعوة عضو' : 'Invite Member')}
             </Button>
           )
         }
       />
+
+      {showUsersLimitNotice && (
+        <div className="mb-5">
+          <PlanLimitNotice
+            type={subscriptionBlocked ? 'subscriptionInactive' : 'users'}
+            usageItem={usersUsage}
+            plan={billingPlan}
+            subscription={billingSubscription}
+          />
+        </div>
+      )}
 
       {/* Search bar */}
       <div className="relative mb-5 max-w-sm">
@@ -437,7 +541,11 @@ export default function UsersPage() {
         onClose={() => setInvitePanelOpen(false)}
         title={i18n.language === 'ar' ? 'دعوة عضو جديد' : 'Invite New Member'}
       >
-        <InviteForm onClose={() => setInvitePanelOpen(false)} t={t} />
+        <InviteForm
+          onClose={() => setInvitePanelOpen(false)}
+          t={t}
+          onBillingWriteError={handleBillingWriteError}
+        />
       </SlidePanel>
 
       <ConfirmDialog
