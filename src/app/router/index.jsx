@@ -234,14 +234,14 @@ export function AppRouter() {
               }
             />
 
-            <Route
+            {/* <Route
               path={ROUTES.PAYMENTS}
               element={
                 <ProtectedRoute permission={[PERMISSIONS.PAYMENT_READ, PERMISSIONS.PAYMENT_CREATE]}>
                   <PaymentsPage />
                 </ProtectedRoute>
               }
-            />
+            /> */}
 
             <Route
               path={ROUTES.USERS}
