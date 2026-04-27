@@ -170,8 +170,8 @@ function NavItem({ item }) {
         cn(
           'flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors duration-150',
           isActive
-            ? 'bg-primary text-primary-foreground'
-            : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+            ? 'bg-primary-50 text-primary-700 font-semibold'
+            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
         )
       }
     >

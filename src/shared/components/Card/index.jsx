@@ -22,9 +22,15 @@ export function Card({ children, className, padding = 'md', ...props }) {
   )
 }
 
-export function CardHeader({ children, className }) {
+export function CardHeader({ children, className, divided = false }) {
   return (
-    <div className={cn('flex items-center justify-between gap-4 mb-4', className)}>
+    <div
+      className={cn(
+        'flex items-center justify-between gap-4 mb-4',
+        divided && 'pb-4 border-b border-border',
+        className
+      )}
+    >
       {children}
     </div>
   )
@@ -32,9 +38,17 @@ export function CardHeader({ children, className }) {
 
 export function CardTitle({ children, className }) {
   return (
-    <h3 className={cn('text-lg font-semibold text-text-primary', className)}>
+    <h3 className={cn('text-base font-semibold text-text-primary', className)}>
       {children}
     </h3>
+  )
+}
+
+export function CardDescription({ children, className }) {
+  return (
+    <p className={cn('text-sm text-text-secondary mt-0.5', className)}>
+      {children}
+    </p>
   )
 }
 

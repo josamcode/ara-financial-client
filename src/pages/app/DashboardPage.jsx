@@ -498,7 +498,7 @@ export default function DashboardPage() {
   const arap = data?.data?.arap
   const activity = data?.data?.activity
   const insights = data?.data?.insights
-  const currency = user?.tenant?.baseCurrency || 'EGP'
+  const currency = user?.tenant?.baseCurrency || 'SAR'
 
   const netIncomeNum = financials ? Number(financials.netIncome) : null
   const netIncomeAccent = netIncomeNum === null ? 'default' : netIncomeNum >= 0 ? 'green' : 'red'

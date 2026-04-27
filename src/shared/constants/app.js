@@ -9,6 +9,8 @@ export const LANGUAGES = [
 
 export const DEFAULT_LANGUAGE = 'ar'
 
+export const DEFAULT_CURRENCY = 'SAR'
+
 export const CURRENCIES = [
   { code: 'EGP', label: 'جنيه مصري', labelEn: 'Egyptian Pound' },
   { code: 'USD', label: 'دولار أمريكي', labelEn: 'US Dollar' },

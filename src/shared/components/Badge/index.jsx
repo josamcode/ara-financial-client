@@ -7,11 +7,25 @@ const variants = {
   warning: 'bg-warning-soft text-yellow-700',
   error: 'bg-error-soft text-error',
   info: 'bg-info-soft text-info',
+  // account type variants
   asset: 'bg-primary-50 text-primary-700',
   liability: 'bg-error-soft text-error',
   equity: 'bg-info-soft text-info',
   revenue: 'bg-success-soft text-success',
   expense: 'bg-warning-soft text-yellow-700',
+  // financial status variants
+  draft: 'bg-gray-100 text-gray-600',
+  sent: 'bg-info-soft text-info',
+  paid: 'bg-success-soft text-success',
+  overdue: 'bg-error-soft text-error',
+  cancelled: 'bg-gray-200 text-gray-500',
+  partially_paid: 'bg-warning-soft text-yellow-700',
+  posted: 'bg-info-soft text-info',
+  reversed: 'bg-gray-200 text-gray-500',
+  open: 'bg-success-soft text-success',
+  closed: 'bg-gray-100 text-gray-600',
+  locked: 'bg-error-soft text-error',
+  pending: 'bg-warning-soft text-yellow-700',
 }
 
 const sizes = {
@@ -25,7 +39,7 @@ export function Badge({ variant = 'default', size = 'md', children, className })
     <span
       className={cn(
         'inline-flex items-center font-medium rounded-full whitespace-nowrap',
-        variants[variant],
+        variants[variant] ?? variants.default,
         sizes[size],
         className
       )}

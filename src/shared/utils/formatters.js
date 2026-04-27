@@ -17,7 +17,7 @@ export function formatRelativeTime(value, locale = 'ar') {
   return dayjs(value).locale(locale).fromNow()
 }
 
-export function formatCurrency(amount, currency = 'EGP', locale = 'en-US') {
+export function formatCurrency(amount, currency = 'SAR', locale = 'en') {
   if (amount === null || amount === undefined) return '—'
 
   const num = Number(amount)

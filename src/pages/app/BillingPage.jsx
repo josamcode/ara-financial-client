@@ -216,14 +216,10 @@ function PlanCard({ plan, currentPlanId, onCheckout, isLoading, canManage }) {
       className={[
         'flex flex-col rounded-xl border bg-card shadow-sm transition-all hover:shadow-md',
         isCurrent
-          ? 'ring-2 ring-primary border-primary/30'
+          ? 'ring-2 ring-primary border-primary/50 border-t-8'
           : 'border-border hover:border-border/80',
       ].join(' ')}
     >
-      {/* Top accent bar for current plan */}
-      {isCurrent && (
-        <div className="h-1 w-full rounded-t-xl bg-primary/70" />
-      )}
 
       <div className="flex flex-1 flex-col p-6">
         {/* Plan label + current badge */}
@@ -249,7 +245,7 @@ function PlanCard({ plan, currentPlanId, onCheckout, isLoading, canManage }) {
               {plan.price}
               <span className="text-sm font-normal text-text-secondary">{plan.currency}</span>
               {cycleLabel && (
-                <span className="text-sm font-normal text-text-secondary">/ {cycleLabel}</span>
+                <span className="text-sm font-normal text-text-secondary">{cycleLabel}</span>
               )}
             </p>
           )}
