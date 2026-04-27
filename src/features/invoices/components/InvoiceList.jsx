@@ -15,14 +15,14 @@ export function InvoiceList({ invoices, selectedIds = [], onToggleSelect, onView
   return (
     <div className="bg-surface rounded-lg border border-border overflow-hidden">
       {/* Header */}
-      <div className="hidden sm:grid grid-cols-[2.5rem_6rem_1fr_1fr_6rem_7rem_5rem_5rem] items-center gap-3 px-4 py-2.5 border-b border-border bg-surface-subtle">
+      <div className="hidden sm:grid grid-cols-[2.5rem_6rem_1fr_1fr_6rem_7rem_5rem_5rem] items-center gap-3 px-4 py-2.5 border-b border-border bg-surface-muted">
         <span className="w-[18px]" />
-        <span className="text-xs font-semibold text-text-muted">{t('invoices.number')}</span>
-        <span className="text-xs font-semibold text-text-muted">{t('invoices.customer')}</span>
-        <span className="text-xs font-semibold text-text-muted">{t('invoices.dueDate')}</span>
-        <span className="text-xs font-semibold text-text-muted text-end">{t('invoices.total')}</span>
-        <span className="text-xs font-semibold text-text-muted text-center">{t('common.status')}</span>
-        <span className="text-xs font-semibold text-text-muted">{t('common.date')}</span>
+        <span className="text-xs font-semibold text-text-muted uppercase tracking-wide">{t('invoices.number')}</span>
+        <span className="text-xs font-semibold text-text-muted uppercase tracking-wide">{t('invoices.customer')}</span>
+        <span className="text-xs font-semibold text-text-muted uppercase tracking-wide">{t('invoices.dueDate')}</span>
+        <span className="text-xs font-semibold text-text-muted uppercase tracking-wide text-end">{t('invoices.total')}</span>
+        <span className="text-xs font-semibold text-text-muted uppercase tracking-wide text-center">{t('common.status')}</span>
+        <span className="text-xs font-semibold text-text-muted uppercase tracking-wide">{t('common.date')}</span>
         <span className="w-16" />
       </div>
 

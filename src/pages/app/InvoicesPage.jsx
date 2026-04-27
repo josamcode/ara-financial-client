@@ -14,6 +14,7 @@ import { PermissionGate } from '@/shared/components/PermissionGate'
 import { Input } from '@/shared/components/Input'
 import { Select } from '@/shared/components/Select'
 import { PlanLimitNotice } from '@/shared/components/PlanLimitNotice'
+import { PaginationControls } from '@/shared/components/PaginationControls'
 import { PERMISSIONS } from '@/shared/constants/permissions'
 import { ROUTES } from '@/shared/constants/routes'
 import { downloadBlob } from '@/shared/utils/downloadBlob'
@@ -277,7 +278,7 @@ export default function InvoicesPage() {
       )}
 
       {/* Filters */}
-      <div className="mb-4 flex flex-wrap items-end gap-3">
+      <div className="filter-bar">
         <Input
           type="search"
           value={searchFilter}
@@ -417,29 +418,13 @@ export default function InvoicesPage() {
             onDelete={handleDelete}
           />
 
-          {pagination && pagination.totalPages > 1 && (
-            <div className="mt-4 flex items-center justify-between text-sm text-text-secondary">
-              <span>{t('common.noResults', { replace: '' })}</span>
-              <div className="flex gap-2">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  disabled={!pagination.hasPrevPage}
-                  onClick={handlePreviousPage}
-                >
-                  {t('common.previous')}
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  disabled={!pagination.hasNextPage}
-                  onClick={handleNextPage}
-                >
-                  {t('common.next')}
-                </Button>
-              </div>
-            </div>
-          )}
+          <PaginationControls
+            pagination={pagination}
+            onPageChange={(p) => {
+              if (p < page) handlePreviousPage()
+              else handleNextPage()
+            }}
+          />
         </>
       )}
 

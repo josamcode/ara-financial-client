@@ -47,14 +47,14 @@ function StatusPill({ status, ns }) {
   )
 }
 
-// ─── Summary card ─────────────────────────────────────────────────────────────
+// ─── KPI card ─────────────────────────────────────────────────────────────────
 
 const ACCENT = {
-  blue:    { wrap: 'bg-info-soft',    icon: 'text-info',    bar: 'bg-info' },
-  orange:  { wrap: 'bg-warning-soft', icon: 'text-warning', bar: 'bg-warning' },
-  green:   { wrap: 'bg-success-soft', icon: 'text-success', bar: 'bg-success' },
-  red:     { wrap: 'bg-error-soft',   icon: 'text-error',   bar: 'bg-error' },
-  default: { wrap: 'bg-primary-50',   icon: 'text-primary', bar: 'bg-primary' },
+  blue:    { wrap: 'bg-info-soft',    icon: 'text-info' },
+  orange:  { wrap: 'bg-warning-soft', icon: 'text-warning' },
+  green:   { wrap: 'bg-success-soft', icon: 'text-success' },
+  red:     { wrap: 'bg-error-soft',   icon: 'text-error' },
+  default: { wrap: 'bg-primary-50',   icon: 'text-primary' },
 }
 
 function SummaryCard({ label, value, icon: Icon, accent = 'default', subtext, onClick, isLoading }) {
@@ -64,39 +64,33 @@ function SummaryCard({ label, value, icon: Icon, accent = 'default', subtext, on
 
   return (
     <Card
-      padding="none"
+      padding="md"
       className={cn(
-        'overflow-hidden',
-        onClick && 'cursor-pointer hover:shadow-elevated transition-shadow group'
+        'flex flex-col gap-4',
+        onClick && 'cursor-pointer hover:shadow-elevated transition-shadow'
       )}
       onClick={onClick}
     >
-      <div className={`h-1 ${a.bar}`} />
-      <div className="p-5">
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex items-start gap-3 min-w-0 flex-1">
-            <div className={`w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center ${a.wrap}`}>
-              <Icon size={20} className={a.icon} />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-xs text-text-secondary mb-1">{label}</p>
-              <p className="text-2xl font-bold text-text-primary leading-tight">{value}</p>
-              {subtext && <p className="text-xs text-text-muted mt-1">{subtext}</p>}
-            </div>
-          </div>
-          {onClick && (
-            <ChevronRight
-              size={15}
-              className="text-text-muted mt-2 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity rtl:rotate-180"
-            />
-          )}
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-xs font-medium text-text-secondary leading-snug">{label}</p>
+        <div className={cn('w-8 h-8 rounded-lg shrink-0 flex items-center justify-center', a.wrap)}>
+          <Icon size={16} className={a.icon} />
         </div>
+      </div>
+      <div className="flex items-end justify-between gap-2">
+        <div>
+          <p className="text-2xl font-bold text-text-primary tabular-nums leading-none">{value}</p>
+          {subtext && <p className="text-xs text-text-muted mt-1.5">{subtext}</p>}
+        </div>
+        {onClick && (
+          <ChevronRight size={14} className="text-text-muted shrink-0 rtl:rotate-180 mb-0.5" />
+        )}
       </div>
     </Card>
   )
 }
 
-// ─── Recent invoices ──────────────────────────────────────────────────────────
+// ─── Insights ─────────────────────────────────────────────────────────────────
 
 const INSIGHT_STYLES = {
   info: {
@@ -141,99 +135,46 @@ const DASHBOARD_TARGETS = {
 function getInsightContent(insight, t, currency) {
   switch (insight.id) {
     case 'overdue_invoices':
-      return {
-        title: t('dashboard.insights.items.overdueInvoices.title'),
-        description: t('dashboard.insights.items.overdueInvoices.description', {
-          count: insight.count,
-        }),
-      }
+      return { title: t('dashboard.insights.items.overdueInvoices.title'), description: t('dashboard.insights.items.overdueInvoices.description', { count: insight.count }) }
     case 'no_overdue_invoices':
-      return {
-        title: t('dashboard.insights.items.noOverdueInvoices.title'),
-        description: t('dashboard.insights.items.noOverdueInvoices.description'),
-      }
+      return { title: t('dashboard.insights.items.noOverdueInvoices.title'), description: t('dashboard.insights.items.noOverdueInvoices.description') }
     case 'overdue_bills':
-      return {
-        title: t('dashboard.insights.items.overdueBills.title'),
-        description: t('dashboard.insights.items.overdueBills.description', {
-          count: insight.count,
-        }),
-      }
+      return { title: t('dashboard.insights.items.overdueBills.title'), description: t('dashboard.insights.items.overdueBills.description', { count: insight.count }) }
     case 'no_overdue_bills':
-      return {
-        title: t('dashboard.insights.items.noOverdueBills.title'),
-        description: t('dashboard.insights.items.noOverdueBills.description'),
-      }
+      return { title: t('dashboard.insights.items.noOverdueBills.title'), description: t('dashboard.insights.items.noOverdueBills.description') }
     case 'top_customer_outstanding':
-      return {
-        title: t('dashboard.insights.items.topCustomerOutstanding.title'),
-        description: t('dashboard.insights.items.topCustomerOutstanding.description', {
-          name: insight.customerName,
-          amount: formatCurrency(insight.amount, currency),
-        }),
-      }
+      return { title: t('dashboard.insights.items.topCustomerOutstanding.title'), description: t('dashboard.insights.items.topCustomerOutstanding.description', { name: insight.customerName, amount: formatCurrency(insight.amount, currency) }) }
     case 'top_supplier_payable':
-      return {
-        title: t('dashboard.insights.items.topSupplierPayable.title'),
-        description: t('dashboard.insights.items.topSupplierPayable.description', {
-          name: insight.supplierName,
-          amount: formatCurrency(insight.amount, currency),
-        }),
-      }
+      return { title: t('dashboard.insights.items.topSupplierPayable.title'), description: t('dashboard.insights.items.topSupplierPayable.description', { name: insight.supplierName, amount: formatCurrency(insight.amount, currency) }) }
     case 'net_income_positive':
-      return {
-        title: t('dashboard.insights.items.netIncomePositive.title'),
-        description: t('dashboard.insights.items.netIncomePositive.description', {
-          amount: formatCurrency(insight.amount, currency),
-        }),
-      }
+      return { title: t('dashboard.insights.items.netIncomePositive.title'), description: t('dashboard.insights.items.netIncomePositive.description', { amount: formatCurrency(insight.amount, currency) }) }
     case 'net_income_negative':
-      return {
-        title: t('dashboard.insights.items.netIncomeNegative.title'),
-        description: t('dashboard.insights.items.netIncomeNegative.description', {
-          amount: formatCurrency(insight.amount, currency),
-        }),
-      }
+      return { title: t('dashboard.insights.items.netIncomeNegative.title'), description: t('dashboard.insights.items.netIncomeNegative.description', { amount: formatCurrency(insight.amount, currency) }) }
     case 'net_income_neutral':
-      return {
-        title: t('dashboard.insights.items.netIncomeNeutral.title'),
-        description: t('dashboard.insights.items.netIncomeNeutral.description'),
-      }
+      return { title: t('dashboard.insights.items.netIncomeNeutral.title'), description: t('dashboard.insights.items.netIncomeNeutral.description') }
     default:
       return null
   }
 }
 
 function buildStatementInsightHref(href, basePath, buildStatementRoute) {
-  if (!href) {
-    return basePath
-  }
-
+  if (!href) return basePath
   const detailPrefix = `${basePath}/`
-  if (!href.startsWith(detailPrefix)) {
-    return href
-  }
-
+  if (!href.startsWith(detailPrefix)) return href
   const entityId = href.slice(detailPrefix.length).split('/')[0]
   return entityId ? buildStatementRoute(entityId) : href
 }
 
 function getInsightHref(insight) {
   switch (insight.id) {
-    case 'overdue_invoices':
-      return DASHBOARD_TARGETS.overdueInvoices
-    case 'overdue_bills':
-      return DASHBOARD_TARGETS.overdueBills
-    case 'top_customer_outstanding':
-      return buildStatementInsightHref(insight.href, ROUTES.CUSTOMERS, ROUTES.CUSTOMER_STATEMENT)
-    case 'top_supplier_payable':
-      return buildStatementInsightHref(insight.href, ROUTES.SUPPLIERS, ROUTES.SUPPLIER_STATEMENT)
+    case 'overdue_invoices': return DASHBOARD_TARGETS.overdueInvoices
+    case 'overdue_bills': return DASHBOARD_TARGETS.overdueBills
+    case 'top_customer_outstanding': return buildStatementInsightHref(insight.href, ROUTES.CUSTOMERS, ROUTES.CUSTOMER_STATEMENT)
+    case 'top_supplier_payable': return buildStatementInsightHref(insight.href, ROUTES.SUPPLIERS, ROUTES.SUPPLIER_STATEMENT)
     case 'net_income_positive':
     case 'net_income_negative':
-    case 'net_income_neutral':
-      return DASHBOARD_TARGETS.incomeStatement
-    default:
-      return insight.href
+    case 'net_income_neutral': return DASHBOARD_TARGETS.incomeStatement
+    default: return insight.href
   }
 }
 
@@ -242,30 +183,23 @@ function DashboardInsights({ insights, currency, isLoading }) {
   const navigate = useNavigate()
 
   const resolvedInsights = Array.isArray(insights)
-    ? insights
-        .map((insight) => ({
-          insight,
-          content: getInsightContent(insight, t, currency),
-        }))
-        .filter(({ content }) => content != null)
+    ? insights.map((insight) => ({ insight, content: getInsightContent(insight, t, currency) })).filter(({ content }) => content != null)
     : []
 
   return (
     <Card padding="md">
-      <h3 className="text-base font-semibold text-text-primary">{t('dashboard.insights.title')}</h3>
+      <div className="flex items-center gap-2 pb-3 mb-3 border-b border-border">
+        <h3 className="text-sm font-semibold text-text-primary">{t('dashboard.insights.title')}</h3>
+      </div>
 
-      {isLoading && (
-        <div className="mt-4">
-          <LoadingRows count={4} />
-        </div>
-      )}
+      {isLoading && <LoadingRows count={4} />}
 
       {!isLoading && resolvedInsights.length === 0 && (
-        <p className="py-6 text-center text-sm text-text-secondary">{t('common.noData')}</p>
+        <p className="py-4 text-center text-sm text-text-secondary">{t('common.noData')}</p>
       )}
 
       {!isLoading && resolvedInsights.length > 0 && (
-        <div className="mt-4 grid grid-cols-1 xl:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
           {resolvedInsights.map(({ insight, content }) => {
             const href = getInsightHref(insight)
             const styles = INSIGHT_STYLES[insight.tone] ?? INSIGHT_STYLES.info
@@ -278,40 +212,25 @@ function DashboardInsights({ insights, currency, isLoading }) {
 
             const body = (
               <div className="flex items-start gap-3">
-                <div className={cn('mt-0.5 flex h-9 w-9 items-center justify-center rounded-full', styles.iconWrap)}>
-                  <Icon size={18} />
+                <div className={cn('mt-0.5 flex h-8 w-8 items-center justify-center rounded-full shrink-0', styles.iconWrap)}>
+                  <Icon size={16} />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className={cn('text-sm font-semibold', styles.title)}>{content.title}</p>
-                  <p className={cn('mt-1 text-sm', styles.description)}>{content.description}</p>
+                  <p className={cn('mt-0.5 text-xs leading-relaxed', styles.description)}>{content.description}</p>
                 </div>
-                {href && (
-                  <ChevronRight
-                    size={16}
-                    className="mt-1 flex-shrink-0 text-text-muted rtl:rotate-180"
-                  />
-                )}
+                {href && <ChevronRight size={14} className="mt-1 shrink-0 text-text-muted rtl:rotate-180" />}
               </div>
             )
 
             if (href) {
               return (
-                <button
-                  key={insight.id}
-                  type="button"
-                  className={panelClassName}
-                  onClick={() => navigate(href)}
-                >
+                <button key={insight.id} type="button" className={panelClassName} onClick={() => navigate(href)}>
                   {body}
                 </button>
               )
             }
-
-            return (
-              <div key={insight.id} className={panelClassName}>
-                {body}
-              </div>
-            )
+            return <div key={insight.id} className={panelClassName}>{body}</div>
           })}
         </div>
       )}
@@ -319,57 +238,57 @@ function DashboardInsights({ insights, currency, isLoading }) {
   )
 }
 
+// ─── Recent invoices ──────────────────────────────────────────────────────────
+
 function RecentInvoices({ invoices, currency, isLoading }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
 
   return (
     <Card padding="none">
-      <div className="px-5 py-4 flex items-center justify-between border-b border-border">
-        <h3 className="text-base font-semibold text-text-primary">{t('dashboard.recentInvoices')}</h3>
-        <button
-          onClick={() => navigate(ROUTES.INVOICES)}
-          className="text-xs font-medium text-primary hover:underline"
-        >
+      <div className="px-5 py-3.5 flex items-center justify-between border-b border-border">
+        <h3 className="text-sm font-semibold text-text-primary">{t('dashboard.recentInvoices')}</h3>
+        <button onClick={() => navigate(ROUTES.INVOICES)} className="text-xs font-medium text-primary hover:underline">
           {t('dashboard.viewAll')}
         </button>
       </div>
 
-      {isLoading && (
-        <div className="p-4">
-          <LoadingRows count={4} />
-        </div>
-      )}
+      {isLoading && <div className="p-4"><LoadingRows count={4} /></div>}
 
       {!isLoading && (!invoices || invoices.length === 0) && (
         <p className="py-8 text-center text-sm text-text-secondary">{t('common.noData')}</p>
       )}
 
       {!isLoading && invoices && invoices.length > 0 && (
-        <ul className="divide-y divide-border">
-          {invoices.map((inv) => (
-            <li
-              key={inv._id}
-              className="px-5 py-4 hover:bg-surface-muted transition-colors cursor-pointer"
-              onClick={() => navigate(ROUTES.INVOICE_DETAIL(inv._id))}
-            >
-              <div className="flex items-center justify-between gap-4">
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-text-primary truncate">{inv.customerName}</p>
-                  <p className="text-xs text-text-secondary mt-0.5">
-                    {inv.invoiceNumber} · {formatDate(inv.dueDate)}
-                  </p>
-                </div>
-                <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                  <span className="text-sm font-semibold text-text-primary tabular-nums">
+        <>
+          <div className="hidden sm:grid grid-cols-[1fr_5rem_6rem] items-center gap-3 px-5 py-2 bg-surface-muted border-b border-border">
+            <span className="text-xs font-semibold text-text-muted uppercase tracking-wide">{t('invoices.customer')}</span>
+            <span className="text-xs font-semibold text-text-muted uppercase tracking-wide text-end">{t('common.total')}</span>
+            <span className="text-xs font-semibold text-text-muted uppercase tracking-wide text-end">{t('common.status')}</span>
+          </div>
+          <ul className="divide-y divide-border">
+            {invoices.map((inv) => (
+              <li
+                key={inv._id}
+                className="px-5 py-3 hover:bg-surface-muted transition-colors cursor-pointer"
+                onClick={() => navigate(ROUTES.INVOICE_DETAIL(inv._id))}
+              >
+                <div className="flex items-center justify-between gap-3 sm:grid sm:grid-cols-[1fr_5rem_6rem]">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-text-primary truncate">{inv.customerName}</p>
+                    <p className="text-xs text-text-muted mt-0.5">{inv.invoiceNumber}</p>
+                  </div>
+                  <p className="text-sm font-semibold text-text-primary tabular-nums text-end shrink-0">
                     {formatCurrency(inv.total, currency)}
-                  </span>
-                  <StatusPill status={inv.status} ns="invoices" />
+                  </p>
+                  <div className="hidden sm:flex justify-end">
+                    <StatusPill status={inv.status} ns="invoices" />
+                  </div>
                 </div>
-              </div>
-            </li>
-          ))}
-        </ul>
+              </li>
+            ))}
+          </ul>
+        </>
       )}
     </Card>
   )
@@ -383,51 +302,49 @@ function RecentBills({ bills, currency, isLoading }) {
 
   return (
     <Card padding="none">
-      <div className="px-5 py-4 flex items-center justify-between border-b border-border">
-        <h3 className="text-base font-semibold text-text-primary">{t('dashboard.recentBills')}</h3>
-        <button
-          onClick={() => navigate(ROUTES.BILLS)}
-          className="text-xs font-medium text-primary hover:underline"
-        >
+      <div className="px-5 py-3.5 flex items-center justify-between border-b border-border">
+        <h3 className="text-sm font-semibold text-text-primary">{t('dashboard.recentBills')}</h3>
+        <button onClick={() => navigate(ROUTES.BILLS)} className="text-xs font-medium text-primary hover:underline">
           {t('dashboard.viewAll')}
         </button>
       </div>
 
-      {isLoading && (
-        <div className="p-4">
-          <LoadingRows count={4} />
-        </div>
-      )}
+      {isLoading && <div className="p-4"><LoadingRows count={4} /></div>}
 
       {!isLoading && (!bills || bills.length === 0) && (
         <p className="py-8 text-center text-sm text-text-secondary">{t('common.noData')}</p>
       )}
 
       {!isLoading && bills && bills.length > 0 && (
-        <ul className="divide-y divide-border">
-          {bills.map((bill) => (
-            <li
-              key={bill._id}
-              className="px-5 py-4 hover:bg-surface-muted transition-colors cursor-pointer"
-              onClick={() => navigate(ROUTES.BILL_DETAIL(bill._id))}
-            >
-              <div className="flex items-center justify-between gap-4">
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-text-primary truncate">{bill.supplierName}</p>
-                  <p className="text-xs text-text-secondary mt-0.5">
-                    {bill.billNumber} · {formatDate(bill.dueDate)}
-                  </p>
-                </div>
-                <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                  <span className="text-sm font-semibold text-text-primary tabular-nums">
+        <>
+          <div className="hidden sm:grid grid-cols-[1fr_5rem_6rem] items-center gap-3 px-5 py-2 bg-surface-muted border-b border-border">
+            <span className="text-xs font-semibold text-text-muted uppercase tracking-wide">{t('bills.supplier')}</span>
+            <span className="text-xs font-semibold text-text-muted uppercase tracking-wide text-end">{t('common.total')}</span>
+            <span className="text-xs font-semibold text-text-muted uppercase tracking-wide text-end">{t('common.status')}</span>
+          </div>
+          <ul className="divide-y divide-border">
+            {bills.map((bill) => (
+              <li
+                key={bill._id}
+                className="px-5 py-3 hover:bg-surface-muted transition-colors cursor-pointer"
+                onClick={() => navigate(ROUTES.BILL_DETAIL(bill._id))}
+              >
+                <div className="flex items-center justify-between gap-3 sm:grid sm:grid-cols-[1fr_5rem_6rem]">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-text-primary truncate">{bill.supplierName}</p>
+                    <p className="text-xs text-text-muted mt-0.5">{bill.billNumber}</p>
+                  </div>
+                  <p className="text-sm font-semibold text-text-primary tabular-nums text-end shrink-0">
                     {formatCurrency(bill.total, currency)}
-                  </span>
-                  <StatusPill status={bill.status} ns="bills" />
+                  </p>
+                  <div className="hidden sm:flex justify-end">
+                    <StatusPill status={bill.status} ns="bills" />
+                  </div>
                 </div>
-              </div>
-            </li>
-          ))}
-        </ul>
+              </li>
+            ))}
+          </ul>
+        </>
       )}
     </Card>
   )
@@ -451,31 +368,24 @@ function QuickActions() {
   ]
 
   return (
-    <Card padding="md">
-      <h3 className="text-base font-semibold text-text-primary mb-4">{t('dashboard.quickActions')}</h3>
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-        <div className="flex-1">
-          <p className="text-xs text-text-muted mb-2.5">{t('common.create')}</p>
-          <div className="flex flex-wrap gap-2">
-            {primary.map(({ label, to }) => (
-              <Button key={to} variant="primary" size="sm" onClick={() => navigate(to)}>
-                <Plus size={13} />
-                {label}
-              </Button>
-            ))}
-          </div>
-        </div>
-        <div className="sm:border-s sm:border-border sm:ps-6">
-          <p className="text-xs text-text-muted mb-2.5">{t('nav.reports')}</p>
-          <div className="flex flex-wrap gap-2">
-            {secondary.map(({ label, icon: Icon, to }) => (
-              <Button key={to} variant="secondary" size="sm" onClick={() => navigate(to)}>
-                <Icon size={13} />
-                {label}
-              </Button>
-            ))}
-          </div>
-        </div>
+    <Card padding="none">
+      <div className="px-5 py-3.5 border-b border-border">
+        <h3 className="text-sm font-semibold text-text-primary">{t('dashboard.quickActions')}</h3>
+      </div>
+      <div className="px-5 py-4 flex flex-wrap items-center gap-2">
+        {primary.map(({ label, icon: Icon, to }) => (
+          <Button key={to} size="sm" onClick={() => navigate(to)}>
+            <Plus size={13} />
+            {label}
+          </Button>
+        ))}
+        <div className="h-5 w-px bg-border mx-1" />
+        {secondary.map(({ label, icon: Icon, to }) => (
+          <Button key={to} variant="secondary" size="sm" onClick={() => navigate(to)}>
+            <Icon size={13} />
+            {label}
+          </Button>
+        ))}
       </div>
     </Card>
   )
@@ -504,7 +414,7 @@ export default function DashboardPage() {
   const netIncomeAccent = netIncomeNum === null ? 'default' : netIncomeNum >= 0 ? 'green' : 'red'
 
   return (
-    <div className="p-4 sm:p-6 space-y-8 animate-fade-in">
+    <div className="p-4 sm:p-6 space-y-5 animate-fade-in">
       <PageHeader
         title={`${t('dashboard.welcome')}, ${user?.name?.split(' ')[0] || ''}`}
         subtitle={t('dashboard.subtitle')}
@@ -514,14 +424,14 @@ export default function DashboardPage() {
         <ErrorState
           title={t('common.somethingWentWrong')}
           onRetry={refetch}
-          className="py-10"
+          compact
         />
       )}
 
       {!isError && (
         <>
-          {/* Row 1 — summary cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          {/* Row 1 — KPI cards */}
+          <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
             <SummaryCard
               label={t('dashboard.arOutstanding')}
               value={arap ? formatCurrency(arap.arOutstanding, currency) : '—'}
@@ -558,27 +468,16 @@ export default function DashboardPage() {
             />
           </div>
 
-          {/* Row 2 — recent activity */}
-          <DashboardInsights
-            insights={insights}
-            currency={currency}
-            isLoading={isLoading}
-          />
+          {/* Row 2 — insights */}
+          <DashboardInsights insights={insights} currency={currency} isLoading={isLoading} />
 
+          {/* Row 3 — recent activity */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <RecentInvoices
-              invoices={activity?.recentInvoices}
-              currency={currency}
-              isLoading={isLoading}
-            />
-            <RecentBills
-              bills={activity?.recentBills}
-              currency={currency}
-              isLoading={isLoading}
-            />
+            <RecentInvoices invoices={activity?.recentInvoices} currency={currency} isLoading={isLoading} />
+            <RecentBills bills={activity?.recentBills} currency={currency} isLoading={isLoading} />
           </div>
 
-          {/* Row 3 — quick actions */}
+          {/* Row 4 — quick actions */}
           <QuickActions />
         </>
       )}

@@ -6,6 +6,7 @@ import { PageHeader } from '@/shared/components/PageHeader'
 import { Button } from '@/shared/components/Button'
 import { LoadingState } from '@/shared/components/LoadingState'
 import { ErrorState } from '@/shared/components/ErrorState'
+import { EmptyState } from '@/shared/components/EmptyState'
 import { Input } from '@/shared/components/Input'
 import { Select } from '@/shared/components/Select'
 import { ConfirmDialog } from '@/shared/components/ConfirmDialog'
@@ -17,7 +18,6 @@ import { useInvoice, useSendInvoice, usePayInvoice, useCancelInvoice, useUpdateI
 import { InvoiceStatusBadge } from '@/features/invoices/components/InvoiceStatusBadge'
 import { InvoiceForm } from '@/features/invoices/components/InvoiceForm'
 import { useAccountList } from '@/features/accounts/hooks/useAccounts'
-
 function AccountSelect({ label, value, onChange, accounts, isLoading }) {
   const options = (accounts ?? []).filter((a) => !a.isParentOnly && a.isActive).map((a) => ({
     value: a._id,
@@ -49,7 +49,7 @@ function CurrencySnapshotCard({ invoice, t, locale }) {
   const baseCurr = invoice.baseCurrency
   const isForeign = docCurrency && baseCurr && docCurrency !== baseCurr
 
-  if (!docCurrency) return null
+  if (!isForeign) return null
 
   const hasBaseAmounts = invoice.baseSubtotal != null || invoice.baseTotal != null
 
@@ -67,7 +67,7 @@ function CurrencySnapshotCard({ invoice, t, locale }) {
             <p className="font-semibold text-text-primary font-mono">{baseCurr}</p>
           </div>
         )}
-        {isForeign && invoice.exchangeRate != null && (
+        {invoice.exchangeRate != null && (
           <div>
             <p className="text-xs text-text-muted mb-0.5">{t('multiCurrency.exchangeRate')}</p>
             <p className="font-medium tabular-nums">
@@ -75,13 +75,13 @@ function CurrencySnapshotCard({ invoice, t, locale }) {
             </p>
           </div>
         )}
-        {isForeign && invoice.exchangeRateDate && (
+        {invoice.exchangeRateDate && (
           <div>
             <p className="text-xs text-text-muted mb-0.5">{t('multiCurrency.exchangeRateDate')}</p>
             <p className="font-medium tabular-nums">{formatDate(invoice.exchangeRateDate, 'ar')}</p>
           </div>
         )}
-        {isForeign && invoice.exchangeRateSource && (
+        {invoice.exchangeRateSource && (
           <div>
             <p className="text-xs text-text-muted mb-0.5">{t('multiCurrency.exchangeRateSource')}</p>
             <p className="font-medium">{invoice.exchangeRateSource}</p>
@@ -89,44 +89,36 @@ function CurrencySnapshotCard({ invoice, t, locale }) {
         )}
       </div>
 
-      {isForeign && hasBaseAmounts && (
+      {hasBaseAmounts && (
         <div className="border-t border-border pt-3">
           <p className="text-xs font-medium text-text-muted mb-2">{t('multiCurrency.amountsInBaseCurrency')} ({baseCurr})</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
             {invoice.baseSubtotal != null && (
               <div>
                 <p className="text-xs text-text-muted mb-0.5">{t('invoices.subtotal')}</p>
-                <p className="font-medium tabular-nums">
-                  {formatCurrency(invoice.baseSubtotal, baseCurr, locale)}
-                </p>
+                <p className="font-medium tabular-nums">{formatCurrency(invoice.baseSubtotal, baseCurr, locale)}</p>
               </div>
             )}
             {invoice.baseTaxTotal != null && Number(invoice.baseTaxTotal) > 0 && (
               <div>
                 <p className="text-xs text-text-muted mb-0.5">{t('invoices.taxTotal', 'ضريبة')}</p>
-                <p className="font-medium tabular-nums">
-                  {formatCurrency(invoice.baseTaxTotal, baseCurr, locale)}
-                </p>
+                <p className="font-medium tabular-nums">{formatCurrency(invoice.baseTaxTotal, baseCurr, locale)}</p>
               </div>
             )}
             {invoice.baseTotal != null && (
               <div>
                 <p className="text-xs text-text-muted mb-0.5">{t('invoices.total')}</p>
-                <p className="font-semibold tabular-nums">
-                  {formatCurrency(invoice.baseTotal, baseCurr, locale)}
-                </p>
+                <p className="font-semibold tabular-nums">{formatCurrency(invoice.baseTotal, baseCurr, locale)}</p>
               </div>
             )}
           </div>
         </div>
       )}
 
-      {isForeign && (
-        <div className="flex items-start gap-2 pt-2 border-t border-border text-sm text-warning bg-warning/5 rounded px-3 py-2">
-          <AlertTriangle size={14} className="mt-0.5 shrink-0" />
-          <span>{t('multiCurrency.foreignPaymentUnsupported')}</span>
-        </div>
-      )}
+      <div className="flex items-start gap-2 pt-2 border-t border-border text-sm text-warning bg-warning/5 rounded px-3 py-2">
+        <AlertTriangle size={14} className="mt-0.5 shrink-0" />
+        <span>{t('multiCurrency.foreignPaymentUnsupported')}</span>
+      </div>
     </div>
   )
 }
@@ -134,7 +126,7 @@ function CurrencySnapshotCard({ invoice, t, locale }) {
 export default function InvoiceDetailPage() {
   const { id } = useParams()
   const { t, i18n } = useTranslation()
-  const locale = i18n.language === 'ar' ? 'ar-EG' : 'en-US'
+  const locale = 'en'
 
   const { data: invoice, isLoading, isError, refetch } = useInvoice(id)
   const { data: accounts, isLoading: accountsLoading } = useAccountList({ limit: 200, isActive: true })
@@ -197,14 +189,7 @@ export default function InvoiceDetailPage() {
 
   async function handlePay() {
     if (payDisabled) return
-    await payMutation.mutateAsync({
-      id,
-      data: {
-        cashAccountId,
-        amount: paymentAmount,
-        paymentDate,
-      },
-    })
+    await payMutation.mutateAsync({ id, data: { cashAccountId, amount: paymentAmount, paymentDate } })
     setPayDialog(false)
   }
 
@@ -227,9 +212,10 @@ export default function InvoiceDetailPage() {
           { label: invoice.invoiceNumber },
         ]}
         actions={
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <InvoiceStatusBadge status={invoice.status} />
 
+            {/* Secondary actions */}
             <Link
               to={ROUTES.INVOICE_PRINT(id)}
               target="_blank"
@@ -248,7 +234,7 @@ export default function InvoiceDetailPage() {
                   onClick={() => emailMutation.mutate(id)}
                   isLoading={emailMutation.isPending}
                 >
-                  <Mail size={14} className="me-1" />
+                  <Mail size={14} />
                   {t('invoices.sendEmail')}
                 </Button>
               </PermissionGate>
@@ -257,16 +243,17 @@ export default function InvoiceDetailPage() {
             {isDraft && (
               <PermissionGate permission={PERMISSIONS.INVOICE_UPDATE}>
                 <Button variant="secondary" size="sm" onClick={() => setEditing(!editing)}>
-                  <Pencil size={14} className="me-1" />
+                  <Pencil size={14} />
                   {t('common.edit')}
                 </Button>
               </PermissionGate>
             )}
 
+            {/* Primary actions */}
             {canSend && (
               <PermissionGate permission={PERMISSIONS.INVOICE_SEND}>
                 <Button size="sm" onClick={() => setSendDialog(true)}>
-                  <Send size={14} className="me-1" />
+                  <Send size={14} />
                   {t('invoices.markAsSent')}
                 </Button>
               </PermissionGate>
@@ -280,18 +267,21 @@ export default function InvoiceDetailPage() {
                   disabled={!!isForeignCurrency}
                   title={isForeignCurrency ? t('multiCurrency.foreignPaymentUnsupported') : undefined}
                 >
-                  <CreditCard size={14} className="me-1" />
+                  <CreditCard size={14} />
                   {t('invoices.recordPayment')}
                 </Button>
               </PermissionGate>
             )}
 
+            {/* Destructive — separated */}
             {canCancel && (
               <PermissionGate permission={PERMISSIONS.INVOICE_UPDATE}>
-                <Button variant="danger" size="sm" onClick={() => setCancelDialog(true)}>
-                  <XCircle size={14} className="me-1" />
-                  {t('invoices.cancel')}
-                </Button>
+                <div className="border-s border-border ps-2 ms-1">
+                  <Button variant="danger" size="sm" onClick={() => setCancelDialog(true)}>
+                    <XCircle size={14} />
+                    {t('invoices.cancel')}
+                  </Button>
+                </div>
               </PermissionGate>
             )}
           </div>
@@ -327,102 +317,149 @@ export default function InvoiceDetailPage() {
           />
         </div>
       ) : (
-        <div className="space-y-6">
-          <div className="bg-surface rounded-lg border border-border p-6">
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 text-sm">
-              <div>
-                <p className="text-text-muted mb-1">{t('invoices.customer')}</p>
-                <p className="font-medium text-text-primary">{invoice.customerName}</p>
-                {invoice.customerEmail && (
-                  <p className="text-text-secondary text-xs">{invoice.customerEmail}</p>
-                )}
+        <div className="space-y-4">
+
+          {/* ── Info panel ─────────────────────────────────────── */}
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_220px] gap-4">
+
+            {/* Left: identity */}
+            <div className="bg-surface rounded-lg border border-border p-5 space-y-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
+                <div>
+                  <p className="text-xs text-text-muted mb-1">{t('invoices.customer')}</p>
+                  <p className="font-semibold text-text-primary">{invoice.customerName}</p>
+                  {invoice.customerEmail && (
+                    <p className="text-xs text-text-secondary mt-0.5">{invoice.customerEmail}</p>
+                  )}
+                </div>
+                <div>
+                  <p className="text-xs text-text-muted mb-1">{t('invoices.issueDate')}</p>
+                  <p className="font-medium tabular-nums">{formatDate(invoice.issueDate, i18n.language)}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-text-muted mb-1">{t('invoices.dueDate')}</p>
+                  <p className="font-medium tabular-nums">{formatDate(invoice.dueDate, i18n.language)}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-text-muted mb-1">{t('invoices.issueDate')}</p>
-                <p className="font-medium tabular-nums">{formatDate(invoice.issueDate, i18n.language)}</p>
-              </div>
-              <div>
-                <p className="text-text-muted mb-1">{t('invoices.dueDate')}</p>
-                <p className="font-medium tabular-nums">{formatDate(invoice.dueDate, i18n.language)}</p>
-              </div>
-              <div>
-                <p className="text-text-muted mb-1">{t('invoices.total')}</p>
-                <p className="font-semibold text-lg tabular-nums">
-                  {formatCurrency(invoice.total, docCurrency, locale)}
-                </p>
-              </div>
-              <div>
-                <p className="text-text-muted mb-1">{t('invoices.paidAmount')}</p>
-                <p className="font-semibold text-lg tabular-nums">
-                  {formatCurrency(paidAmount, docCurrency, locale)}
-                </p>
-              </div>
-              <div>
-                <p className="text-text-muted mb-1">{t('invoices.remainingAmount')}</p>
-                <p className="font-semibold text-lg tabular-nums">
-                  {formatCurrency(remainingAmount, docCurrency, locale)}
-                </p>
-              </div>
+              {invoice.notes && (
+                <div className="pt-3 border-t border-border">
+                  <p className="text-xs text-text-muted mb-1">{t('common.notes')}</p>
+                  <p className="text-sm text-text-secondary">{invoice.notes}</p>
+                </div>
+              )}
             </div>
 
-            {invoice.notes && (
-              <div className="mt-4 pt-4 border-t border-border">
-                <p className="text-xs text-text-muted mb-1">{t('common.notes')}</p>
-                <p className="text-sm text-text-secondary">{invoice.notes}</p>
+            {/* Right: financial summary */}
+            <div className="bg-surface rounded-lg border border-border p-5 flex flex-col gap-3 text-sm">
+              <p className="text-xs font-semibold text-text-muted uppercase tracking-wide">{t('common.balance')}</p>
+              <div className="flex items-baseline justify-between gap-2">
+                <span className="text-text-secondary">{t('invoices.total')}</span>
+                <span className="text-xl font-bold text-text-primary tabular-nums">
+                  {formatCurrency(totalAmount, docCurrency, locale)}
+                </span>
               </div>
-            )}
+              <div className="flex items-baseline justify-between gap-2">
+                <span className="text-text-secondary">{t('invoices.paidAmount')}</span>
+                <span className="font-semibold text-success tabular-nums">
+                  {formatCurrency(paidAmount, docCurrency, locale)}
+                </span>
+              </div>
+              <div className="flex items-baseline justify-between gap-2 pt-2 border-t border-border">
+                <span className="font-medium text-text-primary">{t('invoices.remainingAmount')}</span>
+                <span className={`font-bold tabular-nums ${remainingAmount > 0 ? 'text-error' : 'text-success'}`}>
+                  {formatCurrency(remainingAmount, docCurrency, locale)}
+                </span>
+              </div>
+            </div>
           </div>
 
+          {/* ── Currency snapshot (foreign only) ───────────────── */}
           <CurrencySnapshotCard invoice={invoice} t={t} locale={locale} />
 
+          {/* ── Line items ─────────────────────────────────────── */}
           <div className="bg-surface rounded-lg border border-border overflow-hidden">
-            <div className="px-4 py-3 border-b border-border bg-surface-subtle">
+            <div className="px-4 py-3 border-b border-border bg-surface-muted">
               <h3 className="text-sm font-semibold text-text-primary">{t('invoices.lineItems')}</h3>
             </div>
+
+            {/* Column headers */}
+            <div className="grid grid-cols-[1fr_5rem_6rem_6rem] gap-3 px-4 py-2.5 border-b border-border bg-surface-subtle text-xs font-semibold text-text-muted uppercase tracking-wide">
+              <span>{t('common.description')}</span>
+              <span className="text-end">{t('invoices.qty')}</span>
+              <span className="text-end">{t('invoices.unitPrice')}</span>
+              <span className="text-end">{t('invoices.lineTotal')}</span>
+            </div>
+
             <div className="divide-y divide-border">
-              {invoice.lineItems.map((item) => (
-                <div key={item._id} className="grid grid-cols-[1fr_5rem_6rem_6rem] gap-3 px-4 py-3 text-sm">
+              {invoice.lineItems.map((item, idx) => (
+                <div
+                  key={item._id ?? idx}
+                  className="grid grid-cols-[1fr_5rem_6rem_6rem] gap-3 px-4 py-3 text-sm hover:bg-surface-subtle transition-colors"
+                >
                   <span className="text-text-primary">{item.description}</span>
                   <span className="text-end text-text-secondary tabular-nums">{item.quantity}</span>
-                  <span className="text-end text-text-secondary tabular-nums">{item.unitPrice}</span>
-                  <span className="text-end font-medium tabular-nums">{item.lineTotal}</span>
+                  <span className="text-end text-text-secondary tabular-nums">
+                    {formatCurrency(item.unitPrice, docCurrency, locale)}
+                  </span>
+                  <span className="text-end font-medium tabular-nums">
+                    {formatCurrency(item.lineTotal, docCurrency, locale)}
+                  </span>
                 </div>
               ))}
             </div>
-            <div className="px-4 py-3 border-t border-border flex justify-end">
-              <div className="w-48 space-y-1 text-sm">
-                <div className="flex justify-between text-text-secondary">
-                  <span>{t('invoices.subtotal')}</span>
-                  <span className="tabular-nums">{formatCurrency(invoice.subtotal, docCurrency, locale)}</span>
-                </div>
-                <div className="flex justify-between font-semibold text-text-primary border-t border-border pt-1">
-                  <span>{t('invoices.total')}</span>
-                  <span className="tabular-nums">{formatCurrency(invoice.total, docCurrency, locale)}</span>
+
+            {/* Totals */}
+            <div className="px-4 py-4 border-t border-border bg-surface-subtle">
+              <div className="flex justify-end">
+                <div className="w-56 space-y-2 text-sm">
+                  <div className="flex justify-between text-text-secondary">
+                    <span>{t('invoices.subtotal')}</span>
+                    <span className="tabular-nums font-medium">
+                      {formatCurrency(invoice.subtotal, docCurrency, locale)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between font-bold text-text-primary border-t border-border pt-2">
+                    <span>{t('invoices.total')}</span>
+                    <span className="tabular-nums text-base">
+                      {formatCurrency(invoice.total, docCurrency, locale)}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
+          {/* ── Payment history ────────────────────────────────── */}
           <div className="bg-surface rounded-lg border border-border overflow-hidden">
-            <div className="px-4 py-3 border-b border-border bg-surface-subtle">
+            <div className="px-4 py-3 border-b border-border bg-surface-muted">
               <h3 className="text-sm font-semibold text-text-primary">{t('invoices.paymentHistory')}</h3>
             </div>
             {payments.length === 0 ? (
-              <div className="px-4 py-3 text-sm text-text-muted">{t('common.noData')}</div>
+              <EmptyState
+                compact
+                title={t('common.noData')}
+              />
             ) : (
               <div className="divide-y divide-border">
                 {payments.map((payment) => (
-                  <div key={payment._id || `${payment.date}-${payment.amount}`} className="px-4 py-3 flex items-start justify-between gap-4 text-sm">
-                    <div className="space-y-1 min-w-0">
-                      <p className="font-medium text-text-primary tabular-nums">
+                  <div
+                    key={payment._id || `${payment.date}-${payment.amount}`}
+                    className="px-4 py-3 flex items-start justify-between gap-4 text-sm hover:bg-surface-subtle transition-colors"
+                  >
+                    <div className="space-y-0.5 min-w-0">
+                      <p className="font-semibold text-text-primary tabular-nums">
                         {formatCurrency(payment.amount, docCurrency, locale)}
                       </p>
-                      <p className="text-text-secondary">{formatDate(payment.date, i18n.language)}</p>
-                      <p className="text-text-secondary break-words">{getPaymentAccountLabel(payment.accountId)}</p>
+                      <p className="text-xs text-text-secondary tabular-nums">
+                        {formatDate(payment.date, i18n.language)}
+                      </p>
+                      <p className="text-xs text-text-muted break-words">
+                        {getPaymentAccountLabel(payment.accountId)}
+                      </p>
                     </div>
                     {payment.journalEntryId?.entryNumber && (
-                      <p className="text-text-muted whitespace-nowrap">
-                        {t('invoices.paymentEntry')}: #{payment.journalEntryId.entryNumber}
+                      <p className="text-xs text-text-muted whitespace-nowrap">
+                        {t('invoices.paymentEntry')} #{payment.journalEntryId.entryNumber}
                       </p>
                     )}
                   </div>
@@ -431,9 +468,12 @@ export default function InvoiceDetailPage() {
             )}
           </div>
 
+          {/* ── Journal entries ────────────────────────────────── */}
           {(invoice.sentJournalEntryId || invoice.paymentJournalEntryId) && (
-            <div className="bg-surface rounded-lg border border-border p-4 text-sm space-y-2">
-              <h3 className="font-semibold text-text-primary mb-2">{t('invoices.journalEntries')}</h3>
+            <div className="bg-surface rounded-lg border border-border p-4 text-sm space-y-1.5">
+              <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-2">
+                {t('invoices.journalEntries')}
+              </h3>
               {invoice.sentJournalEntryId && (
                 <p className="text-text-secondary">
                   {t('invoices.sentEntry')}: #{invoice.sentJournalEntryId.entryNumber}
@@ -449,6 +489,7 @@ export default function InvoiceDetailPage() {
         </div>
       )}
 
+      {/* ── Send dialog ──────────────────────────────────────────── */}
       {sendDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-surface rounded-lg border border-border p-6 w-full max-w-sm space-y-4">
@@ -482,6 +523,7 @@ export default function InvoiceDetailPage() {
         </div>
       )}
 
+      {/* ── Pay dialog ───────────────────────────────────────────── */}
       {payDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-surface rounded-lg border border-border p-6 w-full max-w-sm space-y-4">
