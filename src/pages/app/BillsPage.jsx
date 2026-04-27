@@ -16,6 +16,7 @@ import { ROUTES } from '@/shared/constants/routes'
 import { PERMISSIONS } from '@/shared/constants/permissions'
 import { downloadBlob } from '@/shared/utils/downloadBlob'
 import { BillList } from '@/features/bills/components/BillList'
+import { PaginationControls } from '@/shared/components/PaginationControls'
 import { useBillList, useBulkCancelBills, useExportBills } from '@/features/bills/hooks/useBills'
 
 const STATUS_OPTIONS = [
@@ -160,7 +161,7 @@ export default function BillsPage() {
   const createAction = (
     <PermissionGate permission={PERMISSIONS.BILL_CREATE}>
       <Button onClick={() => navigate(ROUTES.BILL_NEW)}>
-        <Plus size={16} className="me-2" />
+        <Plus size={16} />
         {t('bills.new')}
       </Button>
     </PermissionGate>
@@ -170,7 +171,7 @@ export default function BillsPage() {
     <div className="p-4 sm:p-6">
       <PageHeader title={t('nav.bills')} actions={createAction} />
 
-      <div className="mb-4 flex flex-wrap items-end gap-3">
+      <div className="filter-bar">
         <Input
           type="search"
           value={searchFilter}
@@ -236,17 +237,19 @@ export default function BillsPage() {
       {isError && <ErrorState onRetry={refetch} />}
 
       {!isLoading && !isError && bills.length === 0 && (
-        <EmptyState
-          title={t('bills.empty')}
-          message={t('bills.emptyDescription')}
-          actions={createAction}
-        />
+        <div className="bg-surface rounded-lg border border-border">
+          <EmptyState
+            title={t('bills.empty')}
+            message={t('bills.emptyDescription')}
+            actions={createAction}
+          />
+        </div>
       )}
 
       {!isLoading && !isError && bills.length > 0 && (
         <>
           {selectedCount > 0 && (
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-surface px-4 py-3">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-primary/30 bg-primary-50 px-4 py-3">
               <div className="flex flex-wrap items-center gap-3">
                 <Checkbox
                   checked={allSelected}
@@ -283,35 +286,13 @@ export default function BillsPage() {
             onView={handleView}
           />
 
-          {pagination && pagination.totalPages > 1 && (
-            <div className="mt-4 flex items-center justify-between text-sm text-text-secondary">
-              <span>
-                {t('common.showingRange', {
-                  from: (pagination.page - 1) * pagination.limit + 1,
-                  to: Math.min(pagination.page * pagination.limit, pagination.total),
-                  total: pagination.total,
-                })}
-              </span>
-              <div className="flex gap-2">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  disabled={!pagination.hasPrevPage}
-                  onClick={handlePreviousPage}
-                >
-                  {t('common.previous')}
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  disabled={!pagination.hasNextPage}
-                  onClick={handleNextPage}
-                >
-                  {t('common.next')}
-                </Button>
-              </div>
-            </div>
-          )}
+          <PaginationControls
+            pagination={pagination}
+            onPageChange={(p) => {
+              if (p < page) handlePreviousPage()
+              else handleNextPage()
+            }}
+          />
         </>
       )}
 

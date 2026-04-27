@@ -3,113 +3,125 @@ import { Eye } from 'lucide-react'
 import { formatCurrency, formatDate } from '@/shared/utils/formatters'
 import { Checkbox } from '@/shared/components/Checkbox'
 import { BillStatusBadge } from './BillStatusBadge'
+import { cn } from '@/shared/utils/cn'
 
 export function BillList({ bills, selectedIds = [], onToggleSelect, onView }) {
   const { t, i18n } = useTranslation()
-  const locale = i18n.language === 'ar' ? 'ar-EG' : 'en-US'
 
   if (!bills?.length) return null
 
   return (
-    <div className="overflow-hidden rounded-lg border border-border bg-surface">
-      <div className="hidden grid-cols-[2.5rem_6.5rem_1fr_1fr_6rem_7rem_5rem] items-center gap-3 border-b border-border bg-surface-subtle px-4 py-2.5 sm:grid">
-        <span className="w-[18px]" />
-        <span className="text-xs font-semibold text-text-muted">{t('bills.number')}</span>
-        <span className="text-xs font-semibold text-text-muted">{t('bills.supplier')}</span>
-        <span className="text-xs font-semibold text-text-muted">{t('bills.dueDate')}</span>
-        <span className="text-end text-xs font-semibold text-text-muted">{t('bills.total')}</span>
-        <span className="text-center text-xs font-semibold text-text-muted">{t('common.status')}</span>
-        <span className="w-16" />
+    <div className="bg-surface rounded-lg border border-border overflow-hidden">
+      {/* Table header */}
+      <div className="hidden sm:grid grid-cols-[2.5rem_5.5rem_1fr_1fr_5.5rem_7rem_4rem] items-center gap-2 px-4 py-2.5 border-b border-border bg-surface-muted">
+        <span />
+        <span className="text-xs font-semibold text-text-muted uppercase tracking-wide">{t('bills.number')}</span>
+        <span className="text-xs font-semibold text-text-muted uppercase tracking-wide">{t('bills.supplier')}</span>
+        <span className="text-xs font-semibold text-text-muted uppercase tracking-wide">{t('bills.dueDate')}</span>
+        <span className="text-xs font-semibold text-text-muted uppercase tracking-wide text-end">{t('bills.total')}</span>
+        <span className="text-xs font-semibold text-text-muted uppercase tracking-wide text-center">{t('common.status')}</span>
+        <span />
       </div>
 
+      {/* Rows */}
       <div className="divide-y divide-border">
-        {bills.map((bill) => (
-          <div
-            key={bill._id}
-            onClick={() => onView?.(bill)}
-            className="group grid cursor-pointer grid-cols-[1fr_auto] items-center gap-3 px-4 py-3 transition-colors hover:bg-surface-muted sm:grid-cols-[2.5rem_6.5rem_1fr_1fr_6rem_7rem_5rem]"
-          >
-            <div className="hidden sm:flex items-center justify-center" onClick={(event) => event.stopPropagation()}>
-              <Checkbox
-                checked={selectedIds.includes(bill._id)}
-                onChange={(checked) => onToggleSelect?.(bill._id, checked)}
-                ariaLabel={t('common.selectRow', { value: bill.billNumber })}
-                className="gap-0"
-              />
-            </div>
+        {bills.map((bill) => {
+          const isSelected = selectedIds.includes(bill._id)
+          return (
+            <div
+              key={bill._id}
+              onClick={() => onView?.(bill)}
+              className={cn(
+                'group grid cursor-pointer grid-cols-[1fr_auto] items-center gap-2 px-4 py-2.5 transition-colors',
+                'sm:grid-cols-[2.5rem_5.5rem_1fr_1fr_5.5rem_7rem_4rem]',
+                isSelected ? 'bg-primary-50 hover:bg-primary-50' : 'hover:bg-surface-muted'
+              )}
+            >
+              {/* Checkbox desktop */}
+              <div className="hidden sm:flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+                <Checkbox
+                  checked={isSelected}
+                  onChange={(checked) => onToggleSelect?.(bill._id, checked)}
+                  ariaLabel={t('common.selectRow', { value: bill.billNumber })}
+                  className="gap-0"
+                />
+              </div>
 
-            <div className="sm:contents">
-              <span className="hidden text-xs font-mono text-gray-400 sm:block">
+              {/* Bill number — desktop */}
+              <span className="hidden sm:block text-xs font-mono font-semibold text-text-secondary truncate">
                 {bill.billNumber}
               </span>
 
+              {/* Supplier — main cell */}
               <div className="min-w-0">
-                <div className="flex items-start gap-3 sm:block">
-                  <div className="sm:hidden" onClick={(event) => event.stopPropagation()}>
+                <div className="flex items-start gap-2.5 sm:block">
+                  {/* Checkbox mobile */}
+                  <div className="sm:hidden shrink-0 mt-0.5" onClick={(e) => e.stopPropagation()}>
                     <Checkbox
-                      checked={selectedIds.includes(bill._id)}
+                      checked={isSelected}
                       onChange={(checked) => onToggleSelect?.(bill._id, checked)}
                       ariaLabel={t('common.selectRow', { value: bill.billNumber })}
                       className="gap-0"
                     />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-text-primary">{bill.supplierName}</p>
+                    <p className="text-sm font-semibold text-text-primary truncate">{bill.supplierName}</p>
                     {bill.supplierEmail && (
-                      <p className="hidden truncate text-xs text-text-muted sm:block">{bill.supplierEmail}</p>
+                      <p className="text-xs text-text-muted truncate hidden sm:block mt-0.5">{bill.supplierEmail}</p>
                     )}
-                    <div className="mt-0.5 flex items-center gap-2 sm:hidden">
-                      <span className="text-xs font-mono text-gray-400">{bill.billNumber}</span>
+                    {/* Mobile: number + status */}
+                    <div className="flex items-center gap-2 sm:hidden mt-0.5">
+                      <span className="text-xs font-mono text-text-muted">{bill.billNumber}</span>
                       <BillStatusBadge status={bill.status} />
                     </div>
                   </div>
                 </div>
               </div>
 
-              <span className="hidden text-xs tabular-nums text-text-secondary sm:block">
+              {/* Due date — desktop */}
+              <span className="hidden sm:block text-xs text-text-secondary tabular-nums">
                 {formatDate(bill.dueDate, i18n.language)}
               </span>
 
-              <span className="hidden text-end text-xs font-medium tabular-nums text-text-primary sm:block">
-                {formatCurrency(bill.total, bill.currency, locale)}
+              {/* Amount */}
+              <span className="hidden sm:block text-sm font-bold text-text-primary text-end tabular-nums">
+                {formatCurrency(bill.total, bill.currency, 'en')}
               </span>
 
-              <span className="hidden justify-center sm:flex">
+              {/* Status — desktop */}
+              <span className="hidden sm:flex justify-center">
                 <BillStatusBadge status={bill.status} />
               </span>
-            </div>
 
-            <div className="flex flex-col items-end gap-1 sm:hidden">
-              <span className="text-sm font-semibold tabular-nums text-text-primary">
-                {formatCurrency(bill.total, bill.currency, locale)}
-              </span>
-              <span className="text-xs text-text-muted">{formatDate(bill.dueDate, i18n.language)}</span>
-            </div>
+              {/* Mobile: total + date */}
+              <div className="flex flex-col items-end gap-1 sm:hidden shrink-0">
+                <span className="text-sm font-bold text-text-primary tabular-nums">
+                  {formatCurrency(bill.total, bill.currency, 'en')}
+                </span>
+                <span className="text-xs text-text-muted">{formatDate(bill.dueDate, i18n.language)}</span>
+              </div>
 
-            <div className="hidden items-center justify-end opacity-0 transition-opacity group-hover:opacity-100 sm:flex">
+              {/* Actions desktop — revealed on hover */}
+              <div className="hidden sm:flex items-center justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                  onClick={(e) => { e.stopPropagation(); onView?.(bill) }}
+                  className="p-1.5 rounded text-text-muted hover:text-primary hover:bg-primary/10 transition-colors"
+                  title={t('common.view')}
+                >
+                  <Eye size={13} />
+                </button>
+              </div>
+
+              {/* Actions mobile */}
               <button
-                onClick={(event) => {
-                  event.stopPropagation()
-                  onView?.(bill)
-                }}
-                className="rounded p-1.5 text-text-muted transition-colors hover:bg-primary/10 hover:text-primary"
-                title={t('common.view')}
+                onClick={(e) => { e.stopPropagation(); onView?.(bill) }}
+                className="sm:hidden p-1.5 rounded text-text-muted hover:text-primary"
               >
-                <Eye size={14} />
+                <Eye size={13} />
               </button>
             </div>
-
-            <button
-              onClick={(event) => {
-                event.stopPropagation()
-                onView?.(bill)
-              }}
-              className="rounded p-1.5 text-text-muted hover:text-primary sm:hidden"
-            >
-              <Eye size={14} />
-            </button>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )

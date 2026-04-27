@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Send, CreditCard, XCircle, Pencil, Printer, Mail, AlertTriangle } from 'lucide-react'
+import { Send, CreditCard, XCircle, Pencil, Printer, Mail, AlertTriangle, CheckCircle2 } from 'lucide-react'
 import { PageHeader } from '@/shared/components/PageHeader'
 import { Button } from '@/shared/components/Button'
 import { LoadingState } from '@/shared/components/LoadingState'
@@ -18,20 +18,14 @@ import { useInvoice, useSendInvoice, usePayInvoice, useCancelInvoice, useUpdateI
 import { InvoiceStatusBadge } from '@/features/invoices/components/InvoiceStatusBadge'
 import { InvoiceForm } from '@/features/invoices/components/InvoiceForm'
 import { useAccountList } from '@/features/accounts/hooks/useAccounts'
+
 function AccountSelect({ label, value, onChange, accounts, isLoading }) {
   const options = (accounts ?? []).filter((a) => !a.isParentOnly && a.isActive).map((a) => ({
     value: a._id,
     label: `${a.code} - ${a.nameAr || a.nameEn}`,
   }))
   return (
-    <Select
-      label={label}
-      value={value}
-      onChange={onChange}
-      options={options}
-      isLoading={isLoading}
-      placeholder="-"
-    />
+    <Select label={label} value={value} onChange={onChange} options={options} isLoading={isLoading} placeholder="-" />
   )
 }
 
@@ -44,80 +38,50 @@ function getPaymentAccountLabel(account) {
   return account.code ? `${account.code} - ${account.nameAr || account.nameEn}` : account.nameAr || account.nameEn || '-'
 }
 
-function CurrencySnapshotCard({ invoice, t, locale }) {
+// Compact currency snapshot — only renders for foreign-currency invoices
+function CurrencySnapshot({ invoice, t, locale }) {
   const docCurrency = invoice.documentCurrency || invoice.currency
   const baseCurr = invoice.baseCurrency
   const isForeign = docCurrency && baseCurr && docCurrency !== baseCurr
 
   if (!isForeign) return null
 
-  const hasBaseAmounts = invoice.baseSubtotal != null || invoice.baseTotal != null
-
   return (
-    <div className="bg-surface rounded-lg border border-border p-4 space-y-3">
-      <h3 className="text-sm font-semibold text-text-primary">{t('multiCurrency.currencySnapshot')}</h3>
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
-        <div>
-          <p className="text-xs text-text-muted mb-0.5">{t('multiCurrency.invoiceCurrency')}</p>
-          <p className="font-semibold text-text-primary font-mono">{docCurrency}</p>
-        </div>
-        {baseCurr && (
+    <div className="bg-surface rounded-lg border border-border overflow-hidden">
+      <div className="px-4 py-3 border-b border-border bg-surface-muted">
+        <h3 className="text-sm font-semibold text-text-primary">{t('multiCurrency.currencySnapshot')}</h3>
+      </div>
+      <div className="p-4 space-y-3 text-sm">
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <p className="text-xs text-text-muted mb-0.5">{t('multiCurrency.invoiceCurrency')}</p>
+            <p className="font-mono font-semibold text-text-primary">{docCurrency}</p>
+          </div>
           <div>
             <p className="text-xs text-text-muted mb-0.5">{t('multiCurrency.companyBaseCurrency')}</p>
-            <p className="font-semibold text-text-primary font-mono">{baseCurr}</p>
+            <p className="font-mono font-semibold text-text-primary">{baseCurr}</p>
           </div>
-        )}
-        {invoice.exchangeRate != null && (
-          <div>
-            <p className="text-xs text-text-muted mb-0.5">{t('multiCurrency.exchangeRate')}</p>
-            <p className="font-medium tabular-nums">
-              1 {docCurrency} = {String(invoice.exchangeRate)} {baseCurr}
-            </p>
-          </div>
-        )}
-        {invoice.exchangeRateDate && (
-          <div>
-            <p className="text-xs text-text-muted mb-0.5">{t('multiCurrency.exchangeRateDate')}</p>
-            <p className="font-medium tabular-nums">{formatDate(invoice.exchangeRateDate, 'ar')}</p>
-          </div>
-        )}
-        {invoice.exchangeRateSource && (
-          <div>
-            <p className="text-xs text-text-muted mb-0.5">{t('multiCurrency.exchangeRateSource')}</p>
-            <p className="font-medium">{invoice.exchangeRateSource}</p>
-          </div>
-        )}
-      </div>
-
-      {hasBaseAmounts && (
-        <div className="border-t border-border pt-3">
-          <p className="text-xs font-medium text-text-muted mb-2">{t('multiCurrency.amountsInBaseCurrency')} ({baseCurr})</p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
-            {invoice.baseSubtotal != null && (
-              <div>
-                <p className="text-xs text-text-muted mb-0.5">{t('invoices.subtotal')}</p>
-                <p className="font-medium tabular-nums">{formatCurrency(invoice.baseSubtotal, baseCurr, locale)}</p>
-              </div>
-            )}
-            {invoice.baseTaxTotal != null && Number(invoice.baseTaxTotal) > 0 && (
-              <div>
-                <p className="text-xs text-text-muted mb-0.5">{t('invoices.taxTotal', 'ضريبة')}</p>
-                <p className="font-medium tabular-nums">{formatCurrency(invoice.baseTaxTotal, baseCurr, locale)}</p>
-              </div>
-            )}
-            {invoice.baseTotal != null && (
-              <div>
-                <p className="text-xs text-text-muted mb-0.5">{t('invoices.total')}</p>
-                <p className="font-semibold tabular-nums">{formatCurrency(invoice.baseTotal, baseCurr, locale)}</p>
-              </div>
-            )}
-          </div>
+          {invoice.exchangeRate != null && (
+            <div className="col-span-2">
+              <p className="text-xs text-text-muted mb-0.5">{t('multiCurrency.exchangeRate')}</p>
+              <p className="font-medium tabular-nums text-text-primary">
+                1 {docCurrency} = {String(invoice.exchangeRate)} {baseCurr}
+              </p>
+            </div>
+          )}
+          {invoice.baseTotal != null && (
+            <div className="col-span-2 pt-2 border-t border-border">
+              <p className="text-xs text-text-muted mb-0.5">{t('invoices.total')} ({baseCurr})</p>
+              <p className="font-semibold tabular-nums text-text-primary">
+                {formatCurrency(invoice.baseTotal, baseCurr, locale)}
+              </p>
+            </div>
+          )}
         </div>
-      )}
-
-      <div className="flex items-start gap-2 pt-2 border-t border-border text-sm text-warning bg-warning/5 rounded px-3 py-2">
-        <AlertTriangle size={14} className="mt-0.5 shrink-0" />
-        <span>{t('multiCurrency.foreignPaymentUnsupported')}</span>
+        <div className="flex items-start gap-2 bg-warning/5 border border-warning/20 rounded px-3 py-2 text-xs text-warning">
+          <AlertTriangle size={13} className="mt-0.5 shrink-0" />
+          <span>{t('multiCurrency.foreignPaymentUnsupported')}</span>
+        </div>
       </div>
     </div>
   )
@@ -155,14 +119,10 @@ export default function InvoiceDetailPage() {
   const totalAmount = Number(invoice.total ?? 0)
   const paidAmount = typeof invoice.paidAmount === 'number'
     ? invoice.paidAmount
-    : invoice.status === 'paid'
-      ? totalAmount
-      : 0
+    : invoice.status === 'paid' ? totalAmount : 0
   const remainingAmount = typeof invoice.remainingAmount === 'number'
     ? invoice.remainingAmount
-    : invoice.status === 'paid'
-      ? 0
-      : Math.max(totalAmount - paidAmount, 0)
+    : invoice.status === 'paid' ? 0 : Math.max(totalAmount - paidAmount, 0)
   const payments = Array.isArray(invoice.payments) ? invoice.payments : []
 
   const docCurrency = invoice.documentCurrency || invoice.currency
@@ -173,6 +133,7 @@ export default function InvoiceDetailPage() {
   const canPay = ['sent', 'partially_paid', 'overdue'].includes(invoice.status)
   const canCancel = !['paid', 'cancelled'].includes(invoice.status)
   const payDisabled = !cashAccountId || !paymentDate || !paymentAmount || Number(paymentAmount) <= 0 || Number(paymentAmount) > remainingAmount
+  const isFullyPaid = remainingAmount <= 0 && paidAmount > 0
 
   function openPayDialog() {
     setCashAccountId('')
@@ -204,7 +165,8 @@ export default function InvoiceDetailPage() {
   }
 
   return (
-    <div className="p-4 sm:p-6 max-w-4xl mx-auto">
+    <div className="p-4 sm:p-6">
+      {/* ── Page header ───────────────────────────────────────────── */}
       <PageHeader
         title={invoice.invoiceNumber}
         breadcrumbs={[
@@ -212,84 +174,37 @@ export default function InvoiceDetailPage() {
           { label: invoice.invoiceNumber },
         ]}
         actions={
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-2">
             <InvoiceStatusBadge status={invoice.status} />
-
-            {/* Secondary actions */}
+            <div className="h-4 w-px bg-border" />
             <Link
               to={ROUTES.INVOICE_PRINT(id)}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 font-medium transition-colors duration-200 h-button-sm px-3 text-sm rounded-sm bg-surface text-text-primary border border-border hover:bg-surface-muted"
+              className="inline-flex items-center gap-1.5 h-button-sm px-3 text-sm font-medium rounded-sm bg-surface text-text-secondary border border-border hover:bg-surface-muted transition-colors"
             >
-              <Printer size={14} />
+              <Printer size={13} />
               {t('invoices.print')}
             </Link>
-
             {invoice.customerEmail && invoice.status !== 'cancelled' && (
               <PermissionGate permission={PERMISSIONS.INVOICE_SEND}>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => emailMutation.mutate(id)}
-                  isLoading={emailMutation.isPending}
-                >
-                  <Mail size={14} />
+                <Button variant="secondary" size="sm" onClick={() => emailMutation.mutate(id)} isLoading={emailMutation.isPending}>
+                  <Mail size={13} />
                   {t('invoices.sendEmail')}
                 </Button>
-              </PermissionGate>
-            )}
-
-            {isDraft && (
-              <PermissionGate permission={PERMISSIONS.INVOICE_UPDATE}>
-                <Button variant="secondary" size="sm" onClick={() => setEditing(!editing)}>
-                  <Pencil size={14} />
-                  {t('common.edit')}
-                </Button>
-              </PermissionGate>
-            )}
-
-            {/* Primary actions */}
-            {canSend && (
-              <PermissionGate permission={PERMISSIONS.INVOICE_SEND}>
-                <Button size="sm" onClick={() => setSendDialog(true)}>
-                  <Send size={14} />
-                  {t('invoices.markAsSent')}
-                </Button>
-              </PermissionGate>
-            )}
-
-            {canPay && (
-              <PermissionGate permission={PERMISSIONS.INVOICE_SEND}>
-                <Button
-                  size="sm"
-                  onClick={isForeignCurrency ? undefined : openPayDialog}
-                  disabled={!!isForeignCurrency}
-                  title={isForeignCurrency ? t('multiCurrency.foreignPaymentUnsupported') : undefined}
-                >
-                  <CreditCard size={14} />
-                  {t('invoices.recordPayment')}
-                </Button>
-              </PermissionGate>
-            )}
-
-            {/* Destructive — separated */}
-            {canCancel && (
-              <PermissionGate permission={PERMISSIONS.INVOICE_UPDATE}>
-                <div className="border-s border-border ps-2 ms-1">
-                  <Button variant="danger" size="sm" onClick={() => setCancelDialog(true)}>
-                    <XCircle size={14} />
-                    {t('invoices.cancel')}
-                  </Button>
-                </div>
               </PermissionGate>
             )}
           </div>
         }
       />
 
-      {editing ? (
+      {/* ── Editing mode (full-width form) ────────────────────────── */}
+      {editing && (
         <div className="bg-surface rounded-lg border border-border p-6 mb-6">
+          <div className="flex items-center justify-between mb-5 pb-4 border-b border-border">
+            <h2 className="text-base font-semibold text-text-primary">{t('common.edit')}: {invoice.invoiceNumber}</h2>
+            <Button variant="ghost" size="sm" onClick={() => setEditing(false)}>{t('common.cancel')}</Button>
+          </div>
           <InvoiceForm
             defaultValues={{
               customerName: invoice.customerName,
@@ -316,206 +231,318 @@ export default function InvoiceDetailPage() {
             isSubmitting={updateMutation.isPending}
           />
         </div>
-      ) : (
-        <div className="space-y-4">
+      )}
 
-          {/* ── Info panel ─────────────────────────────────────── */}
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_220px] gap-4">
+      {/* ── Two-column view ───────────────────────────────────────── */}
+      {!editing && (
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_288px] gap-5 items-start">
 
-            {/* Left: identity */}
-            <div className="bg-surface rounded-lg border border-border p-5 space-y-4">
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
-                <div>
-                  <p className="text-xs text-text-muted mb-1">{t('invoices.customer')}</p>
-                  <p className="font-semibold text-text-primary">{invoice.customerName}</p>
-                  {invoice.customerEmail && (
-                    <p className="text-xs text-text-secondary mt-0.5">{invoice.customerEmail}</p>
-                  )}
-                </div>
-                <div>
-                  <p className="text-xs text-text-muted mb-1">{t('invoices.issueDate')}</p>
-                  <p className="font-medium tabular-nums">{formatDate(invoice.issueDate, i18n.language)}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-text-muted mb-1">{t('invoices.dueDate')}</p>
-                  <p className="font-medium tabular-nums">{formatDate(invoice.dueDate, i18n.language)}</p>
+          {/* ── LEFT: Invoice document + history ────────────────── */}
+          <div className="space-y-4 min-w-0">
+
+            {/* Invoice document card */}
+            <div className="bg-surface rounded-lg border border-border overflow-hidden">
+
+              {/* Customer + metadata header */}
+              <div className="px-6 py-5 border-b border-border">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                  {/* Customer block */}
+                  <div>
+                    <p className="text-xs font-medium text-text-muted uppercase tracking-wide mb-1">
+                      {t('invoices.customer')}
+                    </p>
+                    <p className="text-lg font-bold text-text-primary leading-tight">
+                      {invoice.customerName}
+                    </p>
+                    {invoice.customerEmail && (
+                      <p className="text-sm text-text-secondary mt-0.5">{invoice.customerEmail}</p>
+                    )}
+                  </div>
+
+                  {/* Invoice metadata block */}
+                  <div className="grid grid-cols-2 gap-x-8 gap-y-3 text-sm sm:text-end shrink-0">
+                    <div>
+                      <p className="text-xs text-text-muted mb-0.5">{t('invoices.number')}</p>
+                      <p className="font-mono font-semibold text-text-primary">{invoice.invoiceNumber}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-text-muted mb-0.5">{t('invoices.currency')}</p>
+                      <p className="font-mono font-semibold text-text-primary">{docCurrency}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-text-muted mb-0.5">{t('invoices.issueDate')}</p>
+                      <p className="font-medium tabular-nums">{formatDate(invoice.issueDate, i18n.language)}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-text-muted mb-0.5">{t('invoices.dueDate')}</p>
+                      <p className="font-medium tabular-nums">{formatDate(invoice.dueDate, i18n.language)}</p>
+                    </div>
+                  </div>
                 </div>
               </div>
+
+              {/* Line items table */}
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border bg-surface-muted">
+                      <th className="px-6 py-3 text-start text-xs font-semibold text-text-muted uppercase tracking-wide">
+                        {t('common.description')}
+                      </th>
+                      <th className="px-4 py-3 text-end text-xs font-semibold text-text-muted uppercase tracking-wide w-16">
+                        {t('invoices.qty')}
+                      </th>
+                      <th className="px-4 py-3 text-end text-xs font-semibold text-text-muted uppercase tracking-wide w-32">
+                        {t('invoices.unitPrice')}
+                      </th>
+                      <th className="px-6 py-3 text-end text-xs font-semibold text-text-muted uppercase tracking-wide w-32">
+                        {t('invoices.lineTotal')}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {invoice.lineItems.map((item, idx) => (
+                      <tr key={item._id ?? idx} className="hover:bg-surface-subtle transition-colors">
+                        <td className="px-6 py-3.5 text-text-primary">{item.description}</td>
+                        <td className="px-4 py-3.5 text-end text-text-secondary tabular-nums">{item.quantity}</td>
+                        <td className="px-4 py-3.5 text-end text-text-secondary tabular-nums">
+                          {formatCurrency(item.unitPrice, docCurrency, locale)}
+                        </td>
+                        <td className="px-6 py-3.5 text-end font-semibold tabular-nums text-text-primary">
+                          {formatCurrency(item.lineTotal, docCurrency, locale)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Totals block */}
+              <div className="px-6 py-5 border-t border-border bg-surface-subtle">
+                <div className="flex justify-end">
+                  <div className="w-64 space-y-2.5 text-sm">
+                    <div className="flex justify-between text-text-secondary">
+                      <span>{t('invoices.subtotal')}</span>
+                      <span className="tabular-nums font-medium">
+                        {formatCurrency(invoice.subtotal, docCurrency, locale)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-baseline font-bold text-text-primary border-t border-border pt-2.5">
+                      <span className="text-base">{t('invoices.total')}</span>
+                      <span className="tabular-nums text-lg">
+                        {formatCurrency(invoice.total, docCurrency, locale)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Notes */}
               {invoice.notes && (
-                <div className="pt-3 border-t border-border">
-                  <p className="text-xs text-text-muted mb-1">{t('common.notes')}</p>
-                  <p className="text-sm text-text-secondary">{invoice.notes}</p>
+                <div className="px-6 py-4 border-t border-border">
+                  <p className="text-xs font-medium text-text-muted uppercase tracking-wide mb-1.5">
+                    {t('common.notes')}
+                  </p>
+                  <p className="text-sm text-text-secondary leading-relaxed">{invoice.notes}</p>
                 </div>
               )}
             </div>
 
-            {/* Right: financial summary */}
-            <div className="bg-surface rounded-lg border border-border p-5 flex flex-col gap-3 text-sm">
-              <p className="text-xs font-semibold text-text-muted uppercase tracking-wide">{t('common.balance')}</p>
-              <div className="flex items-baseline justify-between gap-2">
-                <span className="text-text-secondary">{t('invoices.total')}</span>
-                <span className="text-xl font-bold text-text-primary tabular-nums">
-                  {formatCurrency(totalAmount, docCurrency, locale)}
-                </span>
+            {/* Payment history */}
+            <div className="bg-surface rounded-lg border border-border overflow-hidden">
+              <div className="px-5 py-3.5 border-b border-border bg-surface-muted">
+                <h3 className="text-sm font-semibold text-text-primary">{t('invoices.paymentHistory')}</h3>
               </div>
-              <div className="flex items-baseline justify-between gap-2">
-                <span className="text-text-secondary">{t('invoices.paidAmount')}</span>
-                <span className="font-semibold text-success tabular-nums">
-                  {formatCurrency(paidAmount, docCurrency, locale)}
-                </span>
-              </div>
-              <div className="flex items-baseline justify-between gap-2 pt-2 border-t border-border">
-                <span className="font-medium text-text-primary">{t('invoices.remainingAmount')}</span>
-                <span className={`font-bold tabular-nums ${remainingAmount > 0 ? 'text-error' : 'text-success'}`}>
-                  {formatCurrency(remainingAmount, docCurrency, locale)}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* ── Currency snapshot (foreign only) ───────────────── */}
-          <CurrencySnapshotCard invoice={invoice} t={t} locale={locale} />
-
-          {/* ── Line items ─────────────────────────────────────── */}
-          <div className="bg-surface rounded-lg border border-border overflow-hidden">
-            <div className="px-4 py-3 border-b border-border bg-surface-muted">
-              <h3 className="text-sm font-semibold text-text-primary">{t('invoices.lineItems')}</h3>
-            </div>
-
-            {/* Column headers */}
-            <div className="grid grid-cols-[1fr_5rem_6rem_6rem] gap-3 px-4 py-2.5 border-b border-border bg-surface-subtle text-xs font-semibold text-text-muted uppercase tracking-wide">
-              <span>{t('common.description')}</span>
-              <span className="text-end">{t('invoices.qty')}</span>
-              <span className="text-end">{t('invoices.unitPrice')}</span>
-              <span className="text-end">{t('invoices.lineTotal')}</span>
-            </div>
-
-            <div className="divide-y divide-border">
-              {invoice.lineItems.map((item, idx) => (
-                <div
-                  key={item._id ?? idx}
-                  className="grid grid-cols-[1fr_5rem_6rem_6rem] gap-3 px-4 py-3 text-sm hover:bg-surface-subtle transition-colors"
-                >
-                  <span className="text-text-primary">{item.description}</span>
-                  <span className="text-end text-text-secondary tabular-nums">{item.quantity}</span>
-                  <span className="text-end text-text-secondary tabular-nums">
-                    {formatCurrency(item.unitPrice, docCurrency, locale)}
-                  </span>
-                  <span className="text-end font-medium tabular-nums">
-                    {formatCurrency(item.lineTotal, docCurrency, locale)}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            {/* Totals */}
-            <div className="px-4 py-4 border-t border-border bg-surface-subtle">
-              <div className="flex justify-end">
-                <div className="w-56 space-y-2 text-sm">
-                  <div className="flex justify-between text-text-secondary">
-                    <span>{t('invoices.subtotal')}</span>
-                    <span className="tabular-nums font-medium">
-                      {formatCurrency(invoice.subtotal, docCurrency, locale)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between font-bold text-text-primary border-t border-border pt-2">
-                    <span>{t('invoices.total')}</span>
-                    <span className="tabular-nums text-base">
-                      {formatCurrency(invoice.total, docCurrency, locale)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* ── Payment history ────────────────────────────────── */}
-          <div className="bg-surface rounded-lg border border-border overflow-hidden">
-            <div className="px-4 py-3 border-b border-border bg-surface-muted">
-              <h3 className="text-sm font-semibold text-text-primary">{t('invoices.paymentHistory')}</h3>
-            </div>
-            {payments.length === 0 ? (
-              <EmptyState
-                compact
-                title={t('common.noData')}
-              />
-            ) : (
-              <div className="divide-y divide-border">
-                {payments.map((payment) => (
-                  <div
-                    key={payment._id || `${payment.date}-${payment.amount}`}
-                    className="px-4 py-3 flex items-start justify-between gap-4 text-sm hover:bg-surface-subtle transition-colors"
-                  >
-                    <div className="space-y-0.5 min-w-0">
-                      <p className="font-semibold text-text-primary tabular-nums">
-                        {formatCurrency(payment.amount, docCurrency, locale)}
-                      </p>
-                      <p className="text-xs text-text-secondary tabular-nums">
-                        {formatDate(payment.date, i18n.language)}
-                      </p>
-                      <p className="text-xs text-text-muted break-words">
-                        {getPaymentAccountLabel(payment.accountId)}
-                      </p>
+              {payments.length === 0 ? (
+                <EmptyState compact title={t('common.noData')} />
+              ) : (
+                <div className="divide-y divide-border">
+                  {payments.map((payment) => (
+                    <div
+                      key={payment._id || `${payment.date}-${payment.amount}`}
+                      className="px-5 py-3.5 flex items-start justify-between gap-4 text-sm hover:bg-surface-subtle transition-colors"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-7 h-7 rounded-full bg-success-soft flex items-center justify-center shrink-0">
+                          <CheckCircle2 size={14} className="text-success" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-semibold text-text-primary tabular-nums">
+                            {formatCurrency(payment.amount, docCurrency, locale)}
+                          </p>
+                          <p className="text-xs text-text-muted mt-0.5">
+                            {formatDate(payment.date, i18n.language)} · {getPaymentAccountLabel(payment.accountId)}
+                          </p>
+                        </div>
+                      </div>
+                      {payment.journalEntryId?.entryNumber && (
+                        <span className="text-xs text-text-muted whitespace-nowrap shrink-0">
+                          #{payment.journalEntryId.entryNumber}
+                        </span>
+                      )}
                     </div>
-                    {payment.journalEntryId?.entryNumber && (
-                      <p className="text-xs text-text-muted whitespace-nowrap">
-                        {t('invoices.paymentEntry')} #{payment.journalEntryId.entryNumber}
-                      </p>
-                    )}
-                  </div>
-                ))}
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Journal entries */}
+            {(invoice.sentJournalEntryId || invoice.paymentJournalEntryId) && (
+              <div className="bg-surface rounded-lg border border-border p-4 text-sm space-y-1.5">
+                <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-2">
+                  {t('invoices.journalEntries')}
+                </h3>
+                {invoice.sentJournalEntryId && (
+                  <p className="text-text-secondary">
+                    {t('invoices.sentEntry')}: <span className="font-mono">#{invoice.sentJournalEntryId.entryNumber}</span>
+                  </p>
+                )}
+                {invoice.paymentJournalEntryId && (
+                  <p className="text-text-secondary">
+                    {t('invoices.paymentEntry')}: <span className="font-mono">#{invoice.paymentJournalEntryId.entryNumber}</span>
+                  </p>
+                )}
               </div>
             )}
           </div>
 
-          {/* ── Journal entries ────────────────────────────────── */}
-          {(invoice.sentJournalEntryId || invoice.paymentJournalEntryId) && (
-            <div className="bg-surface rounded-lg border border-border p-4 text-sm space-y-1.5">
-              <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-2">
-                {t('invoices.journalEntries')}
-              </h3>
-              {invoice.sentJournalEntryId && (
-                <p className="text-text-secondary">
-                  {t('invoices.sentEntry')}: #{invoice.sentJournalEntryId.entryNumber}
-                </p>
-              )}
-              {invoice.paymentJournalEntryId && (
-                <p className="text-text-secondary">
-                  {t('invoices.paymentEntry')}: #{invoice.paymentJournalEntryId.entryNumber}
-                </p>
-              )}
+          {/* ── RIGHT: Sidebar ───────────────────────────────────── */}
+          <div className="space-y-4">
+
+            {/* Financial summary */}
+            <div className="bg-surface rounded-lg border border-border overflow-hidden">
+              <div className="px-5 py-3.5 border-b border-border bg-surface-muted">
+                <h3 className="text-sm font-semibold text-text-primary">{t('common.balance')}</h3>
+              </div>
+              <div className="p-5 space-y-4">
+                {/* Total */}
+                <div>
+                  <p className="text-xs text-text-muted mb-1">{t('invoices.total')}</p>
+                  <p className="text-2xl font-bold text-text-primary tabular-nums leading-none">
+                    {formatCurrency(totalAmount, docCurrency, locale)}
+                  </p>
+                </div>
+
+                <div className="space-y-3 pt-1 border-t border-border">
+                  {/* Paid */}
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-text-secondary">{t('invoices.paidAmount')}</span>
+                    <span className={`font-semibold tabular-nums ${paidAmount > 0 ? 'text-success' : 'text-text-muted'}`}>
+                      {formatCurrency(paidAmount, docCurrency, locale)}
+                    </span>
+                  </div>
+                  {/* Remaining */}
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="font-medium text-text-primary">{t('invoices.remainingAmount')}</span>
+                    <span className={`font-bold tabular-nums ${remainingAmount > 0 ? 'text-error' : 'text-success'}`}>
+                      {formatCurrency(remainingAmount, docCurrency, locale)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Paid-in-full indicator */}
+                {isFullyPaid && (
+                  <div className="flex items-center gap-2 px-3 py-2 bg-success-soft rounded text-xs font-medium text-success">
+                    <CheckCircle2 size={13} />
+                    {t('invoices.paid')}
+                  </div>
+                )}
+
+                {/* Due date */}
+                <div className="pt-1 border-t border-border text-sm">
+                  <span className="text-text-muted text-xs">{t('invoices.dueDate')}</span>
+                  <p className="font-medium tabular-nums mt-0.5">
+                    {formatDate(invoice.dueDate, i18n.language)}
+                  </p>
+                </div>
+              </div>
             </div>
-          )}
+
+            {/* Workflow actions */}
+            {(isDraft || canSend || canPay || canCancel) && (
+              <div className="bg-surface rounded-lg border border-border overflow-hidden">
+                <div className="px-5 py-3.5 border-b border-border bg-surface-muted">
+                  <h3 className="text-sm font-semibold text-text-primary">{t('common.actions')}</h3>
+                </div>
+                <div className="p-4 space-y-2">
+                  {isDraft && (
+                    <PermissionGate permission={PERMISSIONS.INVOICE_UPDATE}>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="w-full justify-center"
+                        onClick={() => setEditing(true)}
+                      >
+                        <Pencil size={13} />
+                        {t('common.edit')}
+                      </Button>
+                    </PermissionGate>
+                  )}
+                  {canSend && (
+                    <PermissionGate permission={PERMISSIONS.INVOICE_SEND}>
+                      <Button
+                        size="sm"
+                        className="w-full justify-center"
+                        onClick={() => setSendDialog(true)}
+                        isLoading={sendMutation.isPending}
+                      >
+                        <Send size={13} />
+                        {t('invoices.markAsSent')}
+                      </Button>
+                    </PermissionGate>
+                  )}
+                  {canPay && (
+                    <PermissionGate permission={PERMISSIONS.INVOICE_SEND}>
+                      <Button
+                        size="sm"
+                        className="w-full justify-center"
+                        onClick={isForeignCurrency ? undefined : openPayDialog}
+                        disabled={!!isForeignCurrency}
+                        isLoading={payMutation.isPending}
+                        title={isForeignCurrency ? t('multiCurrency.foreignPaymentUnsupported') : undefined}
+                      >
+                        <CreditCard size={13} />
+                        {t('invoices.recordPayment')}
+                      </Button>
+                    </PermissionGate>
+                  )}
+                  {canCancel && (
+                    <PermissionGate permission={PERMISSIONS.INVOICE_UPDATE}>
+                      <div className="pt-1 border-t border-border">
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          className="w-full justify-center"
+                          onClick={() => setCancelDialog(true)}
+                          isLoading={cancelMutation.isPending}
+                        >
+                          <XCircle size={13} />
+                          {t('invoices.cancel')}
+                        </Button>
+                      </div>
+                    </PermissionGate>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Currency snapshot (foreign only) */}
+            <CurrencySnapshot invoice={invoice} t={t} locale={locale} />
+          </div>
         </div>
       )}
 
-      {/* ── Send dialog ──────────────────────────────────────────── */}
+      {/* ── Send dialog ───────────────────────────────────────────── */}
       {sendDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-surface rounded-lg border border-border p-6 w-full max-w-sm space-y-4">
             <h2 className="font-semibold text-text-primary">{t('invoices.markAsSent')}</h2>
             <p className="text-sm text-text-secondary">{t('invoices.sendDescription')}</p>
-            <AccountSelect
-              label={t('invoices.arAccount')}
-              value={arAccountId}
-              onChange={setArAccountId}
-              accounts={accountList}
-              isLoading={accountsLoading}
-            />
-            <AccountSelect
-              label={t('invoices.revenueAccount')}
-              value={revenueAccountId}
-              onChange={setRevenueAccountId}
-              accounts={accountList}
-              isLoading={accountsLoading}
-            />
+            <AccountSelect label={t('invoices.arAccount')} value={arAccountId} onChange={setArAccountId} accounts={accountList} isLoading={accountsLoading} />
+            <AccountSelect label={t('invoices.revenueAccount')} value={revenueAccountId} onChange={setRevenueAccountId} accounts={accountList} isLoading={accountsLoading} />
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="secondary" onClick={() => setSendDialog(false)}>{t('common.cancel')}</Button>
-              <Button
-                onClick={handleSend}
-                isLoading={sendMutation.isPending}
-                disabled={!arAccountId || !revenueAccountId}
-              >
+              <Button onClick={handleSend} isLoading={sendMutation.isPending} disabled={!arAccountId || !revenueAccountId}>
                 {t('invoices.markAsSent')}
               </Button>
             </div>
@@ -523,7 +550,7 @@ export default function InvoiceDetailPage() {
         </div>
       )}
 
-      {/* ── Pay dialog ───────────────────────────────────────────── */}
+      {/* ── Pay dialog ────────────────────────────────────────────── */}
       {payDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-surface rounded-lg border border-border p-6 w-full max-w-sm space-y-4">
@@ -535,29 +562,19 @@ export default function InvoiceDetailPage() {
               min="0"
               step="0.000001"
               value={paymentAmount}
-              onChange={(event) => setPaymentAmount(event.target.value)}
+              onChange={(e) => setPaymentAmount(e.target.value)}
               hint={`${t('invoices.remainingAmount')}: ${formatCurrency(remainingAmount, docCurrency, locale)}`}
             />
             <Input
               label={t('common.date')}
               type="date"
               value={paymentDate}
-              onChange={(event) => setPaymentDate(event.target.value)}
+              onChange={(e) => setPaymentDate(e.target.value)}
             />
-            <AccountSelect
-              label={t('invoices.cashAccount')}
-              value={cashAccountId}
-              onChange={setCashAccountId}
-              accounts={accountList}
-              isLoading={accountsLoading}
-            />
+            <AccountSelect label={t('invoices.cashAccount')} value={cashAccountId} onChange={setCashAccountId} accounts={accountList} isLoading={accountsLoading} />
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="secondary" onClick={() => setPayDialog(false)}>{t('common.cancel')}</Button>
-              <Button
-                onClick={handlePay}
-                isLoading={payMutation.isPending}
-                disabled={payDisabled}
-              >
+              <Button onClick={handlePay} isLoading={payMutation.isPending} disabled={payDisabled}>
                 {t('invoices.recordPayment')}
               </Button>
             </div>

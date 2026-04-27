@@ -259,7 +259,7 @@ export default function InvoicesPage() {
               }
               onClick={handleCreateInvoice}
             >
-              <Plus size={16} className="me-2" />
+              <Plus size={16} />
               {t('invoices.new')}
             </Button>
           </PermissionGate>
@@ -344,32 +344,34 @@ export default function InvoicesPage() {
       {isError && <ErrorState onRetry={refetch} />}
 
       {!isLoading && !isError && invoices.length === 0 && (
-        <EmptyState
-          title={t('invoices.empty')}
-          description={t('invoices.emptyDescription')}
-          action={
-            <PermissionGate permission={PERMISSIONS.INVOICE_CREATE}>
-              <Button
-                variant={invoiceCreateBlocked ? 'secondary' : 'primary'}
-                className={
-                  invoiceCreateBlocked
-                    ? 'border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100'
-                    : undefined
-                }
-                onClick={handleCreateInvoice}
-              >
-                <Plus size={16} className="me-2" />
-                {t('invoices.new')}
-              </Button>
-            </PermissionGate>
-          }
-        />
+        <div className="bg-surface rounded-lg border border-border">
+          <EmptyState
+            title={t('invoices.empty')}
+            description={t('invoices.emptyDescription')}
+            action={
+              <PermissionGate permission={PERMISSIONS.INVOICE_CREATE}>
+                <Button
+                  variant={invoiceCreateBlocked ? 'secondary' : 'primary'}
+                  className={
+                    invoiceCreateBlocked
+                      ? 'border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100'
+                      : undefined
+                  }
+                  onClick={handleCreateInvoice}
+                >
+                  <Plus size={16} />
+                  {t('invoices.new')}
+                </Button>
+              </PermissionGate>
+            }
+          />
+        </div>
       )}
 
       {!isLoading && !isError && invoices.length > 0 && (
         <>
           {selectedCount > 0 && (
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-surface px-4 py-3">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-primary/10 bg-primary-10 px-4 py-3">
               <div className="flex flex-wrap items-center gap-3">
                 <Checkbox
                   checked={allSelected}
