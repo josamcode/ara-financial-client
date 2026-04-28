@@ -77,6 +77,27 @@ export function useUpdateTaxRate() {
   })
 }
 
+export function useSetTaxRateActiveStatus() {
+  const queryClient = useQueryClient()
+  const { t } = useTranslation()
+
+  return useMutation({
+    mutationFn: ({ id, isActive }) => taxRateApi.update(id, { isActive }).then(extractTaxRate),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: KEYS.all })
+      if (variables?.id) {
+        queryClient.invalidateQueries({ queryKey: KEYS.detail(variables.id) })
+      }
+      toast.success(
+        t(variables?.isActive ? 'taxRates.activateSuccess' : 'taxRates.deactivateSuccess')
+      )
+    },
+    onError: (error) => {
+      toast.error(getMutationErrorMessage(error, t))
+    },
+  })
+}
+
 export function useDeleteTaxRate() {
   const queryClient = useQueryClient()
   const { t } = useTranslation()

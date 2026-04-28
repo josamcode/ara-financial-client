@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Pencil, Percent, Plus, Search, Trash2 } from 'lucide-react'
+import { CheckCircle2, Pencil, Percent, Plus, Search, Trash2 } from 'lucide-react'
 import { PageHeader } from '@/shared/components/PageHeader'
 import { Badge } from '@/shared/components/Badge'
 import { Button } from '@/shared/components/Button'
@@ -15,7 +15,7 @@ import { SlidePanel } from '@/shared/components/SlidePanel'
 import { TaxRateForm } from '@/features/taxes/components/TaxRateForm'
 import {
   useCreateTaxRate,
-  useDeleteTaxRate,
+  useSetTaxRateActiveStatus,
   useTaxRates,
   useUpdateTaxRate,
 } from '@/features/taxes/hooks/useTaxRates'
@@ -40,7 +40,7 @@ export default function TaxRatesPage() {
   const [page, setPage] = useState(1)
   const [panelOpen, setPanelOpen] = useState(false)
   const [editTarget, setEditTarget] = useState(null)
-  const [deleteTarget, setDeleteTarget] = useState(null)
+  const [deactivateTarget, setDeactivateTarget] = useState(null)
 
   const canManage = hasPermission(user, PERMISSIONS.TAX_MANAGE)
 
@@ -58,7 +58,7 @@ export default function TaxRatesPage() {
   const { data, isLoading, isError, refetch } = useTaxRates(queryParams)
   const createMutation = useCreateTaxRate()
   const updateMutation = useUpdateTaxRate()
-  const deleteMutation = useDeleteTaxRate()
+  const statusMutation = useSetTaxRateActiveStatus()
 
   const taxRates = data?.taxRates ?? []
   const pagination = data?.pagination ?? null
@@ -117,6 +117,16 @@ export default function TaxRatesPage() {
       await createMutation.mutateAsync(formData)
     }
     closePanel()
+  }
+
+  async function handleActivate(taxRate) {
+    await statusMutation.mutateAsync({ id: taxRate._id, isActive: true })
+  }
+
+  async function handleDeactivateConfirm() {
+    if (!deactivateTarget) return
+    await statusMutation.mutateAsync({ id: deactivateTarget._id, isActive: false })
+    setDeactivateTarget(null)
   }
 
   const hasFilters = Boolean(appliedSearch || type || status)
@@ -238,14 +248,26 @@ export default function TaxRatesPage() {
                             >
                               <Pencil size={13} />
                             </button>
-                            <button
-                              type="button"
-                              onClick={() => setDeleteTarget(taxRate)}
-                              className="rounded p-1.5 text-text-muted transition-colors hover:bg-error/10 hover:text-error"
-                              title={t('taxRates.deactivate')}
-                            >
-                              <Trash2 size={13} />
-                            </button>
+                            {taxRate.isActive ? (
+                              <button
+                                type="button"
+                                onClick={() => setDeactivateTarget(taxRate)}
+                                className="rounded p-1.5 text-text-muted transition-colors hover:bg-error/10 hover:text-error"
+                                title={t('taxRates.deactivate')}
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => handleActivate(taxRate)}
+                                className="rounded p-1.5 text-text-muted transition-colors hover:bg-success/10 hover:text-success"
+                                title={t('taxRates.activate')}
+                                disabled={statusMutation.isPending}
+                              >
+                                <CheckCircle2 size={13} />
+                              </button>
+                            )}
                           </>
                         )}
                       </div>
@@ -279,17 +301,14 @@ export default function TaxRatesPage() {
       </SlidePanel>
 
       <ConfirmDialog
-        open={!!deleteTarget}
+        open={!!deactivateTarget}
         title={t('taxRates.deleteTitle')}
-        message={t('taxRates.deleteMessage', { name: deleteTarget?.name })}
+        message={t('taxRates.deleteMessage', { name: deactivateTarget?.name })}
         confirmLabel={t('taxRates.deactivate')}
         confirmVariant="danger"
-        isLoading={deleteMutation.isPending}
-        onConfirm={async () => {
-          await deleteMutation.mutateAsync(deleteTarget._id)
-          setDeleteTarget(null)
-        }}
-        onCancel={() => setDeleteTarget(null)}
+        isLoading={statusMutation.isPending}
+        onConfirm={handleDeactivateConfirm}
+        onCancel={() => setDeactivateTarget(null)}
       />
     </div>
   )
