@@ -141,7 +141,7 @@ export function BillForm({ defaultValues, onSubmit, isSubmitting }) {
   }
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-5">
       {/* Hidden currency fields managed by CurrencyPanel */}
       <input type="hidden" {...register('documentCurrency')} />
       <input type="hidden" {...register('exchangeRate')} />
@@ -150,8 +150,11 @@ export function BillForm({ defaultValues, onSubmit, isSubmitting }) {
       <input type="hidden" {...register('exchangeRateProvider')} />
       <input type="hidden" {...register('isExchangeRateManualOverride')} />
 
-      {/* Supplier */}
-      <div className="space-y-3">
+      {/* ── Section: Supplier ───────────────────────────────── */}
+      <div className="bg-surface rounded-lg border border-border p-4 space-y-3">
+        <p className="text-xs font-semibold text-text-muted uppercase tracking-wide">
+          {t('bills.supplier')}
+        </p>
         {suppliers.length > 0 && (
           <Select
             label={t('suppliers.selectSupplier')}
@@ -161,7 +164,7 @@ export function BillForm({ defaultValues, onSubmit, isSubmitting }) {
             searchable
           />
         )}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Input
             label={t('bills.supplierName')}
             required
@@ -182,25 +185,30 @@ export function BillForm({ defaultValues, onSubmit, isSubmitting }) {
         <input type="hidden" {...register('supplierId')} />
       </div>
 
-      {/* Dates */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Input
-          label={t('bills.issueDate')}
-          type="date"
-          required
-          error={errors.issueDate?.message}
-          {...register('issueDate', { required: t('errors.required') })}
-        />
-        <Input
-          label={t('bills.dueDate')}
-          type="date"
-          required
-          error={errors.dueDate?.message}
-          {...register('dueDate', { required: t('errors.required') })}
-        />
+      {/* ── Section: Dates ──────────────────────────────────── */}
+      <div className="bg-surface rounded-lg border border-border p-4">
+        <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">
+          {t('bills.issueDate').replace(/\s.*/, '')} / {t('bills.dueDate')}
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Input
+            label={t('bills.issueDate')}
+            type="date"
+            required
+            error={errors.issueDate?.message}
+            {...register('issueDate', { required: t('errors.required') })}
+          />
+          <Input
+            label={t('bills.dueDate')}
+            type="date"
+            required
+            error={errors.dueDate?.message}
+            {...register('dueDate', { required: t('errors.required') })}
+          />
+        </div>
       </div>
 
-      {/* Currency */}
+      {/* ── Section: Currency ───────────────────────────────── */}
       <CurrencyPanel
         documentCurrency={documentCurrency}
         baseCurrency={tenantBaseCurrency}
@@ -223,18 +231,21 @@ export function BillForm({ defaultValues, onSubmit, isSubmitting }) {
         onProviderChange={(v) => setValue('exchangeRateProvider', v || '')}
       />
 
-      {/* Line items */}
+      {/* ── Section: Line items ─────────────────────────────── */}
       <div>
-        <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-text-primary">{t('bills.lineItems')}</h3>
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-xs font-semibold text-text-muted uppercase tracking-wide">
+            {t('bills.lineItems')}
+          </p>
           <Button type="button" variant="secondary" size="sm" onClick={addLine}>
-            <Plus size={14} className="me-1" />
+            <Plus size={14} />
             {t('bills.addLine')}
           </Button>
         </div>
 
-        <div className="overflow-hidden rounded-lg border border-border">
-          <div className="hidden grid-cols-[1fr_5rem_6rem_6rem_2.5rem] gap-2 border-b border-border bg-surface-subtle px-3 py-2 text-xs font-semibold text-text-muted sm:grid">
+        <div className="rounded-lg border border-border overflow-hidden">
+          {/* Column headers */}
+          <div className="hidden sm:grid grid-cols-[1fr_5rem_6rem_6rem_2.5rem] gap-2 px-3 py-2 bg-surface-muted text-xs font-semibold text-text-muted uppercase tracking-wide border-b border-border">
             <span>{t('common.description')}</span>
             <span className="text-end">{t('bills.qty')}</span>
             <span className="text-end">{t('bills.unitPrice')}</span>
@@ -242,14 +253,14 @@ export function BillForm({ defaultValues, onSubmit, isSubmitting }) {
             <span />
           </div>
 
-          <div className="divide-y divide-border">
+          <div className="divide-y divide-border bg-surface">
             {fields.map((field, index) => (
               <div
                 key={field.id}
-                className="grid grid-cols-1 items-start gap-2 px-3 py-2.5 sm:grid-cols-[1fr_5rem_6rem_6rem_2.5rem]"
+                className="grid grid-cols-1 sm:grid-cols-[1fr_5rem_6rem_6rem_2.5rem] gap-2 px-3 py-2 items-center"
               >
                 <input
-                  className="h-input w-full rounded border border-input bg-surface px-2 text-sm focus:border-primary focus:outline-none"
+                  className="h-10 w-full rounded border border-input bg-surface px-2.5 text-sm focus:outline-none focus:border-primary"
                   placeholder={t('common.description')}
                   {...register(`lineItems.${index}.description`, { required: true })}
                 />
@@ -257,7 +268,7 @@ export function BillForm({ defaultValues, onSubmit, isSubmitting }) {
                   type="number"
                   step="0.001"
                   min="0"
-                  className="h-input w-full rounded border border-input bg-surface px-2 text-end text-sm focus:border-primary focus:outline-none"
+                  className="h-10 w-full rounded border border-input bg-surface px-2.5 text-sm text-end tabular-nums focus:outline-none focus:border-primary"
                   {...register(`lineItems.${index}.quantity`, {
                     onChange: (event) => handleLineChange(index, 'quantity', event.target.value),
                   })}
@@ -266,20 +277,20 @@ export function BillForm({ defaultValues, onSubmit, isSubmitting }) {
                   type="number"
                   step="0.01"
                   min="0"
-                  className="h-input w-full rounded border border-input bg-surface px-2 text-end text-sm focus:border-primary focus:outline-none"
+                  className="h-10 w-full rounded border border-input bg-surface px-2.5 text-sm text-end tabular-nums focus:outline-none focus:border-primary"
                   {...register(`lineItems.${index}.unitPrice`, {
                     onChange: (event) => handleLineChange(index, 'unitPrice', event.target.value),
                   })}
                 />
                 <input
                   readOnly
-                  className="h-input w-full rounded border border-input bg-surface-subtle px-2 text-end text-sm text-text-secondary"
+                  className="h-10 w-full rounded border border-input bg-surface-muted px-2.5 text-sm text-end tabular-nums text-text-secondary"
                   {...register(`lineItems.${index}.lineTotal`)}
                 />
                 <button
                   type="button"
                   onClick={() => removeLine(index)}
-                  className="flex h-input w-full items-center justify-center text-error hover:text-error/80 disabled:opacity-40"
+                  className="flex items-center justify-center h-10 w-full text-text-muted hover:text-error transition-colors disabled:opacity-40"
                   disabled={fields.length === 1}
                 >
                   <Trash2 size={14} />
@@ -290,23 +301,23 @@ export function BillForm({ defaultValues, onSubmit, isSubmitting }) {
         </div>
       </div>
 
-      {/* Totals */}
+      {/* ── Totals ──────────────────────────────────────────── */}
       <div className="flex justify-end">
-        <div className="w-48 space-y-1.5 text-sm">
+        <div className="bg-surface-muted rounded-lg px-4 py-3 w-60 space-y-2 text-sm">
           <div className="flex justify-between text-text-secondary">
             <span>{t('bills.subtotal')}</span>
             <span className="font-medium tabular-nums">{subtotal}</span>
           </div>
-          <div className="flex justify-between border-t border-border pt-1.5 font-semibold text-text-primary">
+          <div className="flex justify-between font-bold text-text-primary border-t border-border pt-2">
             <span>{t('bills.total')}</span>
-            <span className="tabular-nums">{subtotal}</span>
+            <span className="tabular-nums">{total}</span>
           </div>
         </div>
       </div>
 
-      {/* Notes */}
+      {/* ── Notes ───────────────────────────────────────────── */}
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-text-primary">{t('common.notes')}</label>
+        <label className="block text-sm font-medium text-text-primary mb-1.5">{t('common.notes')}</label>
         <textarea
           rows={3}
           className="w-full resize-none rounded-md border border-input bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-primary focus:outline-none"
@@ -314,7 +325,7 @@ export function BillForm({ defaultValues, onSubmit, isSubmitting }) {
         />
       </div>
 
-      {/* Actions */}
+      {/* ── Actions ─────────────────────────────────────────── */}
       <div className="flex justify-end gap-3 border-t border-border pt-2">
         <Button type="submit" isLoading={isSubmitting}>
           {t('common.save')}

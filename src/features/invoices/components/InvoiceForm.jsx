@@ -140,7 +140,7 @@ export function InvoiceForm({ defaultValues, onSubmit, isSubmitting }) {
   }
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-5">
       {/* Hidden currency fields managed by CurrencyPanel */}
       <input type="hidden" {...register('documentCurrency')} />
       <input type="hidden" {...register('exchangeRate')} />
@@ -149,8 +149,11 @@ export function InvoiceForm({ defaultValues, onSubmit, isSubmitting }) {
       <input type="hidden" {...register('exchangeRateProvider')} />
       <input type="hidden" {...register('isExchangeRateManualOverride')} />
 
-      {/* Customer */}
-      <div className="space-y-3">
+      {/* ── Section: Customer ───────────────────────────────── */}
+      <div className="bg-surface rounded-lg border border-border p-4 space-y-3">
+        <p className="text-xs font-semibold text-text-muted uppercase tracking-wide">
+          {t('invoices.customer')}
+        </p>
         {customers.length > 0 && (
           <Select
             label={t('customers.selectCustomer')}
@@ -181,25 +184,30 @@ export function InvoiceForm({ defaultValues, onSubmit, isSubmitting }) {
         <input type="hidden" {...register('customerId')} />
       </div>
 
-      {/* Dates */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Input
-          label={t('invoices.issueDate')}
-          type="date"
-          required
-          error={errors.issueDate?.message}
-          {...register('issueDate', { required: t('errors.required') })}
-        />
-        <Input
-          label={t('invoices.dueDate')}
-          type="date"
-          required
-          error={errors.dueDate?.message}
-          {...register('dueDate', { required: t('errors.required') })}
-        />
+      {/* ── Section: Dates ──────────────────────────────────── */}
+      <div className="bg-surface rounded-lg border border-border p-4">
+        <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">
+          {t('invoices.issueDate').replace(/\s.*/, '')} / {t('invoices.dueDate')}
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Input
+            label={t('invoices.issueDate')}
+            type="date"
+            required
+            error={errors.issueDate?.message}
+            {...register('issueDate', { required: t('errors.required') })}
+          />
+          <Input
+            label={t('invoices.dueDate')}
+            type="date"
+            required
+            error={errors.dueDate?.message}
+            {...register('dueDate', { required: t('errors.required') })}
+          />
+        </div>
       </div>
 
-      {/* Currency */}
+      {/* ── Section: Currency ───────────────────────────────── */}
       <CurrencyPanel
         documentCurrency={documentCurrency}
         baseCurrency={tenantBaseCurrency}
@@ -222,18 +230,21 @@ export function InvoiceForm({ defaultValues, onSubmit, isSubmitting }) {
         onProviderChange={(v) => setValue('exchangeRateProvider', v || '')}
       />
 
-      {/* Line items */}
+      {/* ── Section: Line items ─────────────────────────────── */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold text-text-primary">{t('invoices.lineItems')}</h3>
+          <p className="text-xs font-semibold text-text-muted uppercase tracking-wide">
+            {t('invoices.lineItems')}
+          </p>
           <Button type="button" variant="secondary" size="sm" onClick={addLine}>
-            <Plus size={14} className="me-1" />
+            <Plus size={14} />
             {t('invoices.addLine')}
           </Button>
         </div>
 
         <div className="rounded-lg border border-border overflow-hidden">
-          <div className="hidden sm:grid grid-cols-[1fr_5rem_6rem_6rem_2.5rem] gap-2 px-3 py-2 bg-surface-subtle text-xs font-semibold text-text-muted border-b border-border">
+          {/* Column headers */}
+          <div className="hidden sm:grid grid-cols-[1fr_5rem_6rem_6rem_2.5rem] gap-2 px-3 py-2 bg-surface-muted text-xs font-semibold text-text-muted uppercase tracking-wide border-b border-border">
             <span>{t('common.description')}</span>
             <span className="text-end">{t('invoices.qty')}</span>
             <span className="text-end">{t('invoices.unitPrice')}</span>
@@ -241,14 +252,14 @@ export function InvoiceForm({ defaultValues, onSubmit, isSubmitting }) {
             <span />
           </div>
 
-          <div className="divide-y divide-border">
+          <div className="divide-y divide-border bg-surface">
             {fields.map((field, index) => (
               <div
                 key={field.id}
-                className="grid grid-cols-1 sm:grid-cols-[1fr_5rem_6rem_6rem_2.5rem] gap-2 px-3 py-2.5 items-start"
+                className="grid grid-cols-1 sm:grid-cols-[1fr_5rem_6rem_6rem_2.5rem] gap-2 px-3 py-2 items-center"
               >
                 <input
-                  className="h-input w-full rounded border border-input bg-surface px-2 text-sm focus:outline-none focus:border-primary"
+                  className="h-10 w-full rounded border border-input bg-surface px-2.5 text-sm focus:outline-none focus:border-primary"
                   placeholder={t('common.description')}
                   {...register(`lineItems.${index}.description`, { required: true })}
                 />
@@ -256,7 +267,7 @@ export function InvoiceForm({ defaultValues, onSubmit, isSubmitting }) {
                   type="number"
                   step="0.001"
                   min="0"
-                  className="h-input w-full rounded border border-input bg-surface px-2 text-sm text-end focus:outline-none focus:border-primary"
+                  className="h-10 w-full rounded border border-input bg-surface px-2.5 text-sm text-end tabular-nums focus:outline-none focus:border-primary"
                   {...register(`lineItems.${index}.quantity`, {
                     onChange: (e) => handleLineChange(index, 'quantity', e.target.value),
                   })}
@@ -265,20 +276,20 @@ export function InvoiceForm({ defaultValues, onSubmit, isSubmitting }) {
                   type="number"
                   step="0.01"
                   min="0"
-                  className="h-input w-full rounded border border-input bg-surface px-2 text-sm text-end focus:outline-none focus:border-primary"
+                  className="h-10 w-full rounded border border-input bg-surface px-2.5 text-sm text-end tabular-nums focus:outline-none focus:border-primary"
                   {...register(`lineItems.${index}.unitPrice`, {
                     onChange: (e) => handleLineChange(index, 'unitPrice', e.target.value),
                   })}
                 />
                 <input
                   readOnly
-                  className="h-input w-full rounded border border-input bg-surface-subtle px-2 text-sm text-end text-text-secondary"
+                  className="h-10 w-full rounded border border-input bg-surface-muted px-2.5 text-sm text-end tabular-nums text-text-secondary"
                   {...register(`lineItems.${index}.lineTotal`)}
                 />
                 <button
                   type="button"
                   onClick={() => removeLine(index)}
-                  className="flex items-center justify-center h-input w-full text-error hover:text-error/80 disabled:opacity-40"
+                  className="flex items-center justify-center h-10 w-full text-text-muted hover:text-error transition-colors disabled:opacity-40"
                   disabled={fields.length === 1}
                 >
                   <Trash2 size={14} />
@@ -289,21 +300,21 @@ export function InvoiceForm({ defaultValues, onSubmit, isSubmitting }) {
         </div>
       </div>
 
-      {/* Totals */}
+      {/* ── Totals ──────────────────────────────────────────── */}
       <div className="flex justify-end">
-        <div className="w-48 space-y-1.5 text-sm">
+        <div className="bg-surface-muted rounded-lg px-4 py-3 w-60 space-y-2 text-sm">
           <div className="flex justify-between text-text-secondary">
             <span>{t('invoices.subtotal')}</span>
             <span className="font-medium tabular-nums">{subtotal}</span>
           </div>
-          <div className="flex justify-between font-semibold text-text-primary border-t border-border pt-1.5">
+          <div className="flex justify-between font-bold text-text-primary border-t border-border pt-2">
             <span>{t('invoices.total')}</span>
-            <span className="tabular-nums">{subtotal}</span>
+            <span className="tabular-nums">{total}</span>
           </div>
         </div>
       </div>
 
-      {/* Notes */}
+      {/* ── Notes ───────────────────────────────────────────── */}
       <div>
         <label className="block text-sm font-medium text-text-primary mb-1.5">{t('common.notes')}</label>
         <textarea
@@ -313,7 +324,7 @@ export function InvoiceForm({ defaultValues, onSubmit, isSubmitting }) {
         />
       </div>
 
-      {/* Actions */}
+      {/* ── Actions ─────────────────────────────────────────── */}
       <div className="flex justify-end gap-3 pt-2 border-t border-border">
         <Button type="submit" isLoading={isSubmitting}>
           {t('common.save')}

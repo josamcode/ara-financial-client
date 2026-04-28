@@ -393,15 +393,17 @@ export default function UsersPage() {
       )}
 
       {/* Search bar */}
-      <div className="relative mb-5 max-w-sm">
-        <Search size={14} className="absolute inset-y-0 start-3 my-auto text-text-muted pointer-events-none" />
-        <input
-          type="search"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder={i18n.language === 'ar' ? 'بحث بالاسم أو البريد...' : 'Search by name or email...'}
-          className="h-input w-full rounded-md border border-input bg-surface ps-9 pe-3 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-primary focus:shadow-focus"
-        />
+      <div className="filter-bar mb-5">
+        <div className="relative flex-1 max-w-sm">
+          <Search size={14} className="absolute inset-y-0 start-3 my-auto text-text-muted pointer-events-none" />
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={i18n.language === 'ar' ? 'بحث بالاسم أو البريد...' : 'Search by name or email...'}
+            className="h-input w-full rounded-md border border-input bg-surface ps-9 pe-3 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-primary focus:shadow-focus"
+          />
+        </div>
       </div>
 
       {usersQuery.isLoading && <LoadingState message={t('common.loading')} />}
@@ -430,12 +432,12 @@ export default function UsersPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm min-w-[900px]">
                 <thead>
-                  <tr className="border-b border-border bg-surface-subtle">
-                    <th className="px-4 py-3.5 text-start text-xs font-semibold text-text-muted">{t('users.member')}</th>
-                    <th className="px-4 py-3.5 text-start text-xs font-semibold text-text-muted w-56">{t('users.role')}</th>
-                    <th className="px-4 py-3.5 text-start text-xs font-semibold text-text-muted w-40">{t('common.status')}</th>
-                    <th className="px-4 py-3.5 text-start text-xs font-semibold text-text-muted w-64">{t('users.access')}</th>
-                    <th className="px-4 py-3.5 text-end text-xs font-semibold text-text-muted w-32">{t('common.actions')}</th>
+                  <tr className="border-b border-border bg-surface-muted">
+                    <th className="px-4 py-3 text-start text-xs font-semibold text-text-muted uppercase tracking-wide">{t('users.member')}</th>
+                    <th className="px-4 py-3 text-start text-xs font-semibold text-text-muted uppercase tracking-wide w-56">{t('users.role')}</th>
+                    <th className="px-4 py-3 text-start text-xs font-semibold text-text-muted uppercase tracking-wide w-40">{t('common.status')}</th>
+                    <th className="px-4 py-3 text-start text-xs font-semibold text-text-muted uppercase tracking-wide w-64">{t('users.access')}</th>
+                    <th className="px-4 py-3 text-end text-xs font-semibold text-text-muted uppercase tracking-wide w-32">{t('common.actions')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">

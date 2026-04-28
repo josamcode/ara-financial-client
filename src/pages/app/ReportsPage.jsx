@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import { Scale, TrendingUp, Building2, Waves, Clock3 } from 'lucide-react'
+import { Scale, TrendingUp, Building2, Waves, Clock3, ChevronRight } from 'lucide-react'
 import { PageHeader } from '@/shared/components/PageHeader'
 import { ROUTES } from '@/shared/constants/routes'
 
@@ -51,24 +51,28 @@ export default function ReportsPage() {
     <div className="animate-fade-in">
       <PageHeader title={t('reports.title')} />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
         {REPORT_CARDS.map(({ key, route, icon: Icon, subtitleKey }) => (
           <button
             key={key}
             type="button"
             onClick={() => navigate(route)}
-            className="text-start bg-surface rounded-lg border border-border p-5 hover:border-primary hover:shadow-md transition-all group"
+            className="text-start bg-surface rounded-lg border border-border p-5 hover:border-primary hover:shadow-elevated transition-all group"
           >
             <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors shrink-0">
+              <div className="w-10 h-10 rounded-lg bg-primary-50 flex items-center justify-center group-hover:bg-primary/20 transition-colors shrink-0">
                 <Icon size={20} className="text-primary" />
               </div>
-              <div>
+              <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-text-primary mb-1">
                   {t(`reports.${key}`)}
                 </h3>
-                <p className="text-sm text-text-secondary">{t(subtitleKey)}</p>
+                <p className="text-sm text-text-secondary leading-snug">{t(subtitleKey)}</p>
               </div>
+              <ChevronRight
+                size={15}
+                className="text-text-muted shrink-0 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity rtl:rotate-180"
+              />
             </div>
           </button>
         ))}

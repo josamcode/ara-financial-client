@@ -8,6 +8,7 @@ import { Card } from '@/shared/components/Card'
 import { EmptyState } from '@/shared/components/EmptyState'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
+import { PaginationControls } from '@/shared/components/PaginationControls'
 import { SlidePanel } from '@/shared/components/SlidePanel'
 import { ConfirmDialog } from '@/shared/components/ConfirmDialog'
 import { CustomerForm } from '@/features/customers/components/CustomerForm'
@@ -61,7 +62,7 @@ export default function CustomersPage() {
 
   const createAction = canCreate ? (
     <Button onClick={openCreate}>
-      <UserPlus size={16} className="me-2" />
+      <UserPlus size={16} />
       {t('customers.new')}
     </Button>
   ) : null
@@ -93,9 +94,9 @@ export default function CustomersPage() {
       />
 
       {/* Search */}
-      <Card className="p-4">
-        <div className="relative max-w-xs">
-          <Search size={16} className="absolute start-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
+      <div className="filter-bar">
+        <div className="relative flex-1 max-w-xs">
+          <Search size={15} className="absolute start-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
           <input
             className="h-input w-full rounded-md border border-input bg-surface ps-9 pe-3 text-sm focus:outline-none focus:border-primary"
             placeholder={t('customers.searchPlaceholder')}
@@ -104,7 +105,7 @@ export default function CustomersPage() {
             onKeyDown={handleSearchKeyDown}
           />
         </div>
-      </Card>
+      </div>
 
       {/* Table */}
       {isLoading ? (
@@ -112,17 +113,19 @@ export default function CustomersPage() {
       ) : isError ? (
         <ErrorState onRetry={refetch} />
       ) : customers.length === 0 ? (
-        <EmptyState
-          title={appliedSearch ? t('common.noResults') : t('customers.emptyTitle')}
-          description={appliedSearch ? t('customers.emptySearchDesc') : t('customers.emptyDesc')}
-          action={canCreate && !appliedSearch ? createAction : null}
-        />
+        <div className="bg-surface rounded-lg border border-border">
+          <EmptyState
+            title={appliedSearch ? t('common.noResults') : t('customers.emptyTitle')}
+            description={appliedSearch ? t('customers.emptySearchDesc') : t('customers.emptyDesc')}
+            action={canCreate && !appliedSearch ? createAction : null}
+          />
+        </div>
       ) : (
-        <Card>
+        <Card padding="none">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-border bg-surface-subtle text-text-muted text-xs font-semibold uppercase tracking-wide">
+                <tr className="border-b border-border bg-surface-muted text-text-muted text-xs font-semibold uppercase tracking-wide">
                   <th className="px-4 py-3 text-start">{t('common.name')}</th>
                   <th className="px-4 py-3 text-start">{t('common.email')}</th>
                   <th className="px-4 py-3 text-start">{t('common.phone')}</th>
@@ -132,7 +135,7 @@ export default function CustomersPage() {
               <tbody className="divide-y divide-border">
                 {customers.map((c) => (
                   <tr key={c._id} className="hover:bg-surface-subtle transition-colors">
-                    <td className="px-4 py-3 font-medium text-text-primary">
+                    <td className="px-4 py-3 font-semibold text-text-primary">
                       <button
                         onClick={() => navigate(ROUTES.CUSTOMER_DETAIL(c._id))}
                         className="hover:text-primary hover:underline transition-colors text-start"
@@ -151,7 +154,7 @@ export default function CustomersPage() {
                               className="p-1.5 rounded text-text-muted hover:text-primary hover:bg-primary/10 transition-colors"
                               title={t('common.edit')}
                             >
-                              <Pencil size={14} />
+                              <Pencil size={13} />
                             </button>
                           )}
                           {canDelete && (
@@ -160,7 +163,7 @@ export default function CustomersPage() {
                               className="p-1.5 rounded text-text-muted hover:text-error hover:bg-error/10 transition-colors"
                               title={t('common.delete')}
                             >
-                              <Trash2 size={14} />
+                              <Trash2 size={13} />
                             </button>
                           )}
                         </div>
@@ -172,35 +175,11 @@ export default function CustomersPage() {
             </table>
           </div>
 
-          {pagination && pagination.totalPages > 1 && (
-            <div className="flex items-center justify-between px-4 py-3 border-t border-border text-sm text-text-secondary">
-              <span>
-                {t('common.showingRange', {
-                  from: (pagination.page - 1) * pagination.limit + 1,
-                  to: Math.min(pagination.page * pagination.limit, pagination.total),
-                  total: pagination.total,
-                })}
-              </span>
-              <div className="flex gap-2">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  disabled={pagination.page <= 1}
-                  onClick={() => setPage((p) => p - 1)}
-                >
-                  {t('common.previous')}
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  disabled={pagination.page >= pagination.totalPages}
-                  onClick={() => setPage((p) => p + 1)}
-                >
-                  {t('common.next')}
-                </Button>
-              </div>
-            </div>
-          )}
+          <PaginationControls
+            pagination={pagination}
+            onPageChange={(p) => setPage(p)}
+            className="px-4 border-t border-border"
+          />
         </Card>
       )}
 

@@ -25,7 +25,7 @@ export default function SupplierDetailPage() {
   const { id } = useParams()
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
-  const locale = i18n.language === 'ar' ? 'ar-EG' : 'en-US'
+  const locale = 'en'
 
   const { data, isLoading, isError, refetch } = useSupplierDetail(id)
 
@@ -34,7 +34,7 @@ export default function SupplierDetailPage() {
   if (!data) return null
 
   const { supplier, bills, summary } = data
-  const currency = bills[0]?.currency ?? 'EGP'
+  const currency = bills[0]?.currency ?? 'SAR'
 
   return (
     <div className="space-y-6">
@@ -47,11 +47,11 @@ export default function SupplierDetailPage() {
         actions={
           <div className="flex items-center gap-2">
             <Button size="sm" onClick={() => navigate(ROUTES.SUPPLIER_STATEMENT(id))}>
-              <FileText size={14} className="me-1" />
+              <FileText size={14} />
               {t('suppliers.openStatement')}
             </Button>
             <Button variant="secondary" size="sm" onClick={() => navigate(ROUTES.SUPPLIERS)}>
-              <ArrowLeft size={14} className="me-1" />
+              <ArrowLeft size={14} />
               {t('common.back')}
             </Button>
           </div>
@@ -109,13 +109,13 @@ export default function SupplierDetailPage() {
         />
       ) : (
         <Card>
-          <div className="px-4 py-3 border-b border-border bg-surface-subtle">
+          <div className="px-4 py-3 border-b border-border bg-surface-muted">
             <h3 className="text-sm font-semibold text-text-primary">{t('nav.bills')}</h3>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-border bg-surface-subtle text-text-muted text-xs font-semibold uppercase tracking-wide">
+                <tr className="border-b border-border bg-surface-muted text-text-muted text-xs font-semibold uppercase tracking-wide">
                   <th className="px-4 py-3 text-start">{t('bills.number')}</th>
                   <th className="px-4 py-3 text-start">{t('bills.issueDate')}</th>
                   <th className="px-4 py-3 text-start">{t('bills.dueDate')}</th>

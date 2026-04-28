@@ -265,20 +265,20 @@ export default function AuditLogsPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm min-w-[1040px]">
                 <thead>
-                  <tr className="border-b border-border bg-surface-subtle">
-                    <th className="px-4 py-3.5 text-start text-xs font-semibold text-text-muted w-48">
+                  <tr className="border-b border-border bg-surface-muted">
+                    <th className="px-4 py-3 text-start text-xs font-semibold text-text-muted uppercase tracking-wide w-48">
                       {t('auditLogs.action')}
                     </th>
-                    <th className="px-4 py-3.5 text-start text-xs font-semibold text-text-muted w-56">
+                    <th className="px-4 py-3 text-start text-xs font-semibold text-text-muted uppercase tracking-wide w-56">
                       {t('auditLogs.resource')}
                     </th>
-                    <th className="px-4 py-3.5 text-start text-xs font-semibold text-text-muted w-56">
+                    <th className="px-4 py-3 text-start text-xs font-semibold text-text-muted uppercase tracking-wide w-56">
                       {t('auditLogs.user')}
                     </th>
-                    <th className="px-4 py-3.5 text-start text-xs font-semibold text-text-muted">
+                    <th className="px-4 py-3 text-start text-xs font-semibold text-text-muted uppercase tracking-wide">
                       {t('auditLogs.summary')}
                     </th>
-                    <th className="px-4 py-3.5 text-start text-xs font-semibold text-text-muted w-44">
+                    <th className="px-4 py-3 text-start text-xs font-semibold text-text-muted uppercase tracking-wide w-44">
                       {t('auditLogs.timestamp')}
                     </th>
                   </tr>

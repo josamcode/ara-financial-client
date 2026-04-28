@@ -124,20 +124,20 @@ export default function FiscalPeriodsPage() {
         subtitle={t('fiscalPeriods.subtitle')}
       />
 
-      <form onSubmit={handleApplyYearFilter} className="flex flex-col gap-3 sm:flex-row sm:items-end mb-5">
+      <form onSubmit={handleApplyYearFilter} className="filter-bar mb-5">
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-text-primary">{t('common.year')}</label>
+          <label className="text-xs font-medium text-text-muted">{t('common.year')}</label>
           <input
             type="number"
             min="1900"
             max="9999"
             value={yearInput}
             onChange={(event) => setYearInput(event.target.value)}
-            className="h-input rounded-md border border-input bg-surface px-3 text-sm text-text-primary focus:outline-none focus:border-primary focus:shadow-focus"
+            className="h-input w-36 rounded-md border border-input bg-surface px-3 text-sm text-text-primary focus:outline-none focus:border-primary focus:shadow-focus"
           />
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-end gap-2">
           <Button size="sm" type="submit">
             {t('common.apply')}
           </Button>
@@ -151,17 +151,32 @@ export default function FiscalPeriodsPage() {
 
       {!periodsQuery.isLoading && !periodsQuery.isError && periods.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
-          <Card padding="md">
-            <p className="text-sm text-text-secondary mb-1">{t('fiscalPeriods.open')}</p>
-            <p className="text-2xl font-bold text-text-primary">{counts.open}</p>
+          <Card padding="md" className="flex items-center gap-4">
+            <div className="w-9 h-9 rounded-lg bg-success-soft flex items-center justify-center shrink-0">
+              <Calendar size={16} className="text-success" />
+            </div>
+            <div>
+              <p className="text-xs font-medium text-text-muted uppercase tracking-wide mb-0.5">{t('fiscalPeriods.open')}</p>
+              <p className="text-2xl font-bold text-text-primary leading-none">{counts.open}</p>
+            </div>
           </Card>
-          <Card padding="md">
-            <p className="text-sm text-text-secondary mb-1">{t('fiscalPeriods.closed')}</p>
-            <p className="text-2xl font-bold text-text-primary">{counts.closed}</p>
+          <Card padding="md" className="flex items-center gap-4">
+            <div className="w-9 h-9 rounded-lg bg-warning-soft flex items-center justify-center shrink-0">
+              <Calendar size={16} className="text-warning" />
+            </div>
+            <div>
+              <p className="text-xs font-medium text-text-muted uppercase tracking-wide mb-0.5">{t('fiscalPeriods.closed')}</p>
+              <p className="text-2xl font-bold text-text-primary leading-none">{counts.closed}</p>
+            </div>
           </Card>
-          <Card padding="md">
-            <p className="text-sm text-text-secondary mb-1">{t('fiscalPeriods.locked')}</p>
-            <p className="text-2xl font-bold text-text-primary">{counts.locked}</p>
+          <Card padding="md" className="flex items-center gap-4">
+            <div className="w-9 h-9 rounded-lg bg-error-soft flex items-center justify-center shrink-0">
+              <Calendar size={16} className="text-error" />
+            </div>
+            <div>
+              <p className="text-xs font-medium text-text-muted uppercase tracking-wide mb-0.5">{t('fiscalPeriods.locked')}</p>
+              <p className="text-2xl font-bold text-text-primary leading-none">{counts.locked}</p>
+            </div>
           </Card>
         </div>
       )}
@@ -188,23 +203,23 @@ export default function FiscalPeriodsPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm min-w-[960px]">
               <thead>
-                <tr className="border-b border-border bg-surface-subtle">
-                  <th className="px-4 py-3 text-start text-xs font-semibold text-text-muted">
+                <tr className="border-b border-border bg-surface-muted">
+                  <th className="px-4 py-3 text-start text-xs font-semibold text-text-muted uppercase tracking-wide">
                     {t('fiscalPeriods.period')}
                   </th>
-                  <th className="px-4 py-3 text-start text-xs font-semibold text-text-muted w-72">
+                  <th className="px-4 py-3 text-start text-xs font-semibold text-text-muted uppercase tracking-wide w-72">
                     {t('fiscalPeriods.dateRange')}
                   </th>
-                  <th className="px-4 py-3 text-start text-xs font-semibold text-text-muted w-36">
+                  <th className="px-4 py-3 text-start text-xs font-semibold text-text-muted uppercase tracking-wide w-36">
                     {t('common.status')}
                   </th>
-                  <th className="px-4 py-3 text-start text-xs font-semibold text-text-muted w-56">
+                  <th className="px-4 py-3 text-start text-xs font-semibold text-text-muted uppercase tracking-wide w-56">
                     {t('fiscalPeriods.closedAt')}
                   </th>
-                  <th className="px-4 py-3 text-start text-xs font-semibold text-text-muted w-56">
+                  <th className="px-4 py-3 text-start text-xs font-semibold text-text-muted uppercase tracking-wide w-56">
                     {t('fiscalPeriods.lockedAt')}
                   </th>
-                  <th className="px-4 py-3 text-end text-xs font-semibold text-text-muted w-44">
+                  <th className="px-4 py-3 text-end text-xs font-semibold text-text-muted uppercase tracking-wide w-44">
                     {t('common.actions')}
                   </th>
                 </tr>
