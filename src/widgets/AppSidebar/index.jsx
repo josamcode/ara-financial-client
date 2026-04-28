@@ -16,6 +16,7 @@ import {
   Contact,
   Briefcase,
   Package,
+  Percent,
 } from 'lucide-react'
 import { cn } from '@/shared/utils/cn'
 import { ROUTES } from '@/shared/constants/routes'
@@ -144,6 +145,13 @@ const navGroups = [
         icon: ScrollText,
         to: ROUTES.AUDIT_LOGS,
         permission: PERMISSIONS.AUDIT_READ,
+      },
+      {
+        key: 'taxRates',
+        label: 'nav.taxRates',
+        icon: Percent,
+        to: ROUTES.TAX_RATES,
+        permission: PERMISSIONS.TAX_READ,
       },
       {
         key: 'settings',

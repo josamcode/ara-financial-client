@@ -43,6 +43,7 @@ const PaymentsPage = lazy(() => import('@/pages/app/PaymentsPage'))
 const UsersPage = lazy(() => import('@/pages/app/UsersPage'))
 const AuditLogsPage = lazy(() => import('@/pages/app/AuditLogsPage'))
 const SettingsPage = lazy(() => import('@/pages/app/SettingsPage'))
+const TaxRatesPage = lazy(() => import('@/pages/app/TaxRatesPage'))
 const CustomersPage = lazy(() => import('@/pages/app/CustomersPage'))
 const CustomerDetailPage = lazy(() => import('@/pages/app/CustomerDetailPage'))
 const CustomerStatementPage = lazy(() => import('@/pages/app/CustomerStatementPage'))
@@ -388,6 +389,15 @@ export function AppRouter() {
             />
 
             <Route path={ROUTES.SETTINGS} element={<SettingsPage />} />
+
+            <Route
+              path={ROUTES.TAX_RATES}
+              element={
+                <ProtectedRoute permission={PERMISSIONS.TAX_READ}>
+                  <TaxRatesPage />
+                </ProtectedRoute>
+              }
+            />
           </Route>
 
           {/* Invoice print — no AppLayout */}

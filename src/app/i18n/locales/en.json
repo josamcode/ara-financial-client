@@ -125,7 +125,8 @@
     "invoices": "Invoices",
     "bills": "Bills",
     "payments": "Payments",
-    "billingSubscription": "Billing"
+    "billingSubscription": "Billing",
+    "taxRates": "Tax Rates"
   },
   "landing": {
     "getStarted": "Get Started",
@@ -626,6 +627,39 @@
     "printDate": "Print Date",
     "noBills": "No bills yet",
     "noBillsDesc": "No bills have been created for this supplier"
+  },
+  "taxRates": {
+    "title": "Tax Rates",
+    "subtitle": "Manage sales and purchase tax rates used across billing documents",
+    "new": "Add Tax Rate",
+    "edit": "Edit Tax Rate",
+    "name": "Name",
+    "code": "Code",
+    "rate": "Rate",
+    "type": "Type",
+    "description": "Description",
+    "isActive": "Tax rate is active",
+    "formSection": "Tax rate details",
+    "searchPlaceholder": "Search by name or code...",
+    "allTypes": "All types",
+    "allStatuses": "All statuses",
+    "emptyTitle": "No tax rates yet",
+    "emptyDesc": "Start by adding the tax rates used by your organization.",
+    "emptySearchDesc": "No tax rates match the current filters.",
+    "deactivate": "Deactivate",
+    "deleteTitle": "Deactivate Tax Rate",
+    "deleteMessage": "Are you sure you want to deactivate {{name}}?",
+    "createSuccess": "Tax rate created successfully",
+    "updateSuccess": "Tax rate updated successfully",
+    "deleteSuccess": "Tax rate deactivated successfully",
+    "rateInvalid": "Rate must be a valid number",
+    "rateRange": "Rate must be between 0 and 100",
+    "ratePrecision": "Rate can include up to 6 decimal places",
+    "types": {
+      "sales": "Sales",
+      "purchase": "Purchase",
+      "both": "Sales and purchase"
+    }
   },
   "invoices": {
     "new": "New Invoice",

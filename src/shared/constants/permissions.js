@@ -68,6 +68,10 @@ export const PERMISSIONS = {
   // Billing (SaaS subscription)
   BILLING_READ: 'billing:read',
   BILLING_MANAGE: 'billing:manage',
+
+  // Tax Rates
+  TAX_READ: 'tax:read',
+  TAX_MANAGE: 'tax:manage',
 }
 
 function getUserPermissions(user) {
