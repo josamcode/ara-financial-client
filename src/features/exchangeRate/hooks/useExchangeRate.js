@@ -27,11 +27,104 @@ function normalizeExchangeRateList(response) {
 }
 
 function extractExchangeRate(response) {
-  return response?.data?.exchangeRate ?? response?.exchangeRate ?? response?.data ?? null
+  return response?.data?.exchangeRate ?? response?.exchangeRate ?? response?.data ?? response ?? null
 }
 
 function getMutationErrorMessage(error, t) {
   return error?.message || t('common.somethingWentWrong')
+}
+
+function createLookupMissError(message = 'Exchange rate not found') {
+  const error = new Error(message)
+  error.code = 'EXCHANGE_RATE_NOT_FOUND'
+  return error
+}
+
+function isLookupMiss(error) {
+  const status = error?.status ?? error?.response?.status
+  return error?.code === 'EXCHANGE_RATE_NOT_FOUND' || status === 404 || status === 304
+}
+
+function getRateNumber(record) {
+  const numericRate = Number(record?.rate)
+  return Number.isFinite(numericRate) && numericRate > 0 ? numericRate : null
+}
+
+function formatInverseRate(rate) {
+  return (1 / rate).toFixed(10)
+}
+
+async function getLatestExchangeRateRecord({ from, to, date }) {
+  const response = await exchangeRateApi.getLatest({ from, to, date })
+  const record = extractExchangeRate(response)
+
+  if (!getRateNumber(record)) {
+    throw createLookupMissError()
+  }
+
+  return record
+}
+
+export async function resolveLatestExchangeRate({ documentCurrency, baseCurrency, date }) {
+  if (!documentCurrency || !baseCurrency) return null
+
+  if (documentCurrency === baseCurrency) {
+    return {
+      mode: 'same',
+      exchangeRate: '1',
+      record: {
+        fromCurrency: documentCurrency,
+        toCurrency: baseCurrency,
+        rate: '1',
+        effectiveDate: date,
+        source: 'company_rate',
+        provider: null,
+      },
+    }
+  }
+
+  try {
+    const record = await getLatestExchangeRateRecord({
+      from: documentCurrency,
+      to: baseCurrency,
+      date,
+    })
+
+    return {
+      mode: 'exact',
+      exchangeRate: String(record.rate),
+      record,
+      from: documentCurrency,
+      to: baseCurrency,
+    }
+  } catch (exactError) {
+    if (!isLookupMiss(exactError)) {
+      throw exactError
+    }
+  }
+
+  try {
+    const record = await getLatestExchangeRateRecord({
+      from: baseCurrency,
+      to: documentCurrency,
+      date,
+    })
+    const numericRate = getRateNumber(record)
+
+    return {
+      mode: 'inverted',
+      exchangeRate: formatInverseRate(numericRate),
+      record,
+      from: baseCurrency,
+      to: documentCurrency,
+    }
+  } catch (reverseError) {
+    if (isLookupMiss(reverseError)) {
+      throw createLookupMissError()
+    }
+
+    throw reverseError
+  }
 }
 
 export function useExchangeRateList(params = {}) {

@@ -1031,6 +1031,7 @@
     "previewUnavailable": "Enter an exchange rate to preview converted amounts.",
     "baseCurrencyHint": "Company accounting currency",
     "rateLoaded": "Exchange rate loaded",
+    "inverseRateHelper": "Using inverse of saved {{from}} → {{to}} rate.",
     "invalidCurrency": "The selected currency is invalid or inactive."
   },
   "errors": {

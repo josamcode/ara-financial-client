@@ -139,6 +139,11 @@ export function InvoiceForm({ defaultValues, onSubmit, isSubmitting }) {
     onSubmit(data)
   }
 
+  function handleExchangeRateChange(value) {
+    setValue('exchangeRate', value)
+    if (Number(value) > 0) clearErrors('exchangeRate')
+  }
+
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-5">
       {/* Hidden currency fields managed by CurrencyPanel */}
@@ -223,7 +228,7 @@ export function InvoiceForm({ defaultValues, onSubmit, isSubmitting }) {
         exchangeRateError={errors.exchangeRate?.message}
         currencyLabel={t('multiCurrency.invoiceCurrency')}
         onCurrencyChange={(code) => setValue('documentCurrency', code)}
-        onRateChange={(v) => setValue('exchangeRate', v)}
+        onRateChange={handleExchangeRateChange}
         onRateDateChange={(v) => setValue('exchangeRateDate', v)}
         onSourceChange={(v) => setValue('exchangeRateSource', v)}
         onManualOverrideChange={(v) => setValue('isExchangeRateManualOverride', v)}

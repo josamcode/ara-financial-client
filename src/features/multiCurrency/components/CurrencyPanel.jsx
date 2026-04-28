@@ -1,11 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { RefreshCw } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { Input } from '@/shared/components/Input'
 import { Select } from '@/shared/components/Select'
 import { Button } from '@/shared/components/Button'
-import { exchangeRateApi } from '@/entities/exchangeRate/api/exchangeRateApi'
+import { resolveLatestExchangeRate } from '@/features/exchangeRate/hooks/useExchangeRate'
 
 export function CurrencyPanel({
   documentCurrency,
@@ -30,6 +30,8 @@ export function CurrencyPanel({
 }) {
   const { t } = useTranslation()
   const [fetchingRate, setFetchingRate] = useState(false)
+  const [rateHelperText, setRateHelperText] = useState('')
+  const lookupRequestIdRef = useRef(0)
 
   const isForeign = documentCurrency && baseCurrency && documentCurrency !== baseCurrency
 
@@ -40,12 +42,11 @@ export function CurrencyPanel({
       }))
     : (documentCurrency ? [{ value: documentCurrency, label: documentCurrency }] : [])
 
-  function applyRateRecord(record, reciprocal = false) {
-    const rawRate = record?.rate != null ? Number(record.rate) : null
-    if (!rawRate || rawRate <= 0) return false
-    const rateValue = reciprocal
-      ? (1 / rawRate).toFixed(6)
-      : String(record.rate)
+  function applyResolvedRate(result) {
+    if (!result || result.mode === 'same') return false
+
+    const record = result.record
+    const rateValue = result.exchangeRate
     const rateDate = record?.effectiveDate
       ? new Date(record.effectiveDate).toISOString().slice(0, 10)
       : null
@@ -54,53 +55,80 @@ export function CurrencyPanel({
     onSourceChange(record?.source ?? 'manual')
     onProviderChange(record?.provider ?? null)
     onManualOverrideChange(false)
+    setRateHelperText(
+      result.mode === 'inverted'
+        ? t('multiCurrency.inverseRateHelper', { from: result.from, to: result.to })
+        : ''
+    )
     return true
   }
 
-  async function handleFetchLatestRate() {
+  async function loadLatestRate({
+    showSuccessToast = false,
+    force = false,
+    dateOverride = null,
+  } = {}) {
     if (!documentCurrency || !baseCurrency) return
-    setFetchingRate(true)
-    const dateParam = issueDate || new Date().toISOString().slice(0, 10)
-    try {
-      // Try direct direction: 1 documentCurrency = ? baseCurrency
-      const data = await exchangeRateApi.getLatest({
-        from: documentCurrency,
-        to: baseCurrency,
-        date: dateParam,
-      })
-      const record = data?.exchangeRate ?? data
-      if (applyRateRecord(record, false)) {
-        toast.success(t('multiCurrency.rateLoaded'))
-        setFetchingRate(false)
-        return
-      }
-    } catch (err) {
-      if (err?.code !== 'EXCHANGE_RATE_NOT_FOUND') {
-        toast.error(t('multiCurrency.latestRateNotFound'))
-        setFetchingRate(false)
-        return
-      }
-    }
+    if (!force && isManualOverride) return
 
-    // Fallback: try reverse direction and compute reciprocal
+    const requestId = lookupRequestIdRef.current + 1
+    lookupRequestIdRef.current = requestId
+    setRateHelperText('')
+    setFetchingRate(true)
+    const dateParam = dateOverride
+      || issueDate
+      || exchangeRateDate
+      || new Date().toISOString().slice(0, 10)
+
     try {
-      const reverseData = await exchangeRateApi.getLatest({
-        from: baseCurrency,
-        to: documentCurrency,
+      const result = await resolveLatestExchangeRate({
+        documentCurrency,
+        baseCurrency,
         date: dateParam,
       })
-      const reverseRecord = reverseData?.exchangeRate ?? reverseData
-      if (applyRateRecord(reverseRecord, true)) {
-        toast.success(t('multiCurrency.rateLoaded'))
-        setFetchingRate(false)
+
+      if (lookupRequestIdRef.current !== requestId) return
+
+      if (applyResolvedRate(result)) {
+        if (showSuccessToast) toast.success(t('multiCurrency.rateLoaded'))
         return
       }
     } catch {
-      // neither direction found
+      if (lookupRequestIdRef.current === requestId) {
+        toast.error(t('multiCurrency.latestRateNotFound'))
+      }
+    } finally {
+      if (lookupRequestIdRef.current === requestId) setFetchingRate(false)
+    }
+  }
+
+  useEffect(() => {
+    if (!isForeign || isManualOverride) {
+      lookupRequestIdRef.current += 1
+      setFetchingRate(false)
+      if (!isForeign) setRateHelperText('')
+      return
     }
 
-    toast.error(t('multiCurrency.latestRateNotFound'))
-    setFetchingRate(false)
+    loadLatestRate()
+  }, [documentCurrency, baseCurrency, issueDate, isForeign, isManualOverride])
+
+  function handleCurrencyChange(code) {
+    lookupRequestIdRef.current += 1
+    setRateHelperText('')
+    onCurrencyChange(code)
+    onManualOverrideChange(false)
+  }
+
+  function handleFetchLatestRate() {
+    loadLatestRate({ showSuccessToast: true, force: true })
+  }
+
+  function handleRateDateChange(value) {
+    onRateDateChange(value)
+    if (isForeign && !isManualOverride) {
+      loadLatestRate({ dateOverride: value })
+    }
   }
 
   const rateNum = parseFloat(exchangeRate) || 0
@@ -113,7 +141,7 @@ export function CurrencyPanel({
         <Select
           label={currencyLabel || t('multiCurrency.invoiceCurrency')}
           value={documentCurrency || ''}
-          onChange={onCurrencyChange}
+          onChange={handleCurrencyChange}
           options={currencyOptions}
           isLoading={isLoadingCurrencies}
           searchable
@@ -156,9 +184,11 @@ export function CurrencyPanel({
                 min="0.000001"
                 value={exchangeRate || ''}
                 onChange={(e) => {
+                  lookupRequestIdRef.current += 1
                   onRateChange(e.target.value)
                   onManualOverrideChange(true)
                   onSourceChange('manual')
+                  setRateHelperText('')
                 }}
                 error={exchangeRateError}
                 required
@@ -167,7 +197,7 @@ export function CurrencyPanel({
                 label={t('multiCurrency.exchangeRateDate')}
                 type="date"
                 value={exchangeRateDate || ''}
-                onChange={(e) => onRateDateChange(e.target.value)}
+                onChange={(e) => handleRateDateChange(e.target.value)}
               />
             </div>
 
@@ -181,6 +211,9 @@ export function CurrencyPanel({
               <RefreshCw size={13} className="me-1.5" />
               {t('multiCurrency.useLatestRate')}
             </Button>
+            {rateHelperText && (
+              <p className="text-xs text-text-muted">{rateHelperText}</p>
+            )}
           </div>
 
           <div className="border-t border-border pt-4">
