@@ -74,8 +74,8 @@ export const PERMISSIONS = {
   TAX_MANAGE: 'tax:manage',
 
   // Exchange Rates
-  EXCHANGE_RATE_READ: 'exchange_rate:read',
-  EXCHANGE_RATE_MANAGE: 'exchange_rate:manage',
+  EXCHANGE_RATE_READ: 'exchangeRate:read',
+  EXCHANGE_RATE_MANAGE: 'exchangeRate:manage',
 }
 
 function getUserPermissions(user) {

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { CheckCircle2, Coins, Pencil, Plus, Search, Trash2 } from 'lucide-react'
+import { CheckCircle2, Coins, Pencil, Plus, Trash2 } from 'lucide-react'
 import { PageHeader } from '@/shared/components/PageHeader'
 import { Badge } from '@/shared/components/Badge'
 import { Button } from '@/shared/components/Button'
@@ -47,8 +47,6 @@ function getSourceLabel(source, t) {
 export default function ExchangeRatesPage() {
   const { t, i18n } = useTranslation()
   const { user } = useAuth()
-  const [search, setSearch] = useState('')
-  const [appliedSearch, setAppliedSearch] = useState('')
   const [fromCurrency, setFromCurrency] = useState('')
   const [toCurrency, setToCurrency] = useState('')
   const [source, setSource] = useState('')
@@ -91,24 +89,6 @@ export default function ExchangeRatesPage() {
     })),
   ]
 
-  const visibleRates = useMemo(() => {
-    const query = appliedSearch.trim().toLowerCase()
-    if (!query) return exchangeRates
-
-    return exchangeRates.filter((rate) =>
-      [
-        rate.fromCurrency,
-        rate.toCurrency,
-        rate.rate,
-        rate.source,
-        rate.provider,
-        rate.notes,
-      ]
-        .filter(Boolean)
-        .some((value) => String(value).toLowerCase().includes(query))
-    )
-  }, [appliedSearch, exchangeRates])
-
   function openCreate() {
     setEditTarget(null)
     setPanelOpen(true)
@@ -124,13 +104,6 @@ export default function ExchangeRatesPage() {
     setEditTarget(null)
   }
 
-  function handleSearchKeyDown(event) {
-    if (event.key === 'Enter') {
-      setAppliedSearch(search.trim())
-      setPage(1)
-    }
-  }
-
   function handleFilterChange(setter) {
     return (value) => {
       setter(value)
@@ -139,8 +112,6 @@ export default function ExchangeRatesPage() {
   }
 
   function clearFilters() {
-    setSearch('')
-    setAppliedSearch('')
     setFromCurrency('')
     setToCurrency('')
     setSource('')
@@ -174,7 +145,7 @@ export default function ExchangeRatesPage() {
       {t('exchangeRates.new')}
     </Button>
   ) : null
-  const hasFilters = Boolean(appliedSearch || fromCurrency || toCurrency || source || status)
+  const hasFilters = Boolean(fromCurrency || toCurrency || source || status)
   const isSubmitting = createMutation.isPending || updateMutation.isPending
 
   return (
@@ -186,17 +157,6 @@ export default function ExchangeRatesPage() {
       />
 
       <div className="filter-bar">
-        <div className="relative flex-1 max-w-xs">
-          <Search size={15} className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-text-muted" />
-          <input
-            className="h-input w-full rounded-md border border-input bg-surface ps-9 pe-3 text-sm focus:border-primary focus:outline-none"
-            placeholder={t('exchangeRates.searchPlaceholder')}
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            onKeyDown={handleSearchKeyDown}
-          />
-        </div>
-
         <div className="w-full sm:w-44">
           <Select
             value={fromCurrency}
@@ -250,7 +210,7 @@ export default function ExchangeRatesPage() {
         <LoadingState message={t('common.loading')} />
       ) : ratesQuery.isError ? (
         <ErrorState title={t('common.somethingWentWrong')} onRetry={() => ratesQuery.refetch()} />
-      ) : visibleRates.length === 0 ? (
+      ) : exchangeRates.length === 0 ? (
         <div className="bg-surface rounded-lg border border-border">
           <EmptyState
             icon={Coins}
@@ -275,7 +235,7 @@ export default function ExchangeRatesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {visibleRates.map((rate) => (
+                {exchangeRates.map((rate) => (
                   <tr key={rate._id} className="transition-colors hover:bg-surface-subtle">
                     <td className="px-4 py-3 align-top font-semibold text-text-primary">
                       {rate.fromCurrency || '-'}
@@ -344,13 +304,11 @@ export default function ExchangeRatesPage() {
             </table>
           </div>
 
-          {!appliedSearch && (
-            <PaginationControls
-              pagination={pagination}
-              onPageChange={(nextPage) => setPage(nextPage)}
-              className="px-4 border-t border-border"
-            />
-          )}
+          <PaginationControls
+            pagination={pagination}
+            onPageChange={(nextPage) => setPage(nextPage)}
+            className="px-4 border-t border-border"
+          />
         </Card>
       )}
 
