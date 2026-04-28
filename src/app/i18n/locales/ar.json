@@ -126,7 +126,8 @@
     "bills": "فواتير الموردين",
     "payments": "المدفوعات",
     "billingSubscription": "الاشتراك",
-    "taxRates": "معدلات الضريبة"
+    "taxRates": "معدلات الضريبة",
+    "exchangeRates": "أسعار الصرف"
   },
   "landing": {
     "getStarted": "ابدأ الآن",
@@ -662,6 +663,47 @@
       "sales": "مبيعات",
       "purchase": "مشتريات",
       "both": "مبيعات ومشتريات"
+    }
+  },
+  "exchangeRates": {
+    "title": "أسعار الصرف",
+    "subtitle": "إدخال ومراجعة أسعار الصرف المحفوظة المستخدمة في المستندات بالعملات الأجنبية",
+    "new": "إضافة سعر صرف",
+    "edit": "تعديل سعر الصرف",
+    "fromCurrency": "من عملة",
+    "toCurrency": "إلى عملة",
+    "baseCurrency": "العملة الأساسية",
+    "rate": "سعر الصرف",
+    "effectiveDate": "تاريخ السعر",
+    "source": "المصدر",
+    "provider": "المزوّد",
+    "notes": "ملاحظات",
+    "isActive": "سعر الصرف نشط",
+    "formSection": "بيانات سعر الصرف",
+    "selectCurrency": "اختر العملة",
+    "allCurrencies": "كل العملات",
+    "allSources": "كل المصادر",
+    "allStatuses": "كل الحالات",
+    "searchPlaceholder": "بحث بالعملة أو السعر أو المصدر أو الملاحظات...",
+    "emptyTitle": "لا توجد أسعار صرف بعد",
+    "emptyDesc": "ابدأ بإضافة أسعار الصرف اليدوية للعملات التي تستخدمها منشأتك.",
+    "emptySearchDesc": "لا توجد أسعار صرف مطابقة للتصفية الحالية.",
+    "activate": "تفعيل",
+    "deactivate": "إلغاء التفعيل",
+    "deleteTitle": "إلغاء تفعيل سعر الصرف",
+    "deleteMessage": "هل تريد إلغاء تفعيل {{pair}}؟",
+    "createSuccess": "تم إنشاء سعر الصرف بنجاح",
+    "updateSuccess": "تم تحديث سعر الصرف بنجاح",
+    "deactivateSuccess": "تم إلغاء تفعيل سعر الصرف بنجاح",
+    "currencyInvalid": "يجب أن تكون العملة رمز ISO من 3 أحرف",
+    "rateInvalid": "يجب أن يكون سعر الصرف رقمًا صالحًا",
+    "ratePositive": "يجب أن يكون سعر الصرف أكبر من صفر",
+    "ratePrecision": "يمكن أن يحتوي سعر الصرف على 12 منزلة عشرية كحد أقصى",
+    "sources": {
+      "manual": "يدوي",
+      "api": "واجهة برمجة التطبيقات",
+      "central_bank": "البنك المركزي",
+      "company_rate": "سعر الشركة"
     }
   },
   "invoices": {

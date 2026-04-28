@@ -78,4 +78,5 @@ export const ROUTES = {
   SETTINGS_GENERAL: '/settings/general',
   SETTINGS_SECURITY: '/settings/security',
   TAX_RATES: '/settings/tax-rates',
+  EXCHANGE_RATES: '/settings/exchange-rates',
 }

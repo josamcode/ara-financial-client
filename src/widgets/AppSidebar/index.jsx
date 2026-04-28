@@ -17,6 +17,7 @@ import {
   Briefcase,
   Package,
   Percent,
+  Coins,
 } from 'lucide-react'
 import { cn } from '@/shared/utils/cn'
 import { ROUTES } from '@/shared/constants/routes'
@@ -152,6 +153,13 @@ const navGroups = [
         icon: Percent,
         to: ROUTES.TAX_RATES,
         permission: PERMISSIONS.TAX_READ,
+      },
+      {
+        key: 'exchangeRates',
+        label: 'nav.exchangeRates',
+        icon: Coins,
+        to: ROUTES.EXCHANGE_RATES,
+        permission: PERMISSIONS.EXCHANGE_RATE_READ,
       },
       {
         key: 'settings',

@@ -126,7 +126,8 @@
     "bills": "Bills",
     "payments": "Payments",
     "billingSubscription": "Billing",
-    "taxRates": "Tax Rates"
+    "taxRates": "Tax Rates",
+    "exchangeRates": "Exchange Rates"
   },
   "landing": {
     "getStarted": "Get Started",
@@ -662,6 +663,47 @@
       "sales": "Sales",
       "purchase": "Purchase",
       "both": "Sales and purchase"
+    }
+  },
+  "exchangeRates": {
+    "title": "Exchange Rates",
+    "subtitle": "Enter and review stored exchange rates used for foreign-currency documents",
+    "new": "Add Exchange Rate",
+    "edit": "Edit Exchange Rate",
+    "fromCurrency": "From Currency",
+    "toCurrency": "To Currency",
+    "baseCurrency": "Base Currency",
+    "rate": "Rate",
+    "effectiveDate": "Rate Date",
+    "source": "Source",
+    "provider": "Provider",
+    "notes": "Notes",
+    "isActive": "Exchange rate is active",
+    "formSection": "Exchange rate details",
+    "selectCurrency": "Select currency",
+    "allCurrencies": "All currencies",
+    "allSources": "All sources",
+    "allStatuses": "All statuses",
+    "searchPlaceholder": "Search by currency, rate, source, or notes...",
+    "emptyTitle": "No exchange rates yet",
+    "emptyDesc": "Start by adding manual exchange rates for the currencies your organization uses.",
+    "emptySearchDesc": "No exchange rates match the current filters.",
+    "activate": "Activate",
+    "deactivate": "Deactivate",
+    "deleteTitle": "Deactivate Exchange Rate",
+    "deleteMessage": "Are you sure you want to deactivate {{pair}}?",
+    "createSuccess": "Exchange rate created successfully",
+    "updateSuccess": "Exchange rate updated successfully",
+    "deactivateSuccess": "Exchange rate deactivated successfully",
+    "currencyInvalid": "Currency must be a 3-letter ISO code",
+    "rateInvalid": "Rate must be a valid number",
+    "ratePositive": "Rate must be greater than zero",
+    "ratePrecision": "Rate can include up to 12 decimal places",
+    "sources": {
+      "manual": "Manual",
+      "api": "API",
+      "central_bank": "Central bank",
+      "company_rate": "Company rate"
     }
   },
   "invoices": {
