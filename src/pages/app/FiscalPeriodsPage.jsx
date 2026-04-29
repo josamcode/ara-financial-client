@@ -1,7 +1,10 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Calendar } from 'lucide-react'
+import { Calendar, CheckCircle2, LockKeyhole } from 'lucide-react'
 import { useAuth } from '@/entities/auth/model/useAuth'
+import { PeriodDetailPanel } from '@/features/fiscalPeriods/components/PeriodDetailPanel'
+import { PeriodMonthCard } from '@/features/fiscalPeriods/components/PeriodMonthCard'
+import { PeriodYearNav } from '@/features/fiscalPeriods/components/PeriodYearNav'
 import {
   useCloseFiscalPeriod,
   useFiscalPeriods,
@@ -9,28 +12,12 @@ import {
   useReopenFiscalPeriod,
 } from '@/features/fiscalPeriods/hooks/useFiscalPeriods'
 import { PageHeader } from '@/shared/components/PageHeader'
-import { Badge } from '@/shared/components/Badge'
-import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
 import { ConfirmDialog } from '@/shared/components/ConfirmDialog'
 import { EmptyState } from '@/shared/components/EmptyState'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
 import { PERMISSIONS, hasPermission } from '@/shared/constants/permissions'
-import { formatDate, formatDateTime } from '@/shared/utils/formatters'
-
-function getStatusBadgeConfig(status, t) {
-  switch (status) {
-    case 'open':
-      return { label: t('fiscalPeriods.open'), variant: 'success' }
-    case 'closed':
-      return { label: t('fiscalPeriods.closed'), variant: 'warning' }
-    case 'locked':
-      return { label: t('fiscalPeriods.locked'), variant: 'error' }
-    default:
-      return { label: status || '-', variant: 'default' }
-  }
-}
 
 const ACTION_CONFIG = {
   close: {
@@ -53,16 +40,64 @@ const ACTION_CONFIG = {
   },
 }
 
+const QUARTERS = [
+  { key: 'q1Label', months: [0, 1, 2] },
+  { key: 'q2Label', months: [3, 4, 5] },
+  { key: 'q3Label', months: [6, 7, 8] },
+  { key: 'q4Label', months: [9, 10, 11] },
+]
+
+function getPeriodMonthIndex(period, selectedYear) {
+  const nameMatch = period.name?.match(/(\d{4})-(\d{1,2})/)
+  if (nameMatch) {
+    const year = Number(nameMatch[1])
+    const month = Number(nameMatch[2])
+    if (year === selectedYear && month >= 1 && month <= 12) {
+      return month - 1
+    }
+  }
+
+  if (period.startDate) {
+    const startDate = new Date(period.startDate)
+    if (!Number.isNaN(startDate.getTime())) {
+      return startDate.getMonth()
+    }
+  }
+
+  return null
+}
+
+function SummaryItem({ icon: Icon, label, value, tone }) {
+  const toneClass = {
+    success: 'bg-success-soft text-success',
+    warning: 'bg-warning-soft text-warning',
+    error: 'bg-error-soft text-error',
+  }[tone]
+
+  return (
+    <div className="flex items-center gap-3">
+      <div className={`w-8 h-8 rounded-md flex items-center justify-center shrink-0 ${toneClass}`}>
+        <Icon size={15} />
+      </div>
+      <div>
+        <p className="text-xs font-medium text-text-muted uppercase tracking-wide">{label}</p>
+        <p className="text-lg font-semibold text-text-primary leading-tight">{value}</p>
+      </div>
+    </div>
+  )
+}
+
 export default function FiscalPeriodsPage() {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const { user } = useAuth()
-  const [yearInput, setYearInput] = useState('')
-  const [selectedYear, setSelectedYear] = useState('')
+  const [selectedYear, setSelectedYear] = useState(() => new Date().getFullYear())
+  const [selectedPeriodId, setSelectedPeriodId] = useState(null)
+  const [selectedPeriodSnapshot, setSelectedPeriodSnapshot] = useState(null)
   const [pendingAction, setPendingAction] = useState(null)
 
   const queryParams = useMemo(
     () => ({
-      year: selectedYear || undefined,
+      year: selectedYear,
     }),
     [selectedYear]
   )
@@ -75,28 +110,52 @@ export default function FiscalPeriodsPage() {
   const periods = periodsQuery.data || []
   const canClosePeriods = hasPermission(user, PERMISSIONS.FISCAL_UPDATE)
   const canLockPeriods = hasPermission(user, PERMISSIONS.FISCAL_LOCK)
+  const today = useMemo(() => new Date(), [])
 
   const counts = useMemo(
     () =>
       periods.reduce(
         (summary, period) => {
-          summary.total += 1
-          summary[period.status] += 1
+          if (summary[period.status] !== undefined) {
+            summary[period.status] += 1
+          }
           return summary
         },
-        { total: 0, open: 0, closed: 0, locked: 0 }
+        { open: 0, closed: 0, locked: 0 }
       ),
     [periods]
   )
 
-  function handleApplyYearFilter(event) {
-    event.preventDefault()
-    setSelectedYear(yearInput.trim())
+  const periodsByMonth = useMemo(() => {
+    const map = new Map()
+
+    periods.forEach((period) => {
+      const monthIndex = getPeriodMonthIndex(period, selectedYear)
+      if (monthIndex !== null && monthIndex >= 0 && monthIndex <= 11) {
+        map.set(monthIndex, period)
+      }
+    })
+
+    return map
+  }, [periods, selectedYear])
+
+  const selectedPeriod =
+    periods.find((period) => period._id === selectedPeriodId) || selectedPeriodSnapshot
+
+  function handleYearChange(nextYear) {
+    setSelectedYear(nextYear)
+    setSelectedPeriodId(null)
+    setSelectedPeriodSnapshot(null)
   }
 
-  function handleClearYearFilter() {
-    setYearInput('')
-    setSelectedYear('')
+  function handleSelectPeriod(period) {
+    setSelectedPeriodId(period._id)
+    setSelectedPeriodSnapshot(period)
+  }
+
+  function handlePanelAction(type) {
+    if (!selectedPeriod) return
+    setPendingAction({ type, period: selectedPeriod })
   }
 
   async function handleConfirmAction() {
@@ -116,6 +175,7 @@ export default function FiscalPeriodsPage() {
   const activeActionConfig = pendingAction ? ACTION_CONFIG[pendingAction.type] : null
   const isSubmittingAction =
     closeMutation.isPending || lockMutation.isPending || reopenMutation.isPending
+  const showPeriodGrid = !periodsQuery.isLoading && !periodsQuery.isError
 
   return (
     <div className="animate-fade-in">
@@ -124,61 +184,35 @@ export default function FiscalPeriodsPage() {
         subtitle={t('fiscalPeriods.subtitle')}
       />
 
-      <form onSubmit={handleApplyYearFilter} className="filter-bar mb-5">
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-text-muted">{t('common.year')}</label>
-          <input
-            type="number"
-            min="1900"
-            max="9999"
-            value={yearInput}
-            onChange={(event) => setYearInput(event.target.value)}
-            className="h-input w-36 rounded-md border border-input bg-surface px-3 text-sm text-text-primary focus:outline-none focus:border-primary focus:shadow-focus"
-          />
-        </div>
+      <PeriodYearNav
+        year={selectedYear}
+        onPrev={() => handleYearChange(selectedYear - 1)}
+        onNext={() => handleYearChange(selectedYear + 1)}
+      />
 
-        <div className="flex items-end gap-2">
-          <Button size="sm" type="submit">
-            {t('common.apply')}
-          </Button>
-          {selectedYear && (
-            <Button size="sm" type="button" variant="secondary" onClick={handleClearYearFilter}>
-              {t('common.clear')}
-            </Button>
-          )}
-        </div>
-      </form>
-
-      {!periodsQuery.isLoading && !periodsQuery.isError && periods.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
-          <Card padding="md" className="flex items-center gap-4">
-            <div className="w-9 h-9 rounded-lg bg-success-soft flex items-center justify-center shrink-0">
-              <Calendar size={16} className="text-success" />
-            </div>
-            <div>
-              <p className="text-xs font-medium text-text-muted uppercase tracking-wide mb-0.5">{t('fiscalPeriods.open')}</p>
-              <p className="text-2xl font-bold text-text-primary leading-none">{counts.open}</p>
-            </div>
-          </Card>
-          <Card padding="md" className="flex items-center gap-4">
-            <div className="w-9 h-9 rounded-lg bg-warning-soft flex items-center justify-center shrink-0">
-              <Calendar size={16} className="text-warning" />
-            </div>
-            <div>
-              <p className="text-xs font-medium text-text-muted uppercase tracking-wide mb-0.5">{t('fiscalPeriods.closed')}</p>
-              <p className="text-2xl font-bold text-text-primary leading-none">{counts.closed}</p>
-            </div>
-          </Card>
-          <Card padding="md" className="flex items-center gap-4">
-            <div className="w-9 h-9 rounded-lg bg-error-soft flex items-center justify-center shrink-0">
-              <Calendar size={16} className="text-error" />
-            </div>
-            <div>
-              <p className="text-xs font-medium text-text-muted uppercase tracking-wide mb-0.5">{t('fiscalPeriods.locked')}</p>
-              <p className="text-2xl font-bold text-text-primary leading-none">{counts.locked}</p>
-            </div>
-          </Card>
-        </div>
+      {!periodsQuery.isLoading && !periodsQuery.isError && (
+        <Card padding="sm" className="mb-5">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <SummaryItem
+              icon={Calendar}
+              label={t('fiscalPeriods.open')}
+              value={counts.open}
+              tone="success"
+            />
+            <SummaryItem
+              icon={CheckCircle2}
+              label={t('fiscalPeriods.closed')}
+              value={counts.closed}
+              tone="warning"
+            />
+            <SummaryItem
+              icon={LockKeyhole}
+              label={t('fiscalPeriods.locked')}
+              value={counts.locked}
+              tone="error"
+            />
+          </div>
+        </Card>
       )}
 
       {periodsQuery.isLoading && <LoadingState message={t('common.loading')} />}
@@ -190,120 +224,58 @@ export default function FiscalPeriodsPage() {
         />
       )}
 
-      {!periodsQuery.isLoading && !periodsQuery.isError && !periods.length && (
+      {showPeriodGrid && !periods.length && (
         <EmptyState
+          compact
           icon={Calendar}
           title={t('fiscalPeriods.emptyTitle')}
           message={t('fiscalPeriods.emptyMessage')}
+          className="mb-2"
         />
       )}
 
-      {!periodsQuery.isLoading && !periodsQuery.isError && periods.length > 0 && (
-        <div className="bg-surface rounded-lg border border-border overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm min-w-[960px]">
-              <thead>
-                <tr className="border-b border-border bg-surface-muted">
-                  <th className="px-4 py-3 text-start text-xs font-semibold text-text-muted uppercase tracking-wide">
-                    {t('fiscalPeriods.period')}
-                  </th>
-                  <th className="px-4 py-3 text-start text-xs font-semibold text-text-muted uppercase tracking-wide w-72">
-                    {t('fiscalPeriods.dateRange')}
-                  </th>
-                  <th className="px-4 py-3 text-start text-xs font-semibold text-text-muted uppercase tracking-wide w-36">
-                    {t('common.status')}
-                  </th>
-                  <th className="px-4 py-3 text-start text-xs font-semibold text-text-muted uppercase tracking-wide w-56">
-                    {t('fiscalPeriods.closedAt')}
-                  </th>
-                  <th className="px-4 py-3 text-start text-xs font-semibold text-text-muted uppercase tracking-wide w-56">
-                    {t('fiscalPeriods.lockedAt')}
-                  </th>
-                  <th className="px-4 py-3 text-end text-xs font-semibold text-text-muted uppercase tracking-wide w-44">
-                    {t('common.actions')}
-                  </th>
-                </tr>
-              </thead>
-
-              <tbody className="divide-y divide-border">
-                {periods.map((period) => {
-                  const statusBadge = getStatusBadgeConfig(period.status, t)
+      {showPeriodGrid && (
+        <div className="space-y-5">
+          {QUARTERS.map((quarter) => (
+            <section key={quarter.key} className="rounded-lg border border-border bg-surface p-4">
+              <h2 className="text-sm font-semibold text-text-primary mb-3">
+                {t(`fiscalPeriods.${quarter.key}`)}
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {quarter.months.map((monthIndex) => {
+                  const period = periodsByMonth.get(monthIndex) || null
+                  const isCurrent =
+                    selectedYear === today.getFullYear() && monthIndex === today.getMonth()
 
                   return (
-                    <tr key={period._id} className="hover:bg-surface-muted transition-colors">
-                      <td className="px-4 py-3 align-top">
-                        <div>
-                          <p className="font-medium text-text-primary">{period.name}</p>
-                          <p className="text-xs text-text-muted mt-1">
-                            {t('fiscalPeriods.fiscalYear')}: {period.year}
-                          </p>
-                        </div>
-                      </td>
-
-                      <td className="px-4 py-3 align-top text-text-secondary">
-                        {formatDate(period.startDate, i18n.language)} -{' '}
-                        {formatDate(period.endDate, i18n.language)}
-                      </td>
-
-                      <td className="px-4 py-3 align-top">
-                        <Badge variant={statusBadge.variant} size="sm">
-                          {statusBadge.label}
-                        </Badge>
-                      </td>
-
-                      <td className="px-4 py-3 align-top text-text-secondary">
-                        {period.closedAt
-                          ? formatDateTime(period.closedAt, i18n.language)
-                          : '-'}
-                      </td>
-
-                      <td className="px-4 py-3 align-top text-text-secondary">
-                        {period.lockedAt
-                          ? formatDateTime(period.lockedAt, i18n.language)
-                          : '-'}
-                      </td>
-
-                      <td className="px-4 py-3 align-top">
-                        <div className="flex justify-end gap-2">
-                          {period.status === 'open' && canClosePeriods && (
-                            <Button
-                              size="sm"
-                              variant="secondary"
-                              onClick={() => setPendingAction({ type: 'close', period })}
-                            >
-                              {t('fiscalPeriods.close')}
-                            </Button>
-                          )}
-
-                          {period.status === 'closed' && canClosePeriods && (
-                            <Button
-                              size="sm"
-                              variant="secondary"
-                              onClick={() => setPendingAction({ type: 'reopen', period })}
-                            >
-                              {t('fiscalPeriods.reopen')}
-                            </Button>
-                          )}
-
-                          {period.status !== 'locked' && canLockPeriods && (
-                            <Button
-                              size="sm"
-                              variant="secondary"
-                              onClick={() => setPendingAction({ type: 'lock', period })}
-                            >
-                              {t('fiscalPeriods.lock')}
-                            </Button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
+                    <PeriodMonthCard
+                      key={monthIndex}
+                      period={period}
+                      year={selectedYear}
+                      monthIndex={monthIndex}
+                      isCurrent={isCurrent}
+                      isSelected={!!period && period._id === selectedPeriodId}
+                      onClick={() => handleSelectPeriod(period)}
+                    />
                   )
                 })}
-              </tbody>
-            </table>
-          </div>
+              </div>
+            </section>
+          ))}
         </div>
       )}
+
+      <PeriodDetailPanel
+        period={selectedPeriod}
+        open={!!selectedPeriodId}
+        onClose={() => {
+          setSelectedPeriodId(null)
+          setSelectedPeriodSnapshot(null)
+        }}
+        canClose={canClosePeriods}
+        canLock={canLockPeriods}
+        onAction={handlePanelAction}
+      />
 
       <ConfirmDialog
         open={!!pendingAction}
