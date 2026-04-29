@@ -17,6 +17,7 @@ import { formatCurrency, formatDate } from '@/shared/utils/formatters'
 import { useBill, useCancelBill, usePayBill, usePostBill } from '@/features/bills/hooks/useBills'
 import { BillStatusBadge } from '@/features/bills/components/BillStatusBadge'
 import { useAccountList } from '@/features/accounts/hooks/useAccounts'
+import { resolveLatestExchangeRate } from '@/features/exchangeRate/hooks/useExchangeRate'
 
 function AccountSelect({ label, value, onChange, accounts, isLoading }) {
   const options = (accounts ?? []).filter((a) => !a.isParentOnly && a.isActive).map((a) => ({
@@ -80,7 +81,7 @@ function CurrencySnapshot({ bill, t, locale }) {
         </div>
         <div className="flex items-start gap-2 bg-warning/5 border border-warning/20 rounded px-3 py-2 text-xs text-warning">
           <AlertTriangle size={13} className="mt-0.5 shrink-0" />
-          <span>{t('multiCurrency.foreignPaymentUnsupported')}</span>
+          <span>{t('multiCurrency.foreignBillPaymentHelp')}</span>
         </div>
       </div>
     </div>
@@ -106,6 +107,9 @@ export default function BillDetailPage() {
   const [cashAccountId, setCashAccountId] = useState('')
   const [paymentAmount, setPaymentAmount] = useState('')
   const [paymentDate, setPaymentDate] = useState(getTodayDateValue())
+  const [paymentExchangeRate, setPaymentExchangeRate] = useState('')
+  const [paymentExchangeRateDate, setPaymentExchangeRateDate] = useState(getTodayDateValue())
+  const [paymentExchangeRateSource, setPaymentExchangeRateSource] = useState('manual')
 
   if (isLoading) return <LoadingState />
   if (isError) return <ErrorState onRetry={refetch} />
@@ -128,7 +132,19 @@ export default function BillDetailPage() {
   const canPay = ['posted', 'partially_paid', 'overdue'].includes(bill.status)
   const canCancel = !['paid', 'cancelled'].includes(bill.status)
   const postDisabled = !apAccountId || !debitAccountId
-  const payDisabled = !cashAccountId || !paymentDate || !paymentAmount || Number(paymentAmount) <= 0 || Number(paymentAmount) > remainingAmount
+  const foreignPaymentRateMissing = isForeignCurrency && (
+    !paymentExchangeRate ||
+    !Number.isFinite(Number(paymentExchangeRate)) ||
+    Number(paymentExchangeRate) <= 0 ||
+    !paymentExchangeRateDate ||
+    !paymentExchangeRateSource
+  )
+  const payDisabled = !cashAccountId ||
+    !paymentDate ||
+    !paymentAmount ||
+    Number(paymentAmount) <= 0 ||
+    Number(paymentAmount) > remainingAmount ||
+    foreignPaymentRateMissing
   const isFullyPaid = remainingAmount <= 0 && paidAmount > 0
 
   function openPostDialog() {
@@ -137,11 +153,31 @@ export default function BillDetailPage() {
     setPostDialog(true)
   }
 
-  function openPayDialog() {
+  async function openPayDialog() {
+    const today = getTodayDateValue()
     setCashAccountId('')
     setPaymentAmount(remainingAmount > 0 ? String(remainingAmount) : '')
-    setPaymentDate(getTodayDateValue())
+    setPaymentDate(today)
+    setPaymentExchangeRate('')
+    setPaymentExchangeRateDate(today)
+    setPaymentExchangeRateSource('manual')
     setPayDialog(true)
+
+    if (!isForeignCurrency) return
+
+    try {
+      const result = await resolveLatestExchangeRate({
+        documentCurrency: docCurrency,
+        baseCurrency: bill.baseCurrency,
+        date: today,
+      })
+      if (result?.exchangeRate) {
+        setPaymentExchangeRate(result.exchangeRate)
+        setPaymentExchangeRateSource(result.record?.source || 'manual')
+      }
+    } catch {
+      // Manual entry remains available when no saved rate exists.
+    }
   }
 
   async function handlePost() {
@@ -152,8 +188,29 @@ export default function BillDetailPage() {
 
   async function handlePay() {
     if (payDisabled) return
-    await payMutation.mutateAsync({ id, data: { cashAccountId, amount: paymentAmount, paymentDate } })
+    const data = {
+      cashAccountId,
+      amount: paymentAmount,
+      paymentDate,
+    }
+
+    if (isForeignCurrency) {
+      data.paymentCurrency = docCurrency
+      data.paymentExchangeRate = paymentExchangeRate
+      data.paymentExchangeRateDate = paymentExchangeRateDate || paymentDate
+      data.paymentExchangeRateSource = paymentExchangeRateSource || 'manual'
+    }
+
+    await payMutation.mutateAsync({ id, data })
     setPayDialog(false)
+  }
+
+  function handlePaymentDateChange(value) {
+    const shouldSyncRateDate = !paymentExchangeRateDate || paymentExchangeRateDate === paymentDate
+    setPaymentDate(value)
+    if (isForeignCurrency && shouldSyncRateDate) {
+      setPaymentExchangeRateDate(value || getTodayDateValue())
+    }
   }
 
   async function handleCancel() {
@@ -426,10 +483,8 @@ export default function BillDetailPage() {
                     <Button
                       size="sm"
                       className="w-full justify-center"
-                      onClick={isForeignCurrency ? undefined : openPayDialog}
-                      disabled={!!isForeignCurrency}
+                      onClick={openPayDialog}
                       isLoading={payMutation.isPending}
-                      title={isForeignCurrency ? t('multiCurrency.foreignPaymentUnsupported') : undefined}
                     >
                       <CreditCard size={13} />
                       {t('bills.recordPayment')}
@@ -498,8 +553,47 @@ export default function BillDetailPage() {
               label={t('common.date')}
               type="date"
               value={paymentDate}
-              onChange={(e) => setPaymentDate(e.target.value)}
+              onChange={(e) => handlePaymentDateChange(e.target.value)}
             />
+            {isForeignCurrency && (
+              <div className="rounded-md border border-border bg-surface-subtle p-3 space-y-3">
+                <Input
+                  label={t('multiCurrency.paymentCurrency')}
+                  value={docCurrency}
+                  disabled
+                  hint={t('multiCurrency.billPaymentCurrencyHint')}
+                />
+                <Input
+                  label={t('multiCurrency.paymentExchangeRate')}
+                  type="number"
+                  min="0"
+                  step="0.000000000001"
+                  required
+                  value={paymentExchangeRate}
+                  onChange={(e) => setPaymentExchangeRate(e.target.value)}
+                  hint={`1 ${docCurrency} = ${paymentExchangeRate || '-'} ${bill.baseCurrency}`}
+                />
+                <Input
+                  label={t('multiCurrency.paymentExchangeRateDate')}
+                  type="date"
+                  required
+                  value={paymentExchangeRateDate}
+                  onChange={(e) => setPaymentExchangeRateDate(e.target.value)}
+                />
+                <Select
+                  label={t('multiCurrency.paymentExchangeRateSource')}
+                  value={paymentExchangeRateSource}
+                  onChange={setPaymentExchangeRateSource}
+                  required
+                  options={[
+                    { value: 'manual', label: t('exchangeRates.sources.manual') },
+                    { value: 'company_rate', label: t('exchangeRates.sources.company_rate') },
+                    { value: 'central_bank', label: t('exchangeRates.sources.central_bank') },
+                    { value: 'api', label: t('exchangeRates.sources.api') },
+                  ]}
+                />
+              </div>
+            )}
             <AccountSelect label={t('bills.cashAccount')} value={cashAccountId} onChange={setCashAccountId} accounts={accountList} isLoading={accountsLoading} />
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="secondary" onClick={() => setPayDialog(false)}>{t('common.cancel')}</Button>
