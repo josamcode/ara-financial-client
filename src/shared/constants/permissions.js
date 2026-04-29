@@ -73,6 +73,10 @@ export const PERMISSIONS = {
   TAX_READ: 'tax:read',
   TAX_MANAGE: 'tax:manage',
 
+  // Currencies
+  CURRENCY_READ: 'currency:read',
+  CURRENCY_MANAGE: 'currency:manage',
+
   // Exchange Rates
   EXCHANGE_RATE_READ: 'exchangeRate:read',
   EXCHANGE_RATE_MANAGE: 'exchangeRate:manage',

@@ -43,6 +43,7 @@ const PaymentsPage = lazy(() => import('@/pages/app/PaymentsPage'))
 const UsersPage = lazy(() => import('@/pages/app/UsersPage'))
 const AuditLogsPage = lazy(() => import('@/pages/app/AuditLogsPage'))
 const SettingsPage = lazy(() => import('@/pages/app/SettingsPage'))
+const CurrenciesPage = lazy(() => import('@/pages/app/CurrenciesPage'))
 const TaxRatesPage = lazy(() => import('@/pages/app/TaxRatesPage'))
 const ExchangeRatesPage = lazy(() => import('@/pages/app/ExchangeRatesPage'))
 const CustomersPage = lazy(() => import('@/pages/app/CustomersPage'))
@@ -390,6 +391,15 @@ export function AppRouter() {
             />
 
             <Route path={ROUTES.SETTINGS} element={<SettingsPage />} />
+
+            <Route
+              path={ROUTES.CURRENCIES}
+              element={
+                <ProtectedRoute permission={PERMISSIONS.CURRENCY_READ}>
+                  <CurrenciesPage />
+                </ProtectedRoute>
+              }
+            />
 
             <Route
               path={ROUTES.TAX_RATES}

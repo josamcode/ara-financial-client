@@ -148,6 +148,13 @@ const navGroups = [
         permission: PERMISSIONS.AUDIT_READ,
       },
       {
+        key: 'currencies',
+        label: 'nav.currencies',
+        icon: Coins,
+        to: ROUTES.CURRENCIES,
+        permission: PERMISSIONS.CURRENCY_READ,
+      },
+      {
         key: 'taxRates',
         label: 'nav.taxRates',
         icon: Percent,
