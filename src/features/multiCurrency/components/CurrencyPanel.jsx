@@ -37,9 +37,9 @@ export function CurrencyPanel({
 
   const currencyOptions = currencies.length > 0
     ? currencies.map((c) => ({
-        value: c.code,
-        label: c.name ? `${c.code} — ${c.name}` : c.code,
-      }))
+      value: c.code,
+      label: c.name ? `${c.code} — ${c.name}` : c.code,
+    }))
     : (documentCurrency ? [{ value: documentCurrency, label: documentCurrency }] : [])
 
   function applyResolvedRate(result) {
@@ -180,7 +180,7 @@ export function CurrencyPanel({
               <Input
                 label={`1 ${documentCurrency} = ? ${baseCurrency}`}
                 type="number"
-                step="0.000001"
+                step="any"
                 min="0.000001"
                 value={exchangeRate || ''}
                 onChange={(e) => {

@@ -15,7 +15,9 @@ const MUTATION_ERROR_KEYS = {
   SUBSCRIPTION_INACTIVE: 'planLimit.error.subscriptionInactive',
   EXCHANGE_RATE_REQUIRED: 'multiCurrency.exchangeRateRequired',
   INVALID_CURRENCY: 'multiCurrency.invalidCurrency',
-  FOREIGN_CURRENCY_PAYMENT_UNSUPPORTED: 'multiCurrency.foreignPaymentUnsupported',
+  PAYMENT_EXCHANGE_RATE_REQUIRED: 'multiCurrency.paymentExchangeRateRequired',
+  PAYMENT_CURRENCY_MISMATCH: 'multiCurrency.paymentCurrencyMismatch',
+  FOREIGN_CURRENCY_PAYMENT_UNSUPPORTED: 'multiCurrency.invoicePaymentUnsupported',
 }
 
 function extractInvoice(response) {
